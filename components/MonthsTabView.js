@@ -1,33 +1,41 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, Dimensions, StatusBar } from 'react-native';
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
-import MonthsTabView from './components/MonthsTabView';
+import { Constants } from 'expo';
 
 const FirstRoute = () => (
-  <MonthsTabView />
+  <View style={[styles.scene, { backgroundColor: '#ff4081' }]} />
 );
 
 const SecondRoute = () => (
-  <MonthsTabView />
+  <View style={[styles.scene, { backgroundColor: '#673ab7' }]} />
 );
 
+// This is our placeholder component for the tabs
+// This will be rendered when a tab isn't loaded yet
+// You could also customize it to render different content depending on the route
+const LazyPlaceholder = ({ route }) => (
+  <View style={styles.scene}>
+    <Text>Loading {route.title}…</Text>
+  </View>
+);
 const renderTabBar = props => (
   <TabBar   
     {...props}    
     scrollEnabled
-    bounces={true}
     indicatorStyle={{ backgroundColor: 'white' }}
-    style={{ backgroundColor: 'pink' }}
-    tabStyle={{width:Dimensions.get('window').width}}
+    style={{ backgroundColor: 'blue' }}
   />
 );
 
-export default class App extends React.Component {
+export default class MonthsTabView extends React.Component {
   state = {
-    index: 1,
+    index: 0,
     routes: [
-      { key: 'first', title: '2020' },
-      { key: 'second', title: '2021' }
+      { key: 'first', title: 'First' },
+      { key: 'second', title: 'Second' },
+      { key: 'a', title: 'A' },
+      { key: 'b', title: 'B' }
     ],
   };
 
@@ -38,14 +46,17 @@ export default class App extends React.Component {
   render() {
     return (
       <TabView
+        tabBarPosition='bottom' 
         renderTabBar={renderTabBar}
-        scrollEnabled={true}
-        swipeEnabled={false}
+        lazy
         navigationState={this.state}
         renderScene={SceneMap({
           first: FirstRoute,
-          second: SecondRoute
+          second: SecondRoute,
+          a: SecondRoute,
+          b: SecondRoute,
         })}
+        renderLazyPlaceholder={this._renderLazyPlaceholder}
         onIndexChange={this._handleIndexChange}
         initialLayout={{ width: Dimensions.get('window').width }}
         style={styles.container}
@@ -56,7 +67,7 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: StatusBar.currentHeight,
+
   },
   scene: {
     flex: 1,
