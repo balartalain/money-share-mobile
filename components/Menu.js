@@ -3,25 +3,33 @@ import { ScrollView, View, TouchableOpacity, Pressable, Text, StyleSheet, Dimens
 import Constants from 'expo-constants';
 const { width } = Dimensions.get('window');
 const Menu = (props) =>{
-  const [selectedItem, setSelectedItem] = useState(1);
-  const scrollRef = useRef();
-  const years = ["","2016", "2017", "2018", "2019", "2020", "2021",""];
-  // state = {
-  //   index: 1,
-  //   routes: [
-  //     { key: 'first', title: '2020' },
-  //     { key: 'second', title: '2021' }
-  //   ],
-  // };
+    const [items, setItems] = useState(["", ...props.items, ""]) 
+    const [selectedItem, setSelectedItem] = useState(1);  
+    const scrollRef = useRef();
+    
+    // state = {
+    //   index: 1,
+    //   routes: [
+    //     { key: 'first', title: '2020' },
+    //     { key: 'second', title: '2021' }
+    //   ], ["", 2020, ""]
+    // };
+    useEffect(()=>{
+        //onSelectedItem(items.length-2);
+        setTimeout(()=> onSelectedItem(props.selectedItem+1 || 1), 100);
+        console.log('Menu mounted '+ (items.length-2))
+    }, [])
     const onSelectedItem = (i)=>{
-      if (i === 0 || i === years.length - 1){
+      if (i === 0 || i === items.length - 1){
         return;
       }
       scrollRef.current.scrollTo({
         x: (width/3 * (i-1)),
         animated: true    
-      })
+      })      
       setSelectedItem(i);
+      console.log(items[i])
+      props.onSelectedItem(i-1)
     }
     return (
       <ScrollView ref={scrollRef}
@@ -31,12 +39,12 @@ const Menu = (props) =>{
           //contentContainerStyle={{flex: 1, justifyContent:'flex-start'}}
           style={styles.menu}>
             {
-              years.map((item, i)=>(                
+              items.map((item, i)=>(                
                 <View key={i} style={[styles.menuItem, i===selectedItem?styles.menuItemActive:i<selectedItem?styles.menuItemLeft:styles.menuItemRight ]}>
                   <Pressable style={[styles.btn, i===selectedItem?styles.btnActive:i<selectedItem?styles.btnLeft:styles.btnRight]} 
                   onPress={()=>onSelectedItem(i)}
                   android_ripple={{color: 'green'}}>
-                    <Text style={{color: 'white', fontWeight: 'bold', fontSize:i===selectedItem?"15":"10"}}>{item} </Text>
+                    <Text style={{color: 'white', fontWeight: 'bold', fontSize:i===selectedItem?15:10}}>{item} </Text>
                   </Pressable>
                   
                 </View>
@@ -65,7 +73,7 @@ const styles = StyleSheet.create({
     //marginBottom: 4,
     //borderLeftWidth: 2,
     //borderLeftColor: 'blue',
-    borderBottomWidth: 2,    
+    borderBottomWidth: 3,    
     borderBottomColor: 'transparent',
     //marginRight: 20,
     //marginLeft: 20,
@@ -80,9 +88,8 @@ const styles = StyleSheet.create({
       flex:1, 
       justifyContent: 'center',
       alignItems:'flex-start',      
-      paddingVertical: 20,
-      alignSelf: 'stretch',
-      marginBottom: 4      
+      paddingVertical: 18,
+      alignSelf: 'stretch',      
     },
     btnActive:{
       alignItems: 'center',      

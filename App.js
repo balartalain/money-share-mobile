@@ -16,7 +16,6 @@ const getFakeYearData = (year) =>{
 const Header = ()=>{
   return (
     <View style={{
-      flex:'1 1' , 
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -46,8 +45,8 @@ const App = () =>{
     return (
       <SafeAreaView style={styles.container}>
         <Header/>
-        <Menu items={getFakeYears()} selectedItem={2} onSelectedItem={onSelectedItem}/>
-        <MonthsTabView  data={getFakeYearData(Object.keys(FakeData)[index]) }  index={index}/>         
+        <Menu items={getFakeYears()} selectedItem={index} onSelectedItem={onSelectedItem}/>
+        <MonthsTabView  data={getFakeYearData(Object.keys(FakeData)[index]) }  index={index}/>          
       </SafeAreaView>
     );  
 }
