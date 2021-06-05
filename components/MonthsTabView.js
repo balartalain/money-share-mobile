@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, Dimensions, StatusBar } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, Dimensions, StatusBar, TouchableOpacity } from 'react-native';
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { Constants } from 'expo';
 
 // This is our placeholder component for the tabs
@@ -97,6 +98,7 @@ export default class MonthsTabView extends React.Component {
       tabs.push({key:i+1, title:monthNames[i]});
     })
     this.state = {
+      navigation: this.props.navigation,
       index: this.props.index,
       routes: tabs
     }
@@ -119,15 +121,28 @@ export default class MonthsTabView extends React.Component {
    renderScene = ({ route }) => {
      if (this.props.data[route.key]){
      const data = this.props.data[route.key];
-      return (
-        <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
-          <TotalAmount />
-          {     
-          Object.keys(data).map(day=>(
-            <DayCard key={day} day={day.length === 1?("0"+day):day} month={monthNames[route.key-1].substring(0, 3)} data={data[day]}/>
-            ))
-          }
-        </View>
+      return (        
+          <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}
+          >
+            <TotalAmount />
+            <ScrollView style={{flex:1}}            
+              alwaysBounceVertical={true}
+              bouncesZoom={true}
+            > 
+            {     
+            Object.keys(data).map(day=>(
+              <DayCard key={day} day={day.length === 1?("0"+day):day} month={monthNames[route.key-1].substring(0, 3)} data={data[day]}/>
+              ))
+            }
+            </ScrollView>
+            <TouchableOpacity onPress={() => this.state.navigation.navigate("AddExpense")} style={[styles.fab, {right: 20}]}>
+              <Text><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => alert('FAB clicked')} style={[styles.fab, {left: 20}]}>
+              <Text><MaterialCommunityIcons name="delete-sweep" size={30} color="white" /></Text>
+            </TouchableOpacity>
+          </View>
+        
       )
      }
      else{
@@ -157,6 +172,28 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     justifyContent: 'flex-start',
   },
+  fab: {
+    position: 'absolute',
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    bottom: 20,
+    backgroundColor: '#3EB489',
+    borderRadius: 30,
+    elevation: 8
+  },fab1: {
+    position: 'absolute',
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    right: 100,
+    bottom: 20,
+    backgroundColor: '#3EB489',
+    borderRadius: 30,
+    elevation: 8
+  }
 });
 
 // moment.monthsShort()
