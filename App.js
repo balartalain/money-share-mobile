@@ -1,52 +1,35 @@
 import React, {useState, useEffect, useRef} from 'react'
 import { SafeAreaView, ScrollView, View, TouchableOpacity, Pressable, Text, StyleSheet, Dimensions, StatusBar } from 'react-native';
-import { Avatar } from "react-native-elements";
+import { Navigation } from 'react-native-navigation';
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 import Constants from 'expo-constants';
-import MonthsTabView from './components/MonthsTabView';
-import Menu from './components/Menu';
+import MainScreen from './components/MainScreen';
+import Profile from './components/Profile'
 
-import FakeData from './components/FakeData';
 
-const getFakeYears = ()=>{
-  return Object.keys(FakeData);  
-}
-const getFakeYearData = (year) =>{
-  return FakeData[year];
-}
-const Header = ()=>{
-  return (
-    <View style={{
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      backgroundColor:'#3EB489',
-      paddingVertical: 10,
-      paddingHorizontal: 20
-    }}
-    >
-      <Text style={{fontSize:18, color: 'white'}}>Money share</Text>
-      <Avatar
-        rounded
-        overlayContainerStyle={{backgroundColor: 'gray'}}
-        size="medium"
-        title="BP"
-        onPress={() => console.log("Works!")}
-        activeOpacity={0.7}        
-      />
-    </View>
-  )
-}
+// import FakeData from './components/FakeData';
+
+// const getFakeYears = ()=>{
+//   return Object.keys(FakeData);  
+// }
+// const getFakeYearData = (year) =>{
+//   return FakeData[year];
+// }
+const Stack = createStackNavigator();
 const App = () =>{
-  const [index, setIndex] = useState(0);
-  const onSelectedItem = (i) => {
-    setIndex(i);
-    console.log('onSelectedItem '+ i);
-  }
+
     return (
-      <SafeAreaView style={styles.container}>
-        <Header/>
-        <Menu items={getFakeYears()} selectedItem={index} onSelectedItem={onSelectedItem}/>
-        <MonthsTabView  data={getFakeYearData(Object.keys(FakeData)[index]) }  index={index}/>          
+      <SafeAreaView style={styles.container}>  
+        <NavigationContainer>
+          <Stack.Navigator
+            >
+            <Stack.Screen name="Home" component={MainScreen} 
+              options={{  headerShown: true }}
+            />
+            <Stack.Screen name="Add Expense" component={Profile} />
+          </Stack.Navigator>
+        </NavigationContainer>    
       </SafeAreaView>
     );  
 }
