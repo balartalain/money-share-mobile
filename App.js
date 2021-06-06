@@ -27,7 +27,7 @@ const App = () =>{
             <Stack.Screen name="Home" component={MainScreen} 
               options={{  headerShown: true }}
             />
-            <Stack.Screen name="Add Expense" component={Profile} />
+            <Stack.Screen name="AddExpense" component={Profile} />
           </Stack.Navigator>
         </NavigationContainer>    
       </SafeAreaView>
