@@ -3,6 +3,7 @@ import { View, ScrollView, Text, StyleSheet, Dimensions, StatusBar, TouchableOpa
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { Constants } from 'expo';
+import {color} from '../utils'
 
 // This is our placeholder component for the tabs
 // This will be rendered when a tab isn't loaded yet
@@ -26,7 +27,7 @@ const InnerCard = (props)=>{
             paddingBottom: 10,
             justifyContent:'space-around',
             borderLeftWidth: 5,
-            borderLeftColor: `${props.amount < 0?'red': '#3EB489'}`,
+            borderLeftColor: `${props.amount < 0?'red': color.primaryGreen}`,
             marginHorizontal: 10,
             marginBottom: 10,
             borderTopLeftRadius: 4,
@@ -36,7 +37,7 @@ const InnerCard = (props)=>{
             <Text>{props.category}</Text>
             <Text style={{fontSize: 12}}>{props.comment}</Text>
           </View>
-          <View style={{flex:1,marginRight:10}}><Text style={{textAlign: 'right', color:`${props.amount < 0?'red': '#3EB489'}`}}>{props.amount} {props.currency}</Text></View>
+          <View style={{flex:1,marginRight:10}}><Text style={{textAlign: 'right', color:`${props.amount < 0?'red': color.primaryGreen}`}}>{props.amount} {props.currency}</Text></View>
         </View>
   );
 }
@@ -82,8 +83,8 @@ const TotalAmount = ()=>{
       backgroundColor: 'white',
       paddingVertical: 10
     }}>
-    <View><Text style={{fontSize: 18,  fontWeight: 'bold', color: '#3EB489'}}>10000.00 USD</Text></View>
-    <View><Text style={{fontSize: 18,  fontWeight: 'bold', color: '#3EB489'}}>100000.00 CUP</Text></View>
+    <View><Text style={{fontSize: 18,  fontWeight: 'bold', color: color.primaryGreen}}>10000.00 USD</Text></View>
+    <View><Text style={{fontSize: 18,  fontWeight: 'bold', color: color.primaryGreen}}>100000.00 CUP</Text></View>
   </View>
   )
 }
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     bottom: 20,
-    backgroundColor: '#3EB489',
+    backgroundColor: color.primaryGreen,
     borderRadius: 30,
     elevation: 22,
     

@@ -7,15 +7,6 @@ import Constants from 'expo-constants';
 import MainScreen from './components/MainScreen';
 import Profile from './components/Profile'
 
-
-// import FakeData from './components/FakeData';
-
-// const getFakeYears = ()=>{
-//   return Object.keys(FakeData);  
-// }
-// const getFakeYearData = (year) =>{
-//   return FakeData[year];
-// }
 const Stack = createStackNavigator();
 const App = () =>{
 
