@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, ScrollView, Text, StyleSheet, Dimensions, StatusBar, TouchableOpacity } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, Dimensions, StatusBar, TouchableOpacity, Animated} from 'react-native';
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { Constants } from 'expo';
@@ -31,9 +31,6 @@ const InnerCard = (props)=>{
             marginBottom: 10,
             borderTopLeftRadius: 4,
             borderBottomLeftRadius: 4,
-            //flexWrap: 'wrap',
-            //alignContent:'center',
-            //alignItems: 'stretch'
         }}>    
           <View style={{flex:1, marginLeft: 10}}>      
             <Text>{props.category}</Text>
@@ -82,11 +79,11 @@ const TotalAmount = ()=>{
   return (
     <View style={{flexDirection: 'row',
       justifyContent: 'space-around',
-      backgroundColor: '#98fb98',
+      backgroundColor: 'white',
       paddingVertical: 10
     }}>
-    <View><Text style={{fontSize: 18,  fontWeight: 'bold', color: '#8b4513'}}>10000.00 USD</Text></View>
-    <View><Text style={{fontSize: 18,  fontWeight: 'bold', color: '#8b4513'}}>100000.00 CUP</Text></View>
+    <View><Text style={{fontSize: 18,  fontWeight: 'bold', color: '#3EB489'}}>10000.00 USD</Text></View>
+    <View><Text style={{fontSize: 18,  fontWeight: 'bold', color: '#3EB489'}}>100000.00 CUP</Text></View>
   </View>
   )
 }
@@ -98,13 +95,29 @@ export default class MonthsTabView extends React.Component {
       tabs.push({key:i+1, title:monthNames[i]});
     })
     this.state = {
-      navigation: this.props.navigation,
+      fadeAnim: new Animated.Value(1),
       index: this.props.index,
       routes: tabs
     }
-  }
-  
 
+  }
+  fadeIn = () => {
+    // Will change fadeAnim value to 0 in 3 seconds
+    Animated.timing(this.state.fadeAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: false
+    }).start();
+  };
+
+  fadeOut = () => {
+    // Will change fadeAnim value to 0 in 3 seconds
+    Animated.timing(this.state.fadeAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false
+    }).start();
+  };
   _handleIndexChange = index => this.setState({ index });
 
   _renderLazyPlaceholder = ({ route }) => <LazyPlaceholder route={route} />;
@@ -128,6 +141,17 @@ export default class MonthsTabView extends React.Component {
             <ScrollView style={{flex:1}}            
               alwaysBounceVertical={true}
               bouncesZoom={true}
+              //scrollEventThrottle={10}
+              // onMomentumScrollBegin = {()=>{
+              //   this.fadeOut();
+              // }}
+              
+              onMomentumScrollEnd = {(e)=>{
+                this.fadeIn();
+              }}
+              onScrollBeginDrag={(e)=>{
+                this.fadeOut();
+              }}
             > 
             {     
             Object.keys(data).map(day=>(
@@ -135,12 +159,15 @@ export default class MonthsTabView extends React.Component {
               ))
             }
             </ScrollView>
-            <TouchableOpacity onPress={() => this.state.navigation.navigate("AddExpense")} style={[styles.fab, {right: 20}]}>
-              <Text><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
-            </TouchableOpacity>
+            <Animated.View style={{opacity: this.state.fadeAnim}}>
+              <TouchableOpacity onPress={() => this.props.navigation.navigate("AddExpense")} style={[styles.fab, {right: 20}]}>
+                <Text><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
+              </TouchableOpacity>
+            
             <TouchableOpacity onPress={() => alert('FAB clicked')} style={[styles.fab, {left: 20}]}>
               <Text><MaterialCommunityIcons name="delete-sweep" size={30} color="white" /></Text>
             </TouchableOpacity>
+            </Animated.View>
           </View>
         
       )
@@ -181,18 +208,8 @@ const styles = StyleSheet.create({
     bottom: 20,
     backgroundColor: '#3EB489',
     borderRadius: 30,
-    elevation: 8
-  },fab1: {
-    position: 'absolute',
-    width: 56,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    right: 100,
-    bottom: 20,
-    backgroundColor: '#3EB489',
-    borderRadius: 30,
-    elevation: 8
+    elevation: 22,
+    
   }
 });
 

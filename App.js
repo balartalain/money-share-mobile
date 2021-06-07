@@ -25,7 +25,7 @@ const App = () =>{
           <Stack.Navigator
             >
             <Stack.Screen name="Home" component={MainScreen} 
-              options={{  headerShown: true }}
+              options={{  headerShown: false }}
             />
             <Stack.Screen name="AddExpense" component={Profile} />
           </Stack.Navigator>

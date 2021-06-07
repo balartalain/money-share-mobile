@@ -43,7 +43,7 @@ const MainScreen = ({navigation}) => {
       console.log('onSelectedItem '+ i);
     }
     return (
-      <View>
+      <View style={{flex:1}}>
         <Header/>
         <Menu items={getFakeYears()} selectedItem={index} onSelectedItem={onSelectedItem}/>
         <MonthsTabView navigation={navigation}  data={getFakeYearData(Object.keys(FakeData)[index]) }  index={index}/>  
