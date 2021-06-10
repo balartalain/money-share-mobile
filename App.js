@@ -4,9 +4,8 @@ import { Navigation } from 'react-native-navigation';
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import Constants from 'expo-constants';
-import MainScreen from './components/MainScreen';
-import Profile from './components/Profile'
-
+import MainScreen from './components/MainScreen'
+import AddExpense from './components/AddExpense'
 const Stack = createStackNavigator();
 const App = () =>{
 
@@ -18,7 +17,9 @@ const App = () =>{
             <Stack.Screen name="Home" component={MainScreen} 
               options={{  headerShown: false }}
             />
-            <Stack.Screen name="AddExpense" component={Profile} />
+            <Stack.Screen name="AddExpensive" 
+            options={{ title: 'Nuevo Gasto' }}
+            component={AddExpense} />
           </Stack.Navigator>
         </NavigationContainer>    
       </SafeAreaView>

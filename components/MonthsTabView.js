@@ -3,7 +3,7 @@ import { View, ScrollView, Text, StyleSheet, Dimensions, StatusBar, TouchableOpa
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { Constants } from 'expo';
-import {color} from '../utils'
+import {color, monthNames } from '../utils'
 
 // This is our placeholder component for the tabs
 // This will be rendered when a tab isn't loaded yet
@@ -13,10 +13,6 @@ import {color} from '../utils'
 //     <Text>Loading {route.title}…</Text>
 //   </View>
 // );
-const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octobre", "Noviembre", "Diciembre"
-];
-
 const InnerCard = (props)=>{
   return (
         <View style={{
@@ -161,7 +157,7 @@ export default class MonthsTabView extends React.Component {
             }
             </ScrollView>
             <Animated.View style={{opacity: this.state.fadeAnim}}>
-              <TouchableOpacity onPress={() => this.props.navigation.navigate("AddExpense")} style={[styles.fab, {right: 20}]}>
+              <TouchableOpacity onPress={() => this.props.navigation.navigate("AddExpensive")} style={[styles.fab, {right: 20}]}>
                 <Text><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
               </TouchableOpacity>
             
@@ -218,3 +214,12 @@ const styles = StyleSheet.create({
 // Array.apply(0, Array(12)).map(function(_,i){return moment().month(i).format('MMM')})
 // const d = new Date()
 // monthNames[d.getMonth()]
+
+
+// moment.locale('es');
+// console.log(moment(Date.now()).fromNow()); 
+// console.log(moment(Date.now())); 
+// console.log(moment(Date.now()).format('MMMM Do YYYY, h:mm:ss a'));
+
+// var options = {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+// var prnDt = 'Printed on ' + new Date().toLocaleTimeString('en-us', options);
