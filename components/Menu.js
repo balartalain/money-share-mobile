@@ -1,35 +1,42 @@
 import React, {useState, useEffect, useRef} from 'react'
 import { ScrollView, View, TouchableOpacity, Pressable, Text, StyleSheet, Dimensions } from 'react-native';
 import Constants from 'expo-constants';
+import {equalsIntegers} from '../utils';
 const { width } = Dimensions.get('window');
+
 const Menu = (props) =>{
     const [items, setItems] = useState(["", ...props.items, ""]) 
-    const [selectedItem, setSelectedItem] = useState(1);  
+    const [selectedItem, setSelectedItem] = useState(props.selectedItem);
+    const [selectedIndex, setSeletedIndex] = useState(-1);    
     const scrollRef = useRef();
-    
-    // state = {
-    //   index: 1,
-    //   routes: [
-    //     { key: 'first', title: '2020' },
-    //     { key: 'second', title: '2021' }
-    //   ], ["", 2020, ""]
-    // };
-    useEffect(()=>{
-        //onSelectedItem(items.length-2);
-        setTimeout(()=> onSelectedItem(props.selectedItem+1 || 1), 100);
-        console.log('Menu mounted '+ (items.length-2))
+
+    useEffect(()=>{  
+      const index = items.findIndex((e)=>equalsIntegers(e, selectedItem));  
+      setSeletedIndex(index);
+      setSelectedItem(props.selectedItem)
+      setTimeout(()=> animateItemChanged(props.selectedItem, index), 100);
     }, [])
-    const onSelectedItem = (i)=>{
+    const itemChanged = (item, i)=>{
       if (i === 0 || i === items.length - 1){
         return;
       }
+      //animateItemChanged(item, i);
+      //props.onSelectedItem(item);
+      setSelectedItem(item)
+      setSeletedIndex(i);
+      animateItemChanged(item, i);
+      props.onSelectedItem(item);
+    }
+
+    const animateItemChanged = (item, i)=>{     
+      if (i === 0 || i === items.length - 1){
+        return;
+      }
+      //console.log({item, i})
       scrollRef.current.scrollTo({
         x: (width/3 * (i-1)),
         animated: true    
-      })      
-      setSelectedItem(i);
-      console.log(items[i])
-      props.onSelectedItem(i-1)
+      })     
     }
     return (
       <ScrollView ref={scrollRef}
@@ -40,11 +47,11 @@ const Menu = (props) =>{
           style={styles.menu}>
             {
               items.map((item, i)=>(                
-                <View key={i} style={[styles.menuItem, i===selectedItem?styles.menuItemActive:i<selectedItem?styles.menuItemLeft:styles.menuItemRight ]}>
-                  <Pressable style={[styles.btn, i===selectedItem?styles.btnActive:i<selectedItem?styles.btnLeft:styles.btnRight]} 
-                  onPress={()=>onSelectedItem(i)}
+                <View key={i} style={[styles.menuItem, equalsIntegers(item,selectedItem) && styles.menuItemActive]}>
+                  <Pressable style={[styles.btn, equalsIntegers(item, selectedItem)?styles.btnActive:(i<selectedIndex)?styles.btnLeft:styles.btnRight]} 
+                  onPress={()=>itemChanged(item, i)}
                   android_ripple={{color: 'green'}}>
-                    <Text style={{color: 'white', fontWeight: 'bold', fontSize:i===selectedItem?15:10}}>{item} </Text>
+                    <Text style={{color: 'white', fontWeight: 'bold'}}>{item}</Text>
                   </Pressable>
                   
                 </View>

@@ -1,17 +1,11 @@
 import React, {useState, useEffect, useRef} from 'react'
-import { View, Button, Text, StyleSheet } from "react-native";
+import { View, Button, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Avatar } from "react-native-elements";
-import { color } from './../utils'
+import { color, currentMonth } from './../utils'
 import Menu from './Menu';
 import MonthsTabView from './MonthsTabView';
-
-import FakeData from './FakeData';
-const getFakeYears = ()=>{
-  return Object.keys(FakeData);  
-}
-const getFakeYearData = (year) =>{
-  return FakeData[year];
-}
+import { getUserData } from '../controllers/index';
+import {currentYear, equalsIntegers} from '../utils';
 
 const Header = ()=>{
     return (
@@ -38,17 +32,66 @@ const Header = ()=>{
   }
 
 const MainScreen = ({navigation}) => {
-    const [index, setIndex] = useState(0);
-    const onSelectedItem = (i) => {
-      setIndex(i);
-      console.log('onSelectedItem '+ i);
+
+    const [selectedYear, setSelectedYear] = useState(currentYear);
+    const [years, setYears] = useState([]);
+    const [loadedYears, setLoadedYears] = useState(false);
+    const [monthData, setMonthData] = useState({});
+    const [userData, setUserData] = useState({});
+    
+    const getAsyncPromise = async (promiseArray)=>{
+        const response = await Promise.all(promiseArray.map(f=>f()))
+        //console.log(response)
+        return response;
+    }
+    useEffect(()=>{
+      (async () => {
+        const userData = await getUserData('balartalain');
+        const _years = Object.keys(userData);  
+        const index = _years.findIndex((e)=>equalsIntegers(e, currentYear));  
+        if (index === -1){
+          _years.push(currentYear);
+        }
+        _years.sort();               
+        setYears(_years);
+        setUserData(userData);
+        setMonthData(userData[currentYear]);
+        setLoadedYears(true);
+      })()            
+    }, [])
+    const onSelectedItem = (item) => {
+      setSelectedYear(item); 
+      setMonthData(userData[item]);
     }
     return (
       <View style={{flex:1}}>
-        <Header/>
-        <Menu items={getFakeYears()} selectedItem={index} onSelectedItem={onSelectedItem}/>
-        <MonthsTabView navigation={navigation}  data={getFakeYearData(Object.keys(FakeData)[index]) }  index={index}/>  
+        <Header/>        
+        { !loadedYears ?
+          (
+            <View style={{flex:1}}>            
+              <View style={{flex:1, justifyContent: 'center'}}>
+                <ActivityIndicator size="large" color={color.primaryGreen}/>
+              </View>
+            </View>
+          )
+          :(
+            <View style={{flex:1}}>
+              <Menu items={years} selectedItem={selectedYear} onSelectedItem={onSelectedItem}/> 
+              <MonthsTabView navigation={navigation} selectedYear={selectedYear}  data={monthData}  index={currentMonth}/>
+            </View>
+           )
+        }
       </View>
     );
   };  
   export default MainScreen;
+
+
+  // const getAsyncPromise = async (promiseArray)=>{
+  //   const response = await Promise.all(promiseArray.map(f=>f()))
+  //   //console.log(response)
+  //   return response;
+  // }
+  //   const [_years, monthdata] = await getAsyncPromise([ ()=>getUserYears('balartalain'), 
+  //                     ()=>getMonthData('balartalain', currentYear, currentMonth+1)
+  //                   ]);

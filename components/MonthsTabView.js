@@ -3,16 +3,16 @@ import { View, ScrollView, Text, StyleSheet, Dimensions, StatusBar, TouchableOpa
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { Constants } from 'expo';
-import {color, monthNames } from '../utils'
+import {color, monthNames, dayOfWeek } from '../utils'
 
 // This is our placeholder component for the tabs
 // This will be rendered when a tab isn't loaded yet
 // You could also customize it to render different content depending on the route
-// const LazyPlaceholder = ({ route }) => (
-//   <View style={styles.scene}>
-//     <Text>Loading {route.title}…</Text>
-//   </View>
-// );
+const LazyPlaceholder = ({ route }) => (
+  <View style={{flex:1, justifyContent: 'center', alignItems: 'center'}}>
+    <Text>Loading {route.title}…</Text>
+  </View>
+);
 const InnerCard = (props)=>{
   return (
         <View style={{
@@ -38,8 +38,13 @@ const InnerCard = (props)=>{
   );
 }
 const DayCard = (props)=> {
-  console.log(props.data)
-  console.log( Object.keys(props.data));
+  const getDayOfWeek = ()=>{
+    let date = new Date();
+    date.setFullYear(props.selectedYear);
+    date.setMonth(props.month)
+    date.setDate(props.day)
+    return dayOfWeek[date.getDay()].substring(0,3);   
+  }
   return (
     <View style={{
       flex:0,
@@ -52,8 +57,8 @@ const DayCard = (props)=> {
       justifyContent: 'flex-start'
     
       }}>
-        <Text style={{ alignItems: 'center'}}>{props.day}</Text>
-        <Text style={{alignItems: 'center'}}>{props.month}</Text>
+        <Text style={{ alignItems: 'center'}}>{props.day.length === 1?("0"+props.day):props.day}</Text>
+        <Text style={{alignItems: 'center'}}>{getDayOfWeek()}</Text>
       </View>
       <View style={{flex:8,  flexDirection: 'column',
         marginBottom: 10,
@@ -129,33 +134,37 @@ export default class MonthsTabView extends React.Component {
   );
   
    renderScene = ({ route }) => {
-     if (this.props.data[route.key]){
-     const data = this.props.data[route.key];
-      return (        
-          <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}
-          >
-            <TotalAmount />
-            <ScrollView style={{flex:1}}            
-              alwaysBounceVertical={true}
-              bouncesZoom={true}
-              //scrollEventThrottle={10}
-              // onMomentumScrollBegin = {()=>{
-              //   this.fadeOut();
-              // }}
-              
-              onMomentumScrollEnd = {(e)=>{
-                this.fadeIn();
-              }}
-              onScrollBeginDrag={(e)=>{
-                this.fadeOut();
-              }}
-            > 
-            {     
-            Object.keys(data).map(day=>(
-              <DayCard key={day} day={day.length === 1?("0"+day):day} month={monthNames[route.key-1].substring(0, 3)} data={data[day]}/>
-              ))
+      const data = this.props.data[route.key] || {}
+      return (            
+          <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
+            { Object.keys(data) ?
+              ( 
+              <View style={{flex:1}}>
+                <TotalAmount />
+                <ScrollView style={{flex:1}}            
+                  alwaysBounceVertical={true}
+                  bouncesZoom={true}
+                  //scrollEventThrottle={10}
+                  // onMomentumScrollBegin = {()=>{
+                  //   this.fadeOut();
+                  // }}
+                  
+                  onMomentumScrollEnd = {(e)=>{
+                    this.fadeIn();
+                  }}
+                  onScrollBeginDrag={(e)=>{
+                    this.fadeOut();
+                  }}
+                > 
+                {     
+                Object.keys(data).map(day=>(
+                  <DayCard key={day} day={day} month={route.key-1} selectedYear={this.props.selectedYear} data={data[day]}/>
+                  ))
+                }
+                </ScrollView>
+              </View>
+              ):<View />
             }
-            </ScrollView>
             <Animated.View style={{opacity: this.state.fadeAnim}}>
               <TouchableOpacity onPress={() => this.props.navigation.navigate("AddExpensive")} style={[styles.fab, {right: 20}]}>
                 <Text><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
@@ -165,23 +174,20 @@ export default class MonthsTabView extends React.Component {
               <Text><MaterialCommunityIcons name="delete-sweep" size={30} color="white" /></Text>
             </TouchableOpacity>
             </Animated.View>
-          </View>
-        
+            
+         </View>        
       )
-     }
-     else{
-       return <View />
-     }
   };
 
   render() {
     return (
       <TabView
+        lazy
         tabBarPosition='bottom' 
         renderTabBar={this.renderTabBar}
         navigationState={this.state}
         renderScene={this.renderScene}
-        //renderLazyPlaceholder={this._renderLazyPlaceholder}
+        renderLazyPlaceholder={this._renderLazyPlaceholder}
         onIndexChange={this._handleIndexChange}
         initialLayout={{ width: Dimensions.get('window').width }}
         style={styles.container}
