@@ -4,18 +4,41 @@ import { Button } from 'react-native-elements';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Picker} from '@react-native-picker/picker';
 import {color, monthNames, dayOfWeek } from '../utils'
+import { Navigation } from "react-native-navigation";
+import { createExpense } from '../controllers/index'
 
 
-const AddExpense = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+const AddExpense = ({navigation, route}) => {
+  const {params} = route;
+  const [currentDate, setCurrentDate] = useState(new Date(params.year, params.month, params.day));
   const [showDatePicker, setshowDatePicker] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState();
+  const [amount, setAmount] = useState();
+  const [concept, setConcept] = useState();
+  const [comment, setComment] = useState();
   const onChange = (event, selectedDate) => {
     //const currentDate = selectedDate || currentDate;
     setshowDatePicker(Platform.OS === 'ios');
     setCurrentDate(selectedDate || currentDate);
   };
-
+  const okButtonPressed = async()=>{
+    try{
+      const result = await createExpense({
+        userId: 'balartalain',
+        year: currentDate.getFullYear(),
+        month: currentDate.getMonth()+1,
+        day: currentDate.getDate(),
+        amount: amount,
+        concept: concept,
+        comment: comment,
+        currency: selectedCurrency
+      });
+      navigation.navigate('Home', { addedExpense: 'ok' })
+    }
+    catch(error){
+      alert(error);
+    }
+  }
   return (
     <View style={{flex:1}}>
       <View style={{flex:1}}>
@@ -44,9 +67,15 @@ const AddExpense = () => {
         <TextInput style={[styles.field, {
                     borderTopWidth: 1,
                     borderTopColor: 'rgb(216, 216, 216)'  
-        }]} placeholder='Cantidad' />
-        <TextInput style={styles.field} placeholder='Concepto' />
-        <TextInput style={styles.field} placeholder='Comentario' />
+        }]} placeholder='Cantidad' 
+          onChangeText={(text) => setAmount(parseFloat(text)) }  
+        />
+        <TextInput style={styles.field} placeholder='Concepto'
+          onChangeText={(text) => setConcept(text) }
+        />
+        <TextInput style={styles.field} placeholder='Comentario' 
+          onChangeText={(text) => setComment(text) }
+        />
         <View style={{
           paddingVertical: 5,
           paddingLeft: 10,
@@ -61,13 +90,14 @@ const AddExpense = () => {
               setSelectedCurrency(itemValue)
             }>
               {/* // https://github.com/react-native-picker/picker */} 
-            <Picker.Item label="USD" value="usd" />
-            <Picker.Item label="CUP" value="cup" />
+            <Picker.Item label="USD" value="USD" />
+            <Picker.Item label="CUP" value="CUP" />
           </Picker> 
         </View>
       </View>
       <View style={{flex:0}}>
       <Button title="Aceptar" 
+      onPress={okButtonPressed}
         buttonStyle={{
           backgroundColor:'red',
           paddingVertical: 15

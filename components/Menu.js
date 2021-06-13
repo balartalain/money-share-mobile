@@ -22,10 +22,12 @@ const Menu = (props) =>{
       }
       //animateItemChanged(item, i);
       //props.onSelectedItem(item);
+      animateItemChanged(item, i);
       setSelectedItem(item)
       setSeletedIndex(i);
-      animateItemChanged(item, i);
-      props.onSelectedItem(item);
+      props.onSelectedItem(item)
+      //setTimeout(()=> props.onSelectedItem(item), 400);
+      
     }
 
     const animateItemChanged = (item, i)=>{     
@@ -50,7 +52,7 @@ const Menu = (props) =>{
                 <View key={i} style={[styles.menuItem, equalsIntegers(item,selectedItem) && styles.menuItemActive]}>
                   <Pressable style={[styles.btn, equalsIntegers(item, selectedItem)?styles.btnActive:(i<selectedIndex)?styles.btnLeft:styles.btnRight]} 
                   onPress={()=>itemChanged(item, i)}
-                  android_ripple={{color: 'green'}}>
+                  android_ripple={{color: '#2F5233' }}>
                     <Text style={{color: 'white', fontWeight: 'bold'}}>{item}</Text>
                   </Pressable>
                   
@@ -61,6 +63,8 @@ const Menu = (props) =>{
         </ScrollView>        
     );  
 }
+export default React.memo(Menu);
+
 const styles = StyleSheet.create({    
   menu: {    
     //paddingLeft:10,
@@ -75,8 +79,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     //marginLeft: 20,
     //paddingVertical: 10,
-    paddingLeft: 10,
-    paddingRight: 10,
+    //paddingLeft: 10,
+    //paddingRight: 10,
     //marginBottom: 4,
     //borderLeftWidth: 2,
     //borderLeftColor: 'blue',
@@ -95,7 +99,8 @@ const styles = StyleSheet.create({
       flex:1, 
       justifyContent: 'center',
       alignItems:'flex-start',      
-      paddingVertical: 18,
+      paddingVertical: 20,
+      paddingHorizontal: 10,
       alignSelf: 'stretch',      
     },
     btnActive:{
@@ -108,4 +113,3 @@ const styles = StyleSheet.create({
       alignItems: 'flex-end',            
     }
 });
-export default Menu;

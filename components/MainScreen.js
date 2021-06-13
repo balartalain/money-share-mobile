@@ -30,9 +30,8 @@ const Header = ()=>{
       </View>
     )
   }
-
-const MainScreen = ({navigation}) => {
-
+const MainScreen = ({navigation, route}) => {
+    const { params } = route;
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [years, setYears] = useState([]);
     const [loadedYears, setLoadedYears] = useState(false);
@@ -44,6 +43,13 @@ const MainScreen = ({navigation}) => {
         //console.log(response)
         return response;
     }
+    useEffect(()=>{
+      if (params && params.data){
+        params.data = null;
+        setMonthData(userData[currentYear]);
+        console.log(monthData)
+      }
+    })
     useEffect(()=>{
       (async () => {
         const userData = await getUserData('balartalain');

@@ -3,6 +3,7 @@ import { View, ScrollView, Text, StyleSheet, Dimensions, StatusBar, TouchableOpa
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { Constants } from 'expo';
+import DayCard from './DayCard'
 import {color, monthNames, dayOfWeek } from '../utils'
 
 // This is our placeholder component for the tabs
@@ -13,70 +14,7 @@ const LazyPlaceholder = ({ route }) => (
     <Text>Loading {route.title}…</Text>
   </View>
 );
-const InnerCard = (props)=>{
-  return (
-        <View style={{
-            backgroundColor: 'white', 
-            flex:0,           
-            flexDirection: 'row',
-            paddingTop: 10,
-            paddingBottom: 10,
-            justifyContent:'space-around',
-            borderLeftWidth: 5,
-            borderLeftColor: `${props.amount < 0?'red': color.primaryGreen}`,
-            marginHorizontal: 10,
-            marginBottom: 10,
-            borderTopLeftRadius: 4,
-            borderBottomLeftRadius: 4,
-        }}>    
-          <View style={{flex:1, marginLeft: 10}}>      
-            <Text>{props.category}</Text>
-            <Text style={{fontSize: 12}}>{props.comment}</Text>
-          </View>
-          <View style={{flex:1,marginRight:10}}><Text style={{textAlign: 'right', color:`${props.amount < 0?'red': color.primaryGreen}`}}>{props.amount} {props.currency}</Text></View>
-        </View>
-  );
-}
-const DayCard = (props)=> {
-  const getDayOfWeek = ()=>{
-    let date = new Date();
-    date.setFullYear(props.selectedYear);
-    date.setMonth(props.month)
-    date.setDate(props.day)
-    return dayOfWeek[date.getDay()].substring(0,3);   
-  }
-  return (
-    <View style={{
-      flex:0,
-      flexDirection:'row', 
-      marginTop: 10,
-    }}>
-      <View style={{flex:1, 
-      paddingTop: 2, 
-      alignItems: 'center',
-      justifyContent: 'flex-start'
-    
-      }}>
-        <Text style={{ alignItems: 'center'}}>{props.day.length === 1?("0"+props.day):props.day}</Text>
-        <Text style={{alignItems: 'center'}}>{getDayOfWeek()}</Text>
-      </View>
-      <View style={{flex:8,  flexDirection: 'column',
-        marginBottom: 10,
-      }}>
-        {
-          Object.keys(props.data).map((e)=>(
-            <InnerCard key={e} 
-              amount={props.data[e].amount} 
-              category={props.data[e].category} 
-              comment={props.data[e].comment}
-              currency={props.data[e].currency}
-            />     
-          ))
-        }     
-      </View>           
-    </View>
-  );
-}
+
 const TotalAmount = ()=>{
   return (
     <View style={{flexDirection: 'row',
@@ -96,12 +34,14 @@ export default class MonthsTabView extends React.Component {
     monthNames.forEach((e, i)=>{
       tabs.push({key:i+1, title:monthNames[i]});
     })
+    const selectedDate = new Date();
     this.state = {
       fadeAnim: new Animated.Value(1),
-      index: this.props.index,
-      routes: tabs
+      index: props.index,
+      routes: tabs,
+      selectedDate: selectedDate
     }
-
+    console.log('AA '+selectedDate)
   }
   fadeIn = () => {
     // Will change fadeAnim value to 0 in 3 seconds
@@ -120,7 +60,12 @@ export default class MonthsTabView extends React.Component {
       useNativeDriver: false
     }).start();
   };
-  _handleIndexChange = index => this.setState({ index });
+  _handleIndexChange = index => {
+    //const _selectedDate = 
+    this.state.selectedDate.setMonth(index);
+    console.log(this.state.selectedDate)
+    this.setState({ index, selectedDate: this.state.selectedDate });
+  }
 
   _renderLazyPlaceholder = ({ route }) => <LazyPlaceholder route={route} />;
 
@@ -134,6 +79,10 @@ export default class MonthsTabView extends React.Component {
   );
   
    renderScene = ({ route }) => {
+    if (Math.abs(this.state.index - this.state.routes.indexOf(route)) > 1) {
+      return <View />;
+    }
+    console.log(route);
       const data = this.props.data[route.key] || {}
       return (            
           <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
@@ -166,7 +115,13 @@ export default class MonthsTabView extends React.Component {
               ):<View />
             }
             <Animated.View style={{opacity: this.state.fadeAnim}}>
-              <TouchableOpacity onPress={() => this.props.navigation.navigate("AddExpensive")} style={[styles.fab, {right: 20}]}>
+              <TouchableOpacity 
+                  onPress={() => this.props.navigation.navigate("AddExpense", {
+                                              year: this.props.selectedYear,
+                                              month: this.state.index,
+                                              day: new Date().getDate()
+                                              })
+                  } style={[styles.fab, {right: 20}]}>
                 <Text><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
               </TouchableOpacity>
             
@@ -182,12 +137,12 @@ export default class MonthsTabView extends React.Component {
   render() {
     return (
       <TabView
-        lazy
+        //lazy
         tabBarPosition='bottom' 
         renderTabBar={this.renderTabBar}
         navigationState={this.state}
         renderScene={this.renderScene}
-        renderLazyPlaceholder={this._renderLazyPlaceholder}
+        //renderLazyPlaceholder={this._renderLazyPlaceholder}
         onIndexChange={this._handleIndexChange}
         initialLayout={{ width: Dimensions.get('window').width }}
         style={styles.container}
