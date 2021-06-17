@@ -20,6 +20,7 @@ export default class MonthsTabView extends React.Component {
   constructor(props){
     super(props);
     this._handleIndexChange = this._handleIndexChange.bind(this);
+    this._addExpenseBtnPress = this._addExpenseBtnPress.bind(this);
     const tabs = [];
     monthNames.forEach((e, i)=>{
       tabs.push({key:i+1, title:monthNames[i]});
@@ -64,10 +65,18 @@ export default class MonthsTabView extends React.Component {
       useNativeDriver: false
     }).start();
   };
+  _addExpenseBtnPress = () =>{
+    this.props.navigation.navigate("AddExpense", {
+      year: this.props.selectedYear,
+      month: this.state.index,
+      day: new Date().getDate()
+    })
+  }
   _handleIndexChange = index => {
     //const _selectedDate = 
     this.state.selectedDate.setMonth(index);
     this.setState({ index, selectedDate: this.state.selectedDate });
+    this.props.onSelectedMonth(index);
   }
 
   _renderLazyPlaceholder = ({ route }) => <LazyPlaceholder route={route} />;
@@ -84,7 +93,7 @@ export default class MonthsTabView extends React.Component {
    renderScene = ({ route }) => {
     if (Math.abs(this.state.index - this.state.routes.indexOf(route)) > 1) {
       return <View />;
-    }
+  }
     console.log(route);
       const data = this.props.data[route.key] || {}
       return (            
@@ -101,10 +110,10 @@ export default class MonthsTabView extends React.Component {
                   // }}
                   
                   onMomentumScrollEnd = {(e)=>{
-                    this.fadeIn();
+                    //this.fadeIn();
                   }}
                   onScrollBeginDrag={(e)=>{
-                    this.fadeOut();
+                    //this.fadeOut();
                   }}
                 > 
                 {     
@@ -117,21 +126,11 @@ export default class MonthsTabView extends React.Component {
               ):<View />
             }
             <Animated.View style={{opacity: this.state.fadeAnim}}>
-              <TouchableOpacity 
-                  onPress={() => this.props.navigation.navigate("AddExpense", {
-                                              year: this.props.selectedYear,
-                                              month: this.state.index,
-                                              day: new Date().getDate()
-                                              })
-                  } style={[styles.fab, {right: 20}]}>
-                <Text><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
-              </TouchableOpacity>
-            
-            <TouchableOpacity onPress={() => alert('FAB clicked')} style={[styles.fab, {left: 20}]}>
-              <Text><MaterialCommunityIcons name="delete-sweep" size={30} color="white" /></Text>
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.fab}
+                    onPress={() => alert("Hello")}>
+                  <Text style={styles.fabIcon}><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
+                </TouchableOpacity>
             </Animated.View>
-            
          </View>        
       )
   };
@@ -166,11 +165,15 @@ const styles = StyleSheet.create({
     height: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    bottom: 20,
+    right: 30,
+    bottom: 25,
     backgroundColor: color.primaryGreen,
-    borderRadius: 30,
-    elevation: 24,
-    
+    borderRadius: 28,
+    elevation: 0,
+  },
+  fabIcon: {
+    fontSize: 30,
+    color: 'white',
   }
 });
 

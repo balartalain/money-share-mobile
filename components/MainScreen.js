@@ -47,30 +47,30 @@ const Header = ()=>{
 const MainScreen = ({navigation, route}) => {
 
     const { params } = route;
-    const [loggedUser, setLoggedUser] = useState(null);
-    const [selectedYear, setSelectedYear] = useState(null);
-    const [years, setYears] = useState([]);
-    const [loadedData, setLoadedData] = useState(false);
-    //const [monthData, setMonthData] = useState({});
-    const [userData, setUserData] = useState(null);
-    const [totalAmountUSD, setTotalAmountUSD] = useState(0)
-    const [totalAmountCUP, setTotalAmountCUP] = useState(0)
-  
+    const [appState, setAppState] = useState({
+      loggedUser: null,
+      selectedMonth: null,
+      selectedYear: null,
+      years: [],
+      loadedData: false,
+      userData: null
+    });  
     const calculateTotalAmount = ()=>{
-      let _totalAmountUSD = 0,
-      _totalAmountCUP = 0;
-      Object.keys(userData[selectedYear]).forEach(m=>{
-        const monthData = userData[selectedYear][m];
-        Object.keys(monthData).forEach(d=>{          
-          Object.keys(monthData[d]).forEach(time=>{   
-            let { currency, amount} = monthData[d][time];
-              (currency == 'USD')?_totalAmountUSD += amount: _totalAmountCUP += amount
+      let totalAmountUSD = 0,
+      totalAmountCUP = 0;
+      const {userData, selectedYear} = appState;
+      if (userData){
+        Object.keys(userData[selectedYear]).forEach(m=>{
+          const monthData = userData[selectedYear][m];
+          Object.keys(monthData).forEach(d=>{          
+            Object.keys(monthData[d]).forEach(time=>{   
+              let { currency, amount} = monthData[d][time];
+                (currency == 'USD')?totalAmountUSD += amount: totalAmountCUP += amount
+              })
             })
           })
-        })
-        setTotalAmountCUP(_totalAmountCUP);
-        setTotalAmountUSD(_totalAmountUSD);
-        console.log('Calculates total')
+        }
+        return {totalAmountUSD, totalAmountCUP};        
     }
     const getAsyncPromise = async (promiseArray)=>{
         const response = await Promise.all(promiseArray.map(f=>f()))
@@ -81,59 +81,59 @@ const MainScreen = ({navigation, route}) => {
     useEffect(()=>{
       if (params && params.newExpense){   
         const {year, month, day, created} = params.newExpense;
-          let _userData = Object.assign({}, userData),
-          currObj = _userData;
+          let userData = Object.assign({}, appState.userData),
+          currObj = userData;
           [year, month, day].forEach(k=>{
             currObj[k] = currObj[k] || {}
             currObj = currObj[k];  
           })
           currObj[created] = params.newExpense.data;
-          AsyncStorageHelper.saveObject(`${ loggedUser }:data`, _userData);
-          setUserData(_userData);
+          AsyncStorageHelper.saveObject(`${ appState.loggedUser }:data`, userData);
+          setAppState({...appState, userData})
+          //setUserData(_userData);
           params.newExpense = null;
       }
     }, [params] )
     
-    useEffect(()=>{
-      if (userData && selectedYear){
-        calculateTotalAmount();
+    const fetchUserData = async () =>{
+      let loggedUser = await AsyncStorageHelper.getItem('loggeduser');
+      let userData;
+      userData =  await AsyncStorageHelper.getObject(`${loggedUser}:data`);
+      if (!userData){
+        userData = await getUserData(loggedUser) ;   
+        await AsyncStorageHelper.saveObject(`${_loggedUser}:data`, userData);        
       }
-    }, [userData, selectedYear])
-
-    const fetchUserData = async (_loggedUser) =>{
-      let _userData;
-      _userData =  await AsyncStorageHelper.getObject(`${_loggedUser}:data`);
-      if (!_userData){
-        _userData = await getUserData(_loggedUser) ;   
-        await AsyncStorageHelper.saveObject(`${_loggedUser}:data`, _userData);        
-      }
-      const _years = Object.keys(_userData);  
-      const index = _years.findIndex((e)=>equalsIntegers(e, currentYear));  
+      const years = Object.keys(userData);  
+      const index = years.findIndex((e)=>equalsIntegers(e, currentYear));  
       if (index === -1){
-        _years.push(currentYear);
+        years.push(currentYear);
       }
-      _years.sort();               
-      //setLoggedUser(_loggedUser);
-      setYears(_years);
-      setUserData(_userData);
-      setSelectedYear(currentYear)
-      setLoadedData(true);
+      years.sort();   
+        
+      setAppState({
+        ...appState,
+        loggedUser,
+        years,
+        userData,
+        selectedMonth: currentMonth,
+        selectedYear: currentYear,
+        loadedData: true
+      })         
     }
     useEffect(()=>{  
-      const init = async ()=>{
-        const _loggedUser = await AsyncStorageHelper.getItem('loggeduser');
-        fetchUserData(_loggedUser);
-        setLoggedUser(_loggedUser);
-      }
-      if (!loggedUser){
-        init()
+      if (!appState.loggedUser){
+        fetchUserData()
       }
     }, [])
-    const onSelectedItem = (year) => {
-      setSelectedYear(year); 
-      //setMonthData(userData[year]);
+    const onSelectedItem = (selectedYear) => {
+      setAppState({...appState, selectedMonth: currentMonth, selectedYear});
     }
-    console.log('Render')
+    const onSelectedMonth = (selectedMonth) => {
+      setAppState({...appState, selectedMonth});
+    }
+    console.log('Render')    
+    const {totalAmountUSD, totalAmountCUP} = calculateTotalAmount();
+    const {loadedData, years, selectedYear, selectedMonth, userData} = appState;
     return (      
       <View style={{flex:1}}>
         <Header/>        
@@ -153,7 +153,8 @@ const MainScreen = ({navigation, route}) => {
                 navigation={navigation} 
                 selectedYear={selectedYear}  
                 data={userData[selectedYear]}  
-                index={currentMonth}
+                index={selectedMonth}
+                onSelectedMonth={onSelectedMonth}
               />
             </View>
            )           
