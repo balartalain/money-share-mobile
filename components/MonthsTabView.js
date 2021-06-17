@@ -5,6 +5,7 @@ import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Constants } from 'expo';
 import DayCard from './DayCard'
 import {color, monthNames, dayOfWeek } from '../utils'
+import shallowCompare from '../shallowEquals'
 
 // This is our placeholder component for the tabs
 // This will be rendered when a tab isn't loaded yet
@@ -15,21 +16,10 @@ const LazyPlaceholder = ({ route }) => (
   </View>
 );
 
-const TotalAmount = ()=>{
-  return (
-    <View style={{flexDirection: 'row',
-      justifyContent: 'space-around',
-      backgroundColor: 'white',
-      paddingVertical: 10
-    }}>
-    <View><Text style={{fontSize: 18,  fontWeight: 'bold', color: color.primaryGreen}}>10000.00 USD</Text></View>
-    <View><Text style={{fontSize: 18,  fontWeight: 'bold', color: color.primaryGreen}}>100000.00 CUP</Text></View>
-  </View>
-  )
-}
 export default class MonthsTabView extends React.Component {
   constructor(props){
     super(props);
+    this._handleIndexChange = this._handleIndexChange.bind(this);
     const tabs = [];
     monthNames.forEach((e, i)=>{
       tabs.push({key:i+1, title:monthNames[i]});
@@ -41,8 +31,22 @@ export default class MonthsTabView extends React.Component {
       routes: tabs,
       selectedDate: selectedDate
     }
-    console.log('AA '+selectedDate)
   }
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    // You don't have to do this check first, but it can help prevent an unneeded render
+    if (nextProps.index !== this.state.index) {
+      this.setState({ index: nextProps.index });
+    }
+  }
+  // componentDidUpdate(prevProps, prevState) {
+  //   if (prevState.pokemons !== this.state.pokemons) {
+  //     console.log('pokemons state has changed.')
+  //   }
+  // }
+  
+  shouldComponentUpdate(nextProps, nextState){
+    return shallowCompare(this, nextProps, nextState);
+ }
   fadeIn = () => {
     // Will change fadeAnim value to 0 in 3 seconds
     Animated.timing(this.state.fadeAnim, {
@@ -63,7 +67,6 @@ export default class MonthsTabView extends React.Component {
   _handleIndexChange = index => {
     //const _selectedDate = 
     this.state.selectedDate.setMonth(index);
-    console.log(this.state.selectedDate)
     this.setState({ index, selectedDate: this.state.selectedDate });
   }
 
@@ -88,8 +91,7 @@ export default class MonthsTabView extends React.Component {
           <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
             { Object.keys(data) ?
               ( 
-              <View style={{flex:1}}>
-                <TotalAmount />
+              <View style={{flex:1}}>                
                 <ScrollView style={{flex:1}}            
                   alwaysBounceVertical={true}
                   bouncesZoom={true}
@@ -135,6 +137,7 @@ export default class MonthsTabView extends React.Component {
   };
 
   render() {
+    console.log('Month tab view')
     return (
       <TabView
         //lazy
@@ -166,7 +169,7 @@ const styles = StyleSheet.create({
     bottom: 20,
     backgroundColor: color.primaryGreen,
     borderRadius: 30,
-    elevation: 22,
+    elevation: 24,
     
   }
 });

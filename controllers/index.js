@@ -29,7 +29,7 @@ export const getMonthData = (userId, year, month)=>{
             const yearData = data[userId][year] || {};        
             resolve(yearData[month] || {})
         }
-        , 2000
+        , 500
     ));
 
 }

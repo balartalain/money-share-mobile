@@ -12,7 +12,7 @@ const AddExpense = ({navigation, route}) => {
   const {params} = route;
   const [currentDate, setCurrentDate] = useState(new Date(params.year, params.month, params.day));
   const [showDatePicker, setshowDatePicker] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState();
+  const [selectedCurrency, setSelectedCurrency] = useState('CUP');
   const [amount, setAmount] = useState();
   const [concept, setConcept] = useState();
   const [comment, setComment] = useState();
@@ -23,17 +23,23 @@ const AddExpense = ({navigation, route}) => {
   };
   const okButtonPressed = async()=>{
     try{
-      const result = await createExpense({
+      const created = new Date().getHours()+''+new Date().getMinutes()+''+new Date().getSeconds();
+      const newExpense = {
         userId: 'balartalain',
         year: currentDate.getFullYear(),
         month: currentDate.getMonth()+1,
         day: currentDate.getDate(),
-        amount: amount,
-        concept: concept,
-        comment: comment,
-        currency: selectedCurrency
-      });
-      navigation.navigate('Home', { addedExpense: 'ok' })
+        created: created,
+        data: {
+          amount: amount,
+          category: concept,
+          comment: comment,
+          currency: selectedCurrency,
+          created: created
+        }
+        
+      }
+      navigation.navigate('Home', { newExpense: newExpense })
     }
     catch(error){
       alert(error);

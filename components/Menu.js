@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, memo} from 'react'
 import { ScrollView, View, TouchableOpacity, Pressable, Text, StyleSheet, Dimensions } from 'react-native';
 import Constants from 'expo-constants';
 import {equalsIntegers} from '../utils';
@@ -14,10 +14,10 @@ const Menu = (props) =>{
       const index = items.findIndex((e)=>equalsIntegers(e, selectedItem));  
       setSeletedIndex(index);
       setSelectedItem(props.selectedItem)
-      setTimeout(()=> animateItemChanged(props.selectedItem, index), 100);
+      setTimeout(()=> animateItemChanged(props.selectedItem, index), 1000);
     }, [])
     const itemChanged = (item, i)=>{
-      if (i === 0 || i === items.length - 1){
+      if (i === 0 || i === items.length - 1 || item===selectedItem){
         return;
       }
       //animateItemChanged(item, i);
