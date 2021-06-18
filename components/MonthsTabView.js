@@ -116,8 +116,8 @@ export default class MonthsTabView extends React.Component {
                     //this.fadeOut();
                   }}
                 > 
-                {     
-                Object.keys(data).map(day=>(
+                {    
+                  Object.keys(data).sort().reverse().map(day=>(
                   <DayCard key={day} day={day} month={route.key-1} selectedYear={this.props.selectedYear} data={data[day]}/>
                   ))
                 }
@@ -127,7 +127,7 @@ export default class MonthsTabView extends React.Component {
             }
             <Animated.View style={{opacity: this.state.fadeAnim}}>
                 <TouchableOpacity style={styles.fab}
-                    onPress={() => alert("Hello")}>
+                    onPress={this._addExpenseBtnPress} >
                   <Text style={styles.fabIcon}><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
                 </TouchableOpacity>
             </Animated.View>

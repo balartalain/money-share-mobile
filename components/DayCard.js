@@ -53,7 +53,7 @@ const InnerCard = (props)=>{
           marginBottom: 10,
         }}>
           {
-            Object.keys(props.data).map((e)=>(
+            Object.keys(props.data).sort().reverse().map((e)=>(
               <InnerCard key={e} 
                 amount={props.data[e].amount} 
                 category={props.data[e].category} 
