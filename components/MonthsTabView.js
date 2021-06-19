@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View, ScrollView, Text, StyleSheet, Dimensions, StatusBar, TouchableOpacity, Animated} from 'react-native';
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { Constants } from 'expo';
 import DayCard from './DayCard'
 import {color, monthNames, dayOfWeek } from '../utils'
@@ -30,7 +30,7 @@ export default class MonthsTabView extends React.Component {
       fadeAnim: new Animated.Value(1),
       index: props.index,
       routes: tabs,
-      selectedDate: selectedDate
+      selectedDate: selectedDate,
     }
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -74,6 +74,7 @@ export default class MonthsTabView extends React.Component {
   }
   _handleIndexChange = index => {
     //const _selectedDate = 
+    console.log('index '+ index)
     this.state.selectedDate.setMonth(index);
     this.setState({ index, selectedDate: this.state.selectedDate });
     this.props.onSelectedMonth(index);
@@ -90,10 +91,10 @@ export default class MonthsTabView extends React.Component {
     />
   );
   
-   renderScene = ({ route }) => {
-    if (Math.abs(this.state.index - this.state.routes.indexOf(route)) > 1) {
+   renderScene = ({ route }) => {  
+    if (Math.abs(this.state.index - this.state.routes.indexOf(route)) > 0) {
       return <View />;
-  }
+    }
     console.log(route);
       const data = this.props.data[route.key] || {}
       return (            
@@ -117,8 +118,18 @@ export default class MonthsTabView extends React.Component {
                   }}
                 > 
                 {    
-                  Object.keys(data).sort().reverse().map(day=>(
-                  <DayCard key={day} day={day} month={route.key-1} selectedYear={this.props.selectedYear} data={data[day]}/>
+                  Object.keys(data).filter(day=>Object.keys(data[day]).length > 0)
+                  .sort().reverse().map((day, i)=>(                    
+                  <DayCard 
+                    key={day+'-'+i}
+                    day={day} 
+                    month={this.state.index} 
+                    selectedYear={this.props.selectedYear} 
+                    data={data[day]}
+                    itemsToDelete={this.props.itemsToDelete}
+                    onPress={(day, time)=>this.props.onPress(this.state.index, day, time)}
+                    onLongPress={(day, time)=>this.props.onLongPress(this.state.index, day, time)}
+                  />                    
                   ))
                 }
                 </ScrollView>
@@ -126,10 +137,17 @@ export default class MonthsTabView extends React.Component {
               ):<View />
             }
             <Animated.View style={{opacity: this.state.fadeAnim}}>
+              { Object.keys(this.props.itemsToDelete).length === 0?
                 <TouchableOpacity style={styles.fab}
                     onPress={this._addExpenseBtnPress} >
                   <Text style={styles.fabIcon}><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
                 </TouchableOpacity>
+              :(
+                <TouchableOpacity style={[styles.fab, , {backgroundColor: 'red'}]}
+                    onPress={this.props.onDeleteItems} >
+                  <Text style={styles.fabIcon}><MaterialCommunityIcons name="delete" size={30} color="white" /></Text>
+                </TouchableOpacity>
+              )}
             </Animated.View>
          </View>        
       )
@@ -169,7 +187,7 @@ const styles = StyleSheet.create({
     bottom: 25,
     backgroundColor: color.primaryGreen,
     borderRadius: 28,
-    elevation: 0,
+    elevation: 8,
   },
   fabIcon: {
     fontSize: 30,

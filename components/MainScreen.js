@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useRef, memo} from 'react'
-import { View, Button, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Button, Text, StyleSheet, ActivityIndicator, TouchableOpacity} from "react-native";
 import { Avatar } from "react-native-elements";
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import AsyncStorageHelper from '../AsyncStorageHelper';
 import { color, currentMonth } from './../utils'
 import Menu from './Menu';
@@ -53,7 +54,8 @@ const MainScreen = ({navigation, route}) => {
       selectedYear: null,
       years: [],
       loadedData: false,
-      userData: null
+      userData: null,
+      itemsToDelete:[]
     });  
     const calculateTotalAmount = ()=>{
       let totalAmountUSD = 0,
@@ -125,15 +127,57 @@ const MainScreen = ({navigation, route}) => {
         fetchUserData()
       }
     }, [])
+    useEffect(()=>{        
+      setAppState({...appState, itemsToDelete:[]}); 
+    }, [appState.selectedYear])
     const onSelectedItem = (selectedYear) => {
       setAppState({...appState, selectedMonth: currentMonth, selectedYear});
     }
     const onSelectedMonth = (selectedMonth) => {
       setAppState({...appState, selectedMonth});
     }
+    const onLongPressDay = (month, day, time)=>{
+      console.log('onLongPressDay '+ month+' '+ day+' '+time)
+      const found = appState.itemsToDelete.find(item=>{
+        return (item.month === month && item.day === day && item.time === time);
+      })
+      if (!found){
+        const itemsToDelete = [...appState.itemsToDelete]
+        itemsToDelete.push({month, day, time})
+        setAppState({...appState, itemsToDelete });
+        console.log('Items '+ itemsToDelete.map(i=>JSON.stringify(i)))
+      }
+    }
+    const onPressDay = (month, day, time)=>{
+      console.log('onPressDay '+ month+' '+ day+' '+time)
+      const found = appState.itemsToDelete.find(item=>{
+        return (item.month === month && item.day === day && item.time === time);
+      })
+      if (appState.itemsToDelete.length > 0){
+        let itemsToDelete = [...appState.itemsToDelete]      
+        if (found){
+          itemsToDelete = itemsToDelete.filter(item=>!(item.month === month && 
+                                                    item.day === day && 
+                                                    item.time === time))
+        }
+        else{
+          itemsToDelete.push({month, day, time})
+        }
+        appState.itemsToDelete = {itemsToDelete}
+        setAppState({...appState, itemsToDelete})
+      }
+    }
+    const onDeleteItems = ()=>{
+      debugger;
+      const _userData = {...appState.userData};
+      appState.itemsToDelete.forEach(item=>{
+        delete _userData[selectedYear][item.month+1][item.day][item.time];
+      })
+      setAppState({...appState, _userData, itemsToDelete:[]});      
+    }
     console.log('Render')    
     const {totalAmountUSD, totalAmountCUP} = calculateTotalAmount();
-    const {loadedData, years, selectedYear, selectedMonth, userData} = appState;
+    const {loadedData, years, selectedYear, selectedMonth, itemsToDelete, userData} = appState;
     return (      
       <View style={{flex:1}}>
         <Header/>        
@@ -154,7 +198,11 @@ const MainScreen = ({navigation, route}) => {
                 selectedYear={selectedYear}  
                 data={userData[selectedYear]}  
                 index={selectedMonth}
+                itemsToDelete={itemsToDelete}
                 onSelectedMonth={onSelectedMonth}
+                onPress={onPressDay}             
+                onLongPress={onLongPressDay} 
+                onDeleteItems={onDeleteItems}               
               />
             </View>
            )           
