@@ -11,7 +11,8 @@ class FadeInView extends React.Component {
       this.state.fadeAnim,            // The animated value to drive
       {
         toValue: 1,                   // Animate to opacity: 1 (opaque)
-        duration: 10000,              // Make it take a while
+        duration: this.props.duration,              // Make it take a while
+        useNativeDriver: false
       }
     ).start();                        // Starts the animation
   }
@@ -31,6 +32,7 @@ class FadeInView extends React.Component {
     );
   }
 }
+export default FadeInView;
 // Use
 // You can then use your `FadeInView` in place of a `View` in your components:
 // export default class App extends React.Component {
