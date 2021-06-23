@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef, memo} from 'react'
 import { View, Button, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions} from "react-native";
-import { Avatar } from "react-native-elements";
+import { Avatar, Divider } from "react-native-elements";
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import AsyncStorageHelper from '../AsyncStorageHelper';
 import { color, currentMonth } from './../utils'
@@ -224,6 +224,7 @@ const MainScreen = ({navigation, route}) => {
             <View style={{flex:1}}>
               <Menu items={years} selectedItem={selectedYear} onSelectedItem={onSelectedItem}/> 
               <TotalAmount totalAmountUSD={totalAmountUSD} totalAmountCUP={totalAmountCUP} />
+              <Divider orientation="horizontal" />
               <MonthsTabView 
                 navigation={navigation} 
                 selectedYear={selectedYear}  

@@ -137,17 +137,12 @@ export default class MonthsTabView extends React.Component {
               ):<View />
             }
             <Animated.View style={{opacity: this.state.fadeAnim}}>
-              { Object.keys(this.props.itemsToDelete).length === 0?
+              { Object.keys(this.props.itemsToDelete).length === 0 &&
                 <TouchableOpacity style={styles.fab}
                     onPress={this._addExpenseBtnPress} >
                   <Text style={styles.fabIcon}><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
                 </TouchableOpacity>
-              :(
-                <TouchableOpacity style={[styles.fab, , {backgroundColor: 'red'}]}
-                    onPress={this.props.onDeleteItems} >
-                  <Text style={styles.fabIcon}><MaterialCommunityIcons name="delete" size={30} color="white" /></Text>
-                </TouchableOpacity>
-              )}
+              }
             </Animated.View>
          </View>        
       )

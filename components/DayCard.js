@@ -9,7 +9,7 @@ const InnerCard = (props)=>{
           <TouchableOpacity activeOpacity={0.6}
             onPress={()=>props.onPress(props.time)} 
             onLongPress={()=>{
-              Vibration.vibrate(100);
+              Vibration.vibrate(50);
               props.onLongPress(props.time)
             }}>                  
               <View style={{flex:1, 
