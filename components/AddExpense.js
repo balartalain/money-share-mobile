@@ -23,20 +23,15 @@ const AddExpense = ({navigation, route}) => {
   };
   const okButtonPressed = async()=>{
     try{
-      const created = new Date().getHours()+''+new Date().getMinutes()+''+new Date().getSeconds();
+      const created = Date.now()
       const newExpense = {
-        userId: 'balartalain',
-        year: currentDate.getFullYear(),
-        month: currentDate.getMonth()+1,
         day: currentDate.getDate(),
         created: created,
-        data: {
-          amount: amount,
-          category: concept,
-          comment: comment,
-          currency: selectedCurrency,
-          created: created
-        }
+        updated: created,
+        amount: amount,
+        concept: concept,
+        comment: comment,
+        currency: selectedCurrency
         
       }
       navigation.navigate('Home', { newExpense: newExpense })

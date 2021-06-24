@@ -28,7 +28,7 @@ const App = () =>{
             >
             <Stack.Screen name="Home" component={MainScreen} 
               options={{  headerShown: false }}
-              /*initialParams={{ loggedUser: loggedUser }}*/
+              initialParams={{ loggedUser: loggedUser }}
             />
             <Stack.Screen name="AddExpense" 
             options={{ title: 'Nuevo Gasto' }}

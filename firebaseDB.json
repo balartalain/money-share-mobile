@@ -1,0 +1,30 @@
+ 
+groups:{
+    "01":{
+        "user1": true,
+        "user2": true
+    }
+    "02": {
+        "user3": true,
+        "user4": true
+    }
+}
+
+users:{
+    "user1":{
+        "group": "01",
+        "2021":{
+            "1":{
+                "1":{
+                    "156434666":{
+                        "amount": 215,
+                        "currency": "USD",
+                        "concept": "Venta de dolares",
+                        "comment": "Comentario",
+                        "updated": "156434666"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -8,7 +8,7 @@ import Header from './Header'
 import Menu from './Menu';
 import TotalAmount from './TotalAmount';
 import MonthsTabView from './MonthsTabView';
-import { getUserData } from '../controllers/index';
+import { getUserData, createExpense } from '../controllers/index';
 import {currentYear, equalsIntegers} from '../utils';
 
 const width = Dimensions.get('window').width;
@@ -34,7 +34,7 @@ const MainScreen = ({navigation, route}) => {
           Object.keys(monthData).forEach(d=>{          
             Object.keys(monthData[d]).forEach(time=>{   
               let { currency, amount} = monthData[d][time];
-                (currency == 'USD')?totalAmountUSD += amount: totalAmountCUP += amount
+                (currency == 'USD')?totalAmountUSD += parseInt(amount): totalAmountCUP += parseInt(amount)
               })
             })
           })
@@ -48,58 +48,75 @@ const MainScreen = ({navigation, route}) => {
     }
     
     useEffect(()=>{
-      if (params && params.newExpense){   
-        const {year, month, day, created} = params.newExpense;
-          let userData = Object.assign({}, appState.userData),
-          currObj = userData;
-          [year, month, day].forEach(k=>{
-            currObj[k] = currObj[k] || {}
-            currObj = currObj[k];  
+      if (params && params.newExpense){ 
+          const year = appState.selectedYear,
+          month = appState.selectedMonth;
+          params.newExpense["year"] = year;
+          params.newExpense["month"] = month+1;
+          params.newExpense.day = (params.newExpense.day < 10)?"0"+params.newExpense.day:params.newExpense.day;
+          createExpense(appState.loggedUser, params.newExpense).then(result=>{
+            if (result.data){
+              let userData = appState.userData,
+              currObj = userData;
+              [result.data.year, result.data.month, result.data.day].forEach(k=>{
+                currObj[k] = currObj[k] || {}
+                currObj = currObj[k];  
+              })
+              currObj[params.newExpense.created] = result.data;
+              setAppState({...appState, userData})
+            }
+          }).catch(err=>{
+            console.log(error);
+          }).finally(()=>{
+            params.newExpense = null;
           })
-          currObj[created] = params.newExpense.data;
-          AsyncStorageHelper.saveObject(`${ appState.loggedUser }:data`, userData);
-          setAppState({...appState, userData})
-          //setUserData(_userData);
-          params.newExpense = null;
+          
+          
       }
     }, [params] )
     
-    const fetchUserData = async () =>{
-      let loggedUser = await AsyncStorageHelper.getItem('loggeduser');
-      let userData;
-      userData =  await AsyncStorageHelper.getObject(`${loggedUser}:data`);
-      if (!userData){
-        userData = await getUserData(loggedUser) ;   
-        await AsyncStorageHelper.saveObject(`${_loggedUser}:data`, userData);        
-      }
-      const years = Object.keys(userData);  
-      const index = years.findIndex((e)=>equalsIntegers(e, currentYear));  
-      if (index === -1){
-        years.push(currentYear);
-      }
-      years.sort();   
-        
-      setAppState({
-        ...appState,
-        loggedUser,
-        years,
-        userData,
-        selectedMonth: currentMonth,
-        selectedYear: currentYear,
-        loadedData: true
-      })         
-    }
     useEffect(()=>{  
-      if (!appState.loggedUser){
-        fetchUserData()
-      }
+      let isMounted = true;
+      const loggedUser = params.loggedUser;
+      debugger;
+        getUserData(loggedUser)
+        .then(data=>{
+          if (isMounted){
+            debugger;
+            const userData = data.data;
+            const years = Object.keys(userData);  
+            const index = years.findIndex((e)=>equalsIntegers(e, currentYear));  
+            if (index === -1){
+              years.push(currentYear);
+            }
+            years.sort();   
+              
+            setAppState({
+              ...appState,
+              loggedUser,
+              years,
+              userData,
+              selectedMonth: currentMonth,
+              selectedYear: currentYear,
+              loadedData: true
+            })  
+          }
+        }).catch(error=>{
+          console.log(error);
+        })  
+        return () => {
+          isMounted = false;
+        }; 
     }, [])
+
     useEffect(()=>{        
       setAppState({...appState, itemsToDelete:[]}); 
     }, [appState.selectedYear])
+
     const onSelectedItem = (selectedYear) => {
       setAppState({...appState, selectedMonth: currentMonth, selectedYear});
     }
+
     const onSelectedMonth = (selectedMonth) => {
       setAppState({...appState, selectedMonth});
     }

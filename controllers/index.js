@@ -1,9 +1,14 @@
+import axios from 'axios';
 import {
     groups,
     users,
     user_months_amount,
     data
   } from '../FakeData';
+import { herokuAPI } from '../herokuAPI';
+
+const REMOTE_HOST_URL = 'https://moneyshare00.herokuapp.com/api';
+
 export const getGroups = ()=>{
     return new Promise(resolve => setTimeout(()=>{
         resolve(groups)}
@@ -11,12 +16,17 @@ export const getGroups = ()=>{
     ));
     return groups;
 }
-export const getUserData = (userId)=>{
-    return new Promise(resolve => setTimeout(()=>{
-        resolve(data[userId])}
-        , 2000
-    )); 
+export const getUserData = async (userId)=>{    
+    let response = await herokuAPI.get(`/${userId}/get-data/`)
+    debugger;
+    return response;
 }
+
+export const createExpense = async(userId, data)=>{  
+   let response = await herokuAPI.put(`/${userId}/add-expense/`, data)
+    return response;     
+}
+
 export const getUserYears = (userId)=>{
     //console.log(Object.keys(user_months_amount[userId]))
     return new Promise(resolve => setTimeout(()=>{
@@ -32,21 +42,4 @@ export const getMonthData = (userId, year, month)=>{
         , 500
     ));
 
-}
-export const createExpense = (props)=>{    
-    return new Promise((resolve, reject) => setTimeout(()=>{
-        data[props.userId][props.year] = data[props.userId][props.year] || {};
-        data[props.userId][props.year][props.month] = data[props.userId][props.year][props.month] || {}
-        data[props.userId][props.year][props.month][props.day] = data[props.userId][props.year][props.month][props.day] || {};
-        const newExpense = data[props.userId][props.year][props.month][props.day][`${new Date().getHours()}${new Date().getMinutes()}`] = {
-            category: props.concept, 
-            amount: props.amount,
-            comment: props.comment,
-            currency: props.currency
-        }       
-        console.log(data[props.userId][props.year]  ) 
-        resolve(1)
-    }
-    , 1000
-));
 }
