@@ -32,6 +32,7 @@ const App = () =>{
             />
             <Stack.Screen name="AddExpense" 
             options={{ title: 'Nuevo Gasto' }}
+            initialParams={{ loggedUser: loggedUser }}
             component={AddExpense} />
           </Stack.Navigator>
         </NavigationContainer>   

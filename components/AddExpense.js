@@ -1,10 +1,10 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import { View, StyleSheet, Text, TextInput, TouchableOpacity} from "react-native";
 import { Button } from 'react-native-elements';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Picker} from '@react-native-picker/picker';
+import Spinner from 'react-native-loading-spinner-overlay';
 import {color, monthNames, dayOfWeek } from '../utils'
-import { Navigation } from "react-native-navigation";
 import { createExpense } from '../controllers/index'
 
 
@@ -16,30 +16,42 @@ const AddExpense = ({navigation, route}) => {
   const [amount, setAmount] = useState();
   const [concept, setConcept] = useState();
   const [comment, setComment] = useState();
+  const [spinner, setSpinner] = useState(false);
+  const [addingExpense, setAddingExpense] = useState(false);
   const onChange = (event, selectedDate) => {
     //const currentDate = selectedDate || currentDate;
     setshowDatePicker(Platform.OS === 'ios');
     setCurrentDate(selectedDate || currentDate);
   };
   const okButtonPressed = async()=>{
-    try{
       const created = Date.now()
       const newExpense = {
-        day: currentDate.getDate(),
+        year: currentDate.getFullYear(),
+        month: currentDate.getMonth()+1, //("0" + (currentDate.getMonth()+1)).slice(-2),
+        day: ("0" + currentDate.getDate()).slice(-2),
         created: created,
         updated: created,
         amount: amount,
         concept: concept,
         comment: comment,
-        currency: selectedCurrency
-        
+        currency: selectedCurrency        
       }
-      navigation.navigate('Home', { newExpense: newExpense })
-    }
-    catch(error){
-      alert(error);
-    }
+      setAddingExpense(true);
+      createExpense(route.params.loggedUser, newExpense).then(result=>{
+        if (result.data){
+          navigation.navigate('Home', { newExpense })
+        }
+      }).catch(err=>{
+        setAddingExpense(false);
+        alert(err);
+      })
   }
+  useEffect(() => {
+    setAddingExpense(false);
+    return () => {
+      setAddingExpense(false);
+    }
+  }, [])
   return (
     <View style={{flex:1}}>
       <View style={{flex:1}}>
@@ -103,6 +115,7 @@ const AddExpense = ({navigation, route}) => {
           backgroundColor:'red',
           paddingVertical: 15
         }}
+        loading = {addingExpense? true: false}
       />
       <Button title="Cancelar" type='clear' 
         buttonStyle={{

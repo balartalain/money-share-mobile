@@ -118,19 +118,21 @@ export default class MonthsTabView extends React.Component {
                   }}
                 > 
                 {    
-                  Object.keys(data).filter(day=>Object.keys(data[day]).length > 0)
-                  .sort().reverse().map((day, i)=>(                    
-                  <DayCard 
-                    key={day+'-'+i}
-                    day={day} 
-                    month={this.state.index} 
-                    selectedYear={this.props.selectedYear} 
-                    data={data[day]}
-                    itemsToDelete={this.props.itemsToDelete}
-                    onPress={(day, time)=>this.props.onPress(this.state.index, day, time)}
-                    onLongPress={(day, time)=>this.props.onLongPress(this.state.index, day, time)}
-                  />                    
-                  ))
+                  Object.keys(data).filter(day=> {                   
+                    return Object.keys(data[day]).filter(time=>data[day][time].deleted!=="true").length > 0
+                  })
+                  .sort().reverse().map((day, i)=>(                                                            
+                      <DayCard 
+                        key={day+'-'+i}
+                        day={day} 
+                        month={this.state.index} 
+                        selectedYear={this.props.selectedYear} 
+                        data={data[day]}
+                        itemsToDelete={this.props.itemsToDelete}
+                        onPress={(day, time)=>this.props.onPress(this.state.index, day, time)}
+                        onLongPress={(day, time)=>this.props.onLongPress(this.state.index, day, time)}
+                      />)                 
+                  )
                 }
                 </ScrollView>
               </View>

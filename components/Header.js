@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef, memo} from 'react'
-import { View, Button, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions} from "react-native";
-import { Avatar, Divider } from "react-native-elements";
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions} from "react-native";
+import { Avatar, Divider, Button } from "react-native-elements";
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import AsyncStorageHelper from '../AsyncStorageHelper';
 import { color, currentMonth } from './../utils'
@@ -10,7 +10,41 @@ import { getUserData } from '../controllers/index';
 import {currentYear, equalsIntegers} from '../utils';
 import FadeInView from './FadeInView'
 
-const Header = (props)=>{
+const Delete = (props) =>{
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(()=>{
+    setDeleting(false);
+    return ()=>{
+      setDeleting(false);
+    }
+  }, [])
+  return (
+    <FadeInView duration={500} style={{
+      flex:1,
+      flexDirection: 'row',   
+      justifyContent: 'space-between',
+      alignItems: 'center',            
+    }}>
+    <TouchableOpacity
+          onPress={props.onCancelDelete} >
+      <Text><MaterialCommunityIcons name="arrow-left-circle-outline" size={28} color="white" /></Text>
+      </TouchableOpacity>
+      <Button
+          onPress={()=>{setDeleting(true); props.onDelete()}}
+          type="clear"
+          title = {<MaterialCommunityIcons name="delete" size={28} color="white" />}
+          loadingProps={{
+            color: 'white',
+            
+          }} 
+          loading={deleting}
+        >
+            
+      </Button>
+    </FadeInView>
+)}
+const Header = (props)=>{  
     return (
       <View style={{   
         backgroundColor: color.primaryGreen,        
@@ -18,21 +52,7 @@ const Header = (props)=>{
         height:65
       }}>  
         { props.deleteItems?
-        <FadeInView duration={500} style={{
-          flex:1,
-          flexDirection: 'row',   
-          justifyContent: 'space-between',
-          alignItems: 'center',            
-        }}>
-          <TouchableOpacity
-              onPress={props.onCancelDelete} >
-          <Text><MaterialCommunityIcons name="arrow-left-circle-outline" size={30} color="white" /></Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-              onPress={props.onDelete} >
-            <Text><MaterialCommunityIcons name="delete" size={30} color="white" /></Text>
-          </TouchableOpacity>
-        </FadeInView>
+          <Delete onCancelDelete={props.onCancelDelete} onDelete={props.onDelete} />
         :(
           <View style={{
             flex:1,
@@ -46,7 +66,7 @@ const Header = (props)=>{
               overlayContainerStyle={{backgroundColor: 'gray'}}
               size="medium"
               title="BP"
-              onPress={() => console.log("Works!")}
+              onPress={() => props.navigation.openDrawer()}
               activeOpacity={0.7}        
             />
           </View>

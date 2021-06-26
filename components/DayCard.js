@@ -24,7 +24,7 @@ const InnerCard = (props)=>{
                 paddingBottom: 10,
                 backgroundColor: props.selected?'rgba(185,185,190,0.2)':'white'}}>
                   <View style={{flex:1, paddingLeft:10}}>      
-                      <Text>{props.category}</Text>
+                      <Text>{props.concept}</Text>
                       <Text style={{fontSize: 12}}>{props.comment}</Text>
                     </View>
                     <View style={{flex:0.6, marginRight:10}}><Text style={{textAlign: 'right', color:`${props.amount < 0?'red': color.primaryGreen}`}}>{props.amount} {props.currency}</Text></View>                                            
@@ -62,19 +62,21 @@ const InnerCard = (props)=>{
         }}>
           {
             Object.keys(props.data).sort().reverse().map((e)=>(
+              props.data[e].deleted !== "true" && 
               <InnerCard key={e} 
                 time={e} //e is the key time
                 amount={props.data[e].amount} 
-                category={props.data[e].category} 
+                concept={props.data[e].concept} 
                 comment={props.data[e].comment}
                 currency={props.data[e].currency}
-                selected={props.itemsToDelete.find(item=>{ return item.month === props.month && 
+                selected={props.itemsToDelete.find(item=>{ return item.month === props.month + 1 && 
                     item.day === props.day &&
-                    item.time === e
+                    item.created === e
                 })?true:false}
                 onPress={(time)=>props.onPress(props.day, time)}
                 onLongPress={(time)=>props.onLongPress(props.day, time)}                
               />     
+              
             ))
           }     
         </View>           

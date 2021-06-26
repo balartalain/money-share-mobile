@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef, memo} from 'react'
-import { View, Button, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions} from "react-native";
-import { Avatar, Divider } from "react-native-elements";
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions} from "react-native";
+import { Avatar, Divider, Button } from "react-native-elements";
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import AsyncStorageHelper from '../AsyncStorageHelper';
 import { color, currentMonth } from './../utils'
@@ -8,7 +8,7 @@ import Header from './Header'
 import Menu from './Menu';
 import TotalAmount from './TotalAmount';
 import MonthsTabView from './MonthsTabView';
-import { getUserData, createExpense } from '../controllers/index';
+import { getUserData, deleteExpense } from '../controllers/index';
 import {currentYear, equalsIntegers} from '../utils';
 
 const width = Dimensions.get('window').width;
@@ -19,22 +19,26 @@ const MainScreen = ({navigation, route}) => {
       loggedUser: null,
       selectedMonth: null,
       selectedYear: null,
-      years: [],
-      loadedData: false,
+      years: [],      
       userData: null,
       itemsToDelete:[]
     });  
-    const calculateTotalAmount = ()=>{
+    const [errorMsg, setErrorMsg] = useState("");
+    const [status, setStatus] = useState(""); // loading, loaded, error
+    const mountedRef = useRef(false),
+    calculateTotalAmount = ()=>{
       let totalAmountUSD = 0,
       totalAmountCUP = 0;
       const {userData, selectedYear} = appState;
-      if (userData){
+      if (userData && Object.keys(userData).length > 0){
         Object.keys(userData[selectedYear]).forEach(m=>{
           const monthData = userData[selectedYear][m];
           Object.keys(monthData).forEach(d=>{          
             Object.keys(monthData[d]).forEach(time=>{   
-              let { currency, amount} = monthData[d][time];
-                (currency == 'USD')?totalAmountUSD += parseInt(amount): totalAmountCUP += parseInt(amount)
+              if (monthData[d][time].deleted !== 'true'){
+                let { currency, amount} = monthData[d][time];
+                  (currency == 'USD')?totalAmountUSD += parseInt(amount): totalAmountCUP += parseInt(amount)
+                }
               })
             })
           })
@@ -49,40 +53,25 @@ const MainScreen = ({navigation, route}) => {
     
     useEffect(()=>{
       if (params && params.newExpense){ 
-          const year = appState.selectedYear,
-          month = appState.selectedMonth;
-          params.newExpense["year"] = year;
-          params.newExpense["month"] = month+1;
-          params.newExpense.day = (params.newExpense.day < 10)?"0"+params.newExpense.day:params.newExpense.day;
-          createExpense(appState.loggedUser, params.newExpense).then(result=>{
-            if (result.data){
-              let userData = appState.userData,
-              currObj = userData;
-              [result.data.year, result.data.month, result.data.day].forEach(k=>{
-                currObj[k] = currObj[k] || {}
-                currObj = currObj[k];  
-              })
-              currObj[params.newExpense.created] = result.data;
-              setAppState({...appState, userData})
-            }
-          }).catch(err=>{
-            console.log(error);
-          }).finally(()=>{
+           let userData = appState.userData,
+           expense = params.newExpense,
+            currObj = userData;
+            [expense.year, expense.month, expense.day].forEach(k=>{
+              currObj[k] = currObj[k] || {}
+              currObj = currObj[k];  
+            })
+            currObj[expense.created] = expense;
+            setAppState({...appState, userData})
             params.newExpense = null;
-          })
-          
-          
       }
     }, [params] )
-    
-    useEffect(()=>{  
-      let isMounted = true;
+
+    const loadData = ()=>{
+      setStatus("loading");
       const loggedUser = params.loggedUser;
-      debugger;
-        getUserData(loggedUser)
+      getUserData(loggedUser)
         .then(data=>{
-          if (isMounted){
-            debugger;
+          if (mountedRef.current){
             const userData = data.data;
             const years = Object.keys(userData);  
             const index = years.findIndex((e)=>equalsIntegers(e, currentYear));  
@@ -90,23 +79,34 @@ const MainScreen = ({navigation, route}) => {
               years.push(currentYear);
             }
             years.sort();   
-              
             setAppState({
               ...appState,
               loggedUser,
               years,
               userData,
               selectedMonth: currentMonth,
-              selectedYear: currentYear,
-              loadedData: true
+              selectedYear: currentYear
             })  
+            setStatus("loaded");
+            
           }
         }).catch(error=>{
-          console.log(error);
+          if (!error.response){
+            setErrorMsg("No hay conexión a internet")
+          }
+          else{
+            setErrorMsg(error);
+          } 
+          setStatus("error");
         })  
-        return () => {
-          isMounted = false;
-        }; 
+    }
+
+    useEffect(()=>{  
+      mountedRef.current = true
+      loadData();
+      return () => {
+        mountedRef.current = false
+      }; 
     }, [])
 
     useEffect(()=>{        
@@ -121,42 +121,51 @@ const MainScreen = ({navigation, route}) => {
       setAppState({...appState, selectedMonth});
     }
     const onLongPressDay = (month, day, time)=>{
-      console.log('onLongPressDay '+ month+' '+ day+' '+time)
+      month = month + 1;
       const found = appState.itemsToDelete.find(item=>{
         return (item.month === month && item.day === day && item.time === time);
       })
       if (!found){
         const itemsToDelete = [...appState.itemsToDelete]
-        itemsToDelete.push({month, day, time})
+        itemsToDelete.push({year: appState.selectedYear, month, day, created:time})
         setAppState({...appState, itemsToDelete });
-        console.log('Items '+ itemsToDelete.map(i=>JSON.stringify(i)))
       }
     }
     const onPressDay = (month, day, time)=>{
-      console.log('onPressDay '+ month+' '+ day+' '+time)
+      month = month + 1;
       const found = appState.itemsToDelete.find(item=>{
-        return (item.month === month && item.day === day && item.time === time);
+        return (item.month === month && item.day === day && item.created === time);
       })
       if (appState.itemsToDelete.length > 0){
         let itemsToDelete = [...appState.itemsToDelete]      
         if (found){
           itemsToDelete = itemsToDelete.filter(item=>!(item.month === month && 
                                                     item.day === day && 
-                                                    item.time === time))
+                                                    item.created === time))
         }
         else{
-          itemsToDelete.push({month, day, time})
+          itemsToDelete.push({year: appState.selectedYear, month, day, created:time})
         }
         appState.itemsToDelete = {itemsToDelete}
         setAppState({...appState, itemsToDelete})
       }
     }
     const onDeleteItems = ()=>{    
-      const _userData = {...appState.userData};
-      appState.itemsToDelete.forEach(item=>{
-        delete _userData[selectedYear][item.month+1][item.day][item.time];
-      })
-      setAppState({...appState, _userData, itemsToDelete:[]});      
+      // const res = await axios.delete('https://httpbin.org/delete', { data: { answer: 42 } });      
+        const deleteAsync = appState.itemsToDelete.map(item=>{
+          return deleteExpense(appState.loggedUser, item)
+        })
+        Promise.all(deleteAsync).then(result => {
+          const _userData = {...appState.userData};
+          appState.itemsToDelete.forEach(item=>{
+            _userData[selectedYear][item.month][item.day][item.created].deleted = "true";
+          })
+          setAppState({...appState, _userData, itemsToDelete:[]});      
+        }).catch(reason => {
+          console.log('Error '+ reason);
+          setAppState({...appState, itemsToDelete:[]});
+          setTimeout(()=> alert("No tiene conexión a internet"), 100)          
+        });      
     }
     const onCancelDelete = ()=>{
       // TODO: Esto es ineficiente debido a que solo queremos cancelar , 
@@ -171,8 +180,9 @@ const MainScreen = ({navigation, route}) => {
         <Header deleteItems={itemsToDelete.length > 0} 
           onDelete={onDeleteItems}
           onCancelDelete={onCancelDelete}
+          navigation={navigation}
         />        
-        { !loadedData ?
+        { status === "loading" ?
           (
             <View style={{flex:1}}>            
               <View style={{flex:1, justifyContent: 'center'}}>
@@ -180,7 +190,8 @@ const MainScreen = ({navigation, route}) => {
               </View>
             </View>
           )
-          :(
+          : status==="loaded" ?
+          (
             <View style={{flex:1}}>
               <Menu items={years} selectedItem={selectedYear} onSelectedItem={onSelectedItem}/> 
               <TotalAmount totalAmountUSD={totalAmountUSD} totalAmountCUP={totalAmountCUP} />
@@ -188,7 +199,7 @@ const MainScreen = ({navigation, route}) => {
               <MonthsTabView 
                 navigation={navigation} 
                 selectedYear={selectedYear}  
-                data={userData[selectedYear]}  
+                data={userData[selectedYear] || {}}  
                 index={selectedMonth}
                 itemsToDelete={itemsToDelete}
                 onSelectedMonth={onSelectedMonth}
@@ -197,7 +208,19 @@ const MainScreen = ({navigation, route}) => {
                 onDeleteItems={onDeleteItems}               
               />
             </View>
-           )           
+           ):
+            (
+              <View style={{flex:1, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{marginBottom: 10}}>{errorMsg}</Text>
+                  <Button title="Volver a intentarlo" 
+                    onPress={loadData}
+                    buttonStyle={{
+                      backgroundColor:'red',
+                      paddingVertical: 15
+                    }}
+                  />
+              </View>
+            )                    
         }
       </View>
     );

@@ -18,7 +18,6 @@ export const getGroups = ()=>{
 }
 export const getUserData = async (userId)=>{    
     let response = await herokuAPI.get(`/${userId}/get-data/`)
-    debugger;
     return response;
 }
 
@@ -26,7 +25,10 @@ export const createExpense = async(userId, data)=>{
    let response = await herokuAPI.put(`/${userId}/add-expense/`, data)
     return response;     
 }
-
+export const deleteExpense = async(userId, data)=>{  
+    let response = await herokuAPI.put(`/${userId}/delete-expense/`, data)
+    return response;     
+ }
 export const getUserYears = (userId)=>{
     //console.log(Object.keys(user_months_amount[userId]))
     return new Promise(resolve => setTimeout(()=>{
