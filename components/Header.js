@@ -9,6 +9,7 @@ import MonthsTabView from './MonthsTabView';
 import { getUserData } from '../controllers/index';
 import {currentYear, equalsIntegers} from '../utils';
 import FadeInView from './FadeInView'
+import FacebookAPI from '../FacebookAPI';
 
 const Delete = (props) =>{
   const [deleting, setDeleting] = useState(false);
@@ -45,6 +46,7 @@ const Delete = (props) =>{
     </FadeInView>
 )}
 const Header = (props)=>{  
+    
     return (
       <View style={{   
         backgroundColor: color.primaryGreen,        
@@ -61,14 +63,9 @@ const Header = (props)=>{
             alignItems: 'center',            
           }}>          
             <Text style={{fontSize:18, color: 'white'}}>Money share</Text>
-            <Avatar
-              rounded
-              overlayContainerStyle={{backgroundColor: 'gray'}}
-              size="medium"
-              title="BP"
-              onPress={() => props.navigation.openDrawer()}
-              activeOpacity={0.7}        
-            />
+            <TouchableOpacity>
+              <Text style={{fontSize:18, color: 'white'}}>{props.currentUser.name.split(' ')[0]}</Text>
+            </TouchableOpacity>
           </View>
         )}
       </View>

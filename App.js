@@ -6,36 +6,50 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Constants from 'expo-constants';
 import MainScreen from './components/MainScreen'
 import AddExpense from './components/AddExpense'
+import FacebookLogin from './components/FacebookLogin';
 import AsyncStorageHelper  from './AsyncStorageHelper'
+import {registerUser} from './controllers'
 
 const Stack = createStackNavigator();
 const App = () =>{
-  const [loggedUser, setLoggedUser] = useState(null);
-  const a = async function(){
-    //AsyncStorageHelper.saveItem('loggeduser', 'balartalain')
-    await AsyncStorageHelper.saveItem('loggeduser', 'balartalain');
-    const _loggedUser = await AsyncStorageHelper.getItem('loggeduser');
-    setLoggedUser('balartalain')
+  const [userInfo, setUserInfo] = useState(null);
+  const success = (_userInfo)=>{    
+    AsyncStorageHelper.saveItem('token', _userInfo.token);
+    registerUser({
+      id: _userInfo.id,
+      name: _userInfo.name,
+      email: _userInfo.email
+    }).then(result=>{
+      AsyncStorageHelper.saveObject('me', _userInfo);
+      setUserInfo(_userInfo);
+    }).catch(err=>alert('Error de conexión'));
+    
   }
   useEffect(()=>{
-    a();
+    const checkUser = async()=>{
+      let _userInfo = null;      
+      //const _userInfo = await AsyncStorageHelper.getObject('me');
+      if (_userInfo != null){
+        setUserInfo(_userInfo);
+      }
+    }
+    checkUser();
   }, [])
     return (
       <SafeAreaView style={styles.container}>  
-        { loggedUser && 
+        { userInfo ?(
         <NavigationContainer>
           <Stack.Navigator
             >
             <Stack.Screen name="Home" component={MainScreen} 
-              options={{  headerShown: false }}
-              initialParams={{ loggedUser: loggedUser }}
+              options={{  headerShown: false }}              
             />
             <Stack.Screen name="AddExpense" 
             options={{ title: 'Nuevo Gasto' }}
-            initialParams={{ loggedUser: loggedUser }}
             component={AddExpense} />
           </Stack.Navigator>
-        </NavigationContainer>   
+        </NavigationContainer>  
+        ):<FacebookLogin onSuccess={success} /> 
         } 
       </SafeAreaView>
     );  

@@ -16,6 +16,10 @@ export const getGroups = ()=>{
     ));
     return groups;
 }
+export const registerUser = async (userInfo)=>{
+    let response = await herokuAPI.put(`/${userInfo.id}/register-user/`, userInfo)
+    return response;
+}
 export const getUserData = async (userId)=>{    
     let response = await herokuAPI.get(`/${userId}/get-data/`)
     return response;

@@ -16,7 +16,7 @@ const MainScreen = ({navigation, route}) => {
 
     const { params } = route;
     const [appState, setAppState] = useState({
-      loggedUser: null,
+      currentUser: null,
       selectedMonth: null,
       selectedYear: null,
       years: [],      
@@ -66,10 +66,9 @@ const MainScreen = ({navigation, route}) => {
       }
     }, [params] )
 
-    const loadData = ()=>{
+    const loadData = async()=>{
       setStatus("loading");
-      const loggedUser = params.loggedUser;
-      getUserData(loggedUser)
+      getUserData(appState.currentUser.id)
         .then(data=>{
           if (mountedRef.current){
             const userData = data.data;
@@ -81,9 +80,8 @@ const MainScreen = ({navigation, route}) => {
             years.sort();   
             setAppState({
               ...appState,
-              loggedUser,
-              years,
               userData,
+              years,
               selectedMonth: currentMonth,
               selectedYear: currentYear
             })  
@@ -100,10 +98,20 @@ const MainScreen = ({navigation, route}) => {
           setStatus("error");
         })  
     }
+    useEffect(()=>{
+      if (appState.currentUser){
+        AsyncStorageHelper.saveObject('currentUser', appState.currentUser);
+        loadData();
+      }
+    }, [appState.currentUser])
 
     useEffect(()=>{  
+      const init = async()=>{
+        const me = await AsyncStorageHelper.getObject('me');
+        setAppState({...appState, currentUser: me});        
+      }      
       mountedRef.current = true
-      loadData();
+      init();
       return () => {
         mountedRef.current = false
       }; 
@@ -153,7 +161,7 @@ const MainScreen = ({navigation, route}) => {
     const onDeleteItems = ()=>{    
       // const res = await axios.delete('https://httpbin.org/delete', { data: { answer: 42 } });      
         const deleteAsync = appState.itemsToDelete.map(item=>{
-          return deleteExpense(appState.loggedUser, item)
+          return deleteExpense(appState.currentUser.id, item)
         })
         Promise.all(deleteAsync).then(result => {
           const _userData = {...appState.userData};
@@ -177,12 +185,15 @@ const MainScreen = ({navigation, route}) => {
     const {loadedData, years, selectedYear, selectedMonth, itemsToDelete, userData} = appState;
     return (      
       <View style={{flex:1}}>
+        { appState.currentUser &&
         <Header deleteItems={itemsToDelete.length > 0} 
           onDelete={onDeleteItems}
           onCancelDelete={onCancelDelete}
           navigation={navigation}
-        />        
-        { status === "loading" ?
+          currentUser={appState.currentUser}
+        />  
+       }      
+        { (status === "loading" || status === "") ?
           (
             <View style={{flex:1}}>            
               <View style={{flex:1, justifyContent: 'center'}}>
@@ -200,7 +211,7 @@ const MainScreen = ({navigation, route}) => {
                 navigation={navigation} 
                 selectedYear={selectedYear}  
                 data={userData[selectedYear] || {}}  
-                index={selectedMonth}
+                index={selectedMonth}id
                 itemsToDelete={itemsToDelete}
                 onSelectedMonth={onSelectedMonth}
                 onPress={onPressDay}             

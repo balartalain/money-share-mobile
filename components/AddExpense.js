@@ -6,6 +6,7 @@ import {Picker} from '@react-native-picker/picker';
 import Spinner from 'react-native-loading-spinner-overlay';
 import {color, monthNames, dayOfWeek } from '../utils'
 import { createExpense } from '../controllers/index'
+import AsyncStorageHelper from '../AsyncStorageHelper'
 
 
 const AddExpense = ({navigation, route}) => {
@@ -37,7 +38,8 @@ const AddExpense = ({navigation, route}) => {
         currency: selectedCurrency        
       }
       setAddingExpense(true);
-      createExpense(route.params.loggedUser, newExpense).then(result=>{
+      const {id} = await AsyncStorageHelper.getObject('currentUser');      
+      createExpense(id, newExpense).then(result=>{
         if (result.data){
           navigation.navigate('Home', { newExpense })
         }
