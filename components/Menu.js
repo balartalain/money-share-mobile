@@ -14,7 +14,7 @@ const Menu = (props) =>{
       const index = items.findIndex((e)=>equalsIntegers(e, selectedItem));  
       setSeletedIndex(index);
       setSelectedItem(props.selectedItem)
-      setTimeout(()=> animateItemChanged(props.selectedItem, index), 1000);
+      setTimeout(()=> animateItemChanged(props.selectedItem, index), 500);
     }, [])
     const itemChanged = (item, i)=>{
       if (i === 0 || i === items.length - 1 || item===selectedItem){

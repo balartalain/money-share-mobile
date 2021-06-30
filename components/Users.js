@@ -1,10 +1,10 @@
-import React, {useState, useEffect, useRef} from 'react'
-import { SafeAreaView, ScrollView, View, TouchableOpacity, Pressable, Text } from 'react-native';
-import { Navigation } from 'react-native-navigation';
-import { ListItem, CheckBox } from 'react-native-elements'
-import {getUsers, setSupervisor} from '../controllers';
-import OverlayIndicator from './OverlayIndicator';
-const Users = ()=>{
+    import React, {useState, useEffect, useRef} from 'react'
+    import { SafeAreaView, ScrollView, View, TouchableOpacity, Pressable, Text } from 'react-native';
+    import { Navigation } from 'react-native-navigation';
+    import { ListItem, CheckBox } from 'react-native-elements'
+    import {getUsers, setSupervisor} from '../controllers';
+    import OverlayIndicator from './OverlayIndicator';
+    const Users = ()=>{
     const [users, setUsers] = useState(null);
     const [loading, setLoading] = useState(false);
     const mountedRef = useRef(false)
@@ -12,6 +12,7 @@ const Users = ()=>{
         mountedRef.current = true
         setLoading(true);
         getUsers().then(_users=>{
+            console.log(_users)
                 if (mountedRef.current){
                     setUsers(_users.data);
                 }

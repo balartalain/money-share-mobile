@@ -72,6 +72,9 @@ export default class MonthsTabView extends React.Component {
       day: new Date().getDate()
     })
   }
+  _changeExpenseView = ()=>{
+    this.props.onChangeExpenseView();
+  }
   _handleIndexChange = index => {
     //const _selectedDate = 
     console.log('index '+ index)
@@ -95,7 +98,6 @@ export default class MonthsTabView extends React.Component {
     if (Math.abs(this.state.index - this.state.routes.indexOf(route)) > 0) {
       return <View />;
     }
-    console.log(route);
       const data = this.props.data[route.key] || {}
       return (            
           <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
@@ -140,10 +142,16 @@ export default class MonthsTabView extends React.Component {
             }
             <Animated.View style={{opacity: this.state.fadeAnim}}>
               { Object.keys(this.props.itemsToDelete).length === 0 &&
+                <>
                 <TouchableOpacity style={styles.fab}
                     onPress={this._addExpenseBtnPress} >
                   <Text style={styles.fabIcon}><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={[styles.fab, {left: 30}]}
+                  onPress={this._changeExpenseView} >
+                  <Text style={styles.fabIcon}><MaterialCommunityIcons name="format-list-bulleted" size={30} color="white" /></Text>
+                </TouchableOpacity>
+                </>
               }
             </Animated.View>
          </View>        

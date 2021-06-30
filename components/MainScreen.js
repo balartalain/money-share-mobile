@@ -8,6 +8,7 @@ import Header from './Header'
 import Menu from './Menu';
 import TotalAmount from './TotalAmount';
 import MonthsTabView from './MonthsTabView';
+import ExpenseList from './ExpenseList';
 import { getUserData, deleteExpense } from '../controllers/index';
 import {currentYear, equalsIntegers} from '../utils';
 
@@ -23,6 +24,7 @@ const MainScreen = ({navigation, route}) => {
       userData: null,
       itemsToDelete:[]
     });  
+    const [expensesView, setExpensesView] = useState("grid");
     const [errorMsg, setErrorMsg] = useState("");
     const [status, setStatus] = useState(""); // loading, loaded, error
     const mountedRef = useRef(false),
@@ -37,7 +39,7 @@ const MainScreen = ({navigation, route}) => {
             Object.keys(monthData[d]).forEach(time=>{   
               if (monthData[d][time].deleted !== 'true'){
                 let { currency, amount} = monthData[d][time];
-                  (currency == 'USD')?totalAmountUSD += parseInt(amount): totalAmountCUP += parseInt(amount)
+                  (currency == 'USD')?totalAmountUSD += parseFloat(amount): totalAmountCUP += parseFloat(amount)
                 }
               })
             })
@@ -106,6 +108,7 @@ const MainScreen = ({navigation, route}) => {
     }, [appState.currentUser])
 
     useEffect(()=>{  
+      setExpensesView("list");
       const init = async()=>{
         const me = await AsyncStorageHelper.getObject('me');
         setAppState({...appState, currentUser: me});        
@@ -120,7 +123,9 @@ const MainScreen = ({navigation, route}) => {
     useEffect(()=>{        
       setAppState({...appState, itemsToDelete:[]}); 
     }, [appState.selectedYear])
-
+  const onChangeExpenseView = ()=>{
+    setExpensesView(expensesView==='list'?'grid':'list');
+  }
     const onSelectedItem = (selectedYear) => {
       setAppState({...appState, selectedMonth: currentMonth, selectedYear});
     }
@@ -180,7 +185,6 @@ const MainScreen = ({navigation, route}) => {
       // es mejor separar itemsToDelete en un estado separado
       setAppState({...appState, itemsToDelete:[]});
     }
-    console.log('Render')    
     const {totalAmountUSD, totalAmountCUP} = calculateTotalAmount();
     const {loadedData, years, selectedYear, selectedMonth, itemsToDelete, userData} = appState;
     return (      
@@ -207,17 +211,22 @@ const MainScreen = ({navigation, route}) => {
               <Menu items={years} selectedItem={selectedYear} onSelectedItem={onSelectedItem}/> 
               <TotalAmount totalAmountUSD={totalAmountUSD} totalAmountCUP={totalAmountCUP} />
               <Divider orientation="horizontal" />
-              <MonthsTabView 
-                navigation={navigation} 
-                selectedYear={selectedYear}  
-                data={userData[selectedYear] || {}}  
-                index={selectedMonth}id
-                itemsToDelete={itemsToDelete}
-                onSelectedMonth={onSelectedMonth}
-                onPress={onPressDay}             
-                onLongPress={onLongPressDay} 
-                onDeleteItems={onDeleteItems}               
-              />
+              {expensesView === 'grid'? (
+                <MonthsTabView 
+                  navigation={navigation} 
+                  selectedYear={selectedYear}  
+                  data={userData[selectedYear] || {}}  
+                  index={selectedMonth}id
+                  itemsToDelete={itemsToDelete}
+                  onSelectedMonth={onSelectedMonth}
+                  onPress={onPressDay}             
+                  onLongPress={onLongPressDay} 
+                  onDeleteItems={onDeleteItems}   
+                  onChangeExpenseView={onChangeExpenseView}            
+                />
+              ):<ExpenseList userData={appState.userData[appState.selectedYear]} selectedYear={selectedYear}
+                  onChangeExpenseView={onChangeExpenseView}  />
+              }
             </View>
            ):
             (
