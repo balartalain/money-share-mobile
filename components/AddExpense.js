@@ -123,6 +123,7 @@ const AddExpense = ({navigation, route}) => {
         buttonStyle={{
           paddingVertical: 15
         }}
+        onPress={()=>navigation.goBack()}
       />
       </View>
     </View>

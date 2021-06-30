@@ -3,14 +3,17 @@ import { SafeAreaView, ScrollView, View, TouchableOpacity, Pressable, Text, Styl
 import { Navigation } from 'react-native-navigation';
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import Constants from 'expo-constants';
 import MainScreen from './components/MainScreen'
 import AddExpense from './components/AddExpense'
 import FacebookLogin from './components/FacebookLogin';
 import AsyncStorageHelper  from './AsyncStorageHelper'
 import {registerUser} from './controllers'
+import Users from './components/Users';
 
 const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 const App = () =>{
   const [userInfo, setUserInfo] = useState(null);
   const success = (_userInfo)=>{    
@@ -38,17 +41,20 @@ const App = () =>{
     return (
       <SafeAreaView style={styles.container}>  
         { userInfo ?(
-        <NavigationContainer>
-          <Stack.Navigator
-            >
-            <Stack.Screen name="Home" component={MainScreen} 
-              options={{  headerShown: false }}              
-            />
-            <Stack.Screen name="AddExpense" 
-            options={{ title: 'Nuevo Gasto' }}
-            component={AddExpense} />
-          </Stack.Navigator>
-        </NavigationContainer>  
+            <NavigationContainer>
+              <Stack.Navigator
+                >
+                <Stack.Screen name="Home" component={MainScreen} 
+                  options={{  headerShown: false }}              
+                />
+                <Stack.Screen name="AddExpense" 
+                options={{ title: 'Nuevo Gasto' }}
+                component={AddExpense} />
+                <Stack.Screen name="Users" 
+                options={{ title: 'Usuarios' }}
+                component={Users} />
+              </Stack.Navigator>              
+            </NavigationContainer>              
         ):<FacebookLogin onSuccess={success} /> 
         } 
       </SafeAreaView>

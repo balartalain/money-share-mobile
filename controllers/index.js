@@ -16,6 +16,11 @@ export const getGroups = ()=>{
     ));
     return groups;
 }
+export const getUsers = async ()=>{
+    let response = await herokuAPI.get('/get-users/')
+    return response;
+}
+
 export const registerUser = async (userInfo)=>{
     let response = await herokuAPI.put(`/${userInfo.id}/register-user/`, userInfo)
     return response;
@@ -31,6 +36,11 @@ export const createExpense = async(userId, data)=>{
 }
 export const deleteExpense = async(userId, data)=>{  
     let response = await herokuAPI.put(`/${userId}/delete-expense/`, data)
+    return response;     
+ }
+
+ export const setSupervisor = async(userId, data)=>{  
+    let response = await herokuAPI.put(`/${userId}/set-supervisor/`, data)
     return response;     
  }
 export const getUserYears = (userId)=>{
