@@ -3,7 +3,6 @@ import { View, StyleSheet, Text, TextInput, TouchableOpacity} from "react-native
 import { Button } from 'react-native-elements';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Picker} from '@react-native-picker/picker';
-import Spinner from 'react-native-loading-spinner-overlay';
 import {color, monthNames, dayOfWeek } from '../utils'
 import { createExpense } from '../controllers/index'
 import AsyncStorageHelper from '../AsyncStorageHelper'
@@ -17,7 +16,6 @@ const AddExpense = ({navigation, route}) => {
   const [amount, setAmount] = useState();
   const [concept, setConcept] = useState();
   const [comment, setComment] = useState();
-  const [spinner, setSpinner] = useState(false);
   const [addingExpense, setAddingExpense] = useState(false);
   const onChange = (event, selectedDate) => {
     //const currentDate = selectedDate || currentDate;
@@ -29,7 +27,6 @@ const AddExpense = ({navigation, route}) => {
       if (isNaN(amount)){
         throw new Error('Cantidad no válida')
       }
-      console.log(concept)
       if (!concept  || concept.trim()===""){
         throw new Error('Tiene que introducir un concepto de gasto')
       }

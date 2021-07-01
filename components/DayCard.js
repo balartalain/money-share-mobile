@@ -1,10 +1,9 @@
 import React, {useState} from 'react';
 import { View, Text, Pressable, Vibration, TouchableOpacity} from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import {color, monthNames, dayOfWeek, formatNumber } from '../utils'
 
 const InnerCard = (props)=>{
-  console.log('InnerCard '+ JSON.stringify(props))
+  //console.log('InnerCard '+ JSON.stringify(props))
     return (   
           <TouchableOpacity activeOpacity={0.6}
             onPress={()=>props.onPress(props.time)} 
@@ -42,7 +41,7 @@ const InnerCard = (props)=>{
       date.setDate(props.day)
       return dayOfWeek[date.getDay()].substring(0,3);   
     }
-    console.log('Render DayCard '+ props.itemsToDelete.map(i=>JSON.stringify(i)))
+    //console.log('Render DayCard '+ props.itemsToDelete.map(i=>JSON.stringify(i)))
     return (
       <View style={{
         flex:0,

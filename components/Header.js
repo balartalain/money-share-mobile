@@ -1,15 +1,9 @@
 import React, {useState, useEffect, useRef, memo} from 'react'
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions} from "react-native";
-import { Avatar, Divider, Button } from "react-native-elements";
+import { View, Text, TouchableOpacity, Dimensions} from "react-native";
+import { Button } from "react-native-elements";
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
-import AsyncStorageHelper from '../AsyncStorageHelper';
 import { color, currentMonth } from './../utils'
-import Menu from './Menu';
-import MonthsTabView from './MonthsTabView';
-import { getUserData } from '../controllers/index';
-import {currentYear, equalsIntegers} from '../utils';
 import FadeInView from './FadeInView'
-import FacebookAPI from '../FacebookAPI';
 
 const Delete = (props) =>{
   const [deleting, setDeleting] = useState(false);
