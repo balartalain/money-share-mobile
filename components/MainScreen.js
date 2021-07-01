@@ -67,12 +67,19 @@ const MainScreen = ({navigation, route}) => {
             params.newExpense = null;
       }
     }, [params] )
+    useEffect(()=>{
+      if (params && params.changeUser && params.changeUser.id !== appState.currentUser.id){ 
+            setAppState({...appState, currentUser:params.changeUser})
+            params.changeUser = null;
+      }
+    }, [params] )
 
     const loadData = async()=>{
       setStatus("loading");
       getUserData(appState.currentUser.id)
         .then(data=>{
           if (mountedRef.current){
+            AsyncStorageHelper.saveObject('currentUser', appState.currentUser);
             const userData = data.data;
             const years = Object.keys(userData);  
             const index = years.findIndex((e)=>equalsIntegers(e, currentYear));  
@@ -100,9 +107,11 @@ const MainScreen = ({navigation, route}) => {
           setStatus("error");
         })  
     }
+    const onChangeUser = (id)=>{
+      setAppState({...appState, currentUser: id});  
+    }
     useEffect(()=>{
-      if (appState.currentUser){
-        AsyncStorageHelper.saveObject('currentUser', appState.currentUser);
+      if (appState.currentUser){ 
         loadData();
       }
     }, [appState.currentUser])
@@ -222,7 +231,8 @@ const MainScreen = ({navigation, route}) => {
                   onPress={onPressDay}             
                   onLongPress={onLongPressDay} 
                   onDeleteItems={onDeleteItems}   
-                  onChangeExpenseView={onChangeExpenseView}            
+                  onChangeExpenseView={onChangeExpenseView}   
+                        
                 />
               ):<ExpenseList userData={appState.userData[appState.selectedYear]} selectedYear={selectedYear}
                   onChangeExpenseView={onChangeExpenseView}  />

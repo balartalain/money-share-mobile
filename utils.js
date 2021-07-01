@@ -14,6 +14,12 @@ const currentYear = new Date().getFullYear(),
 currentMonth = new Date().getMonth(),
 currenteDay = new Date().getDay(),
 currenteDayOfWeek = new Date().getDate();
+
+const formatNumber = amount => {
+  return Number(amount)
+    .toFixed(2)
+    .replace(/\d(?=(\d{3})+\.)/g, '$&,');
+};
 export {
     currentYear,
     currentMonth,
@@ -23,5 +29,6 @@ export {
     monthNames,
     dayOfWeek,
     currency,
-    equalsIntegers
+    equalsIntegers,
+    formatNumber
 }

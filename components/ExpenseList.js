@@ -3,39 +3,55 @@ import { ScrollView, View, TouchableOpacity, Text, StyleSheet } from 'react-nati
 import { ListItem } from 'react-native-elements'
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import Collapsible from 'react-native-collapsible';
-import {monthNames, dayOfWeek, color} from '../utils';
+import {monthNames, dayOfWeek, color, formatNumber} from '../utils';
 
+const transformObjectToArray = (data)=>{
+
+    const getExpenses = (d)=>{
+        let expenses = []
+        Object.keys(d).forEach(time=>{
+            if (!d[time].deleted){
+                 let expense={};
+                Object.keys(d[time]).forEach(k=>{
+                    expense[k] = d[time][k];
+                })
+                expense.create = time;
+                expenses.push(expense)
+            }
+        })  
+        return expenses;  
+    }
+    const getDays = (m)=>{
+        let days = []
+        Object.keys(m).forEach(d=>{
+            const expenses = getExpenses(m[d]);
+            if (expenses.length){
+                days.push({
+                    day:d,
+                    expenses
+                })
+            }
+        })  
+        return days;     
+    }
+    let result = []    
+    Object.keys(data).forEach(m=>{
+        const days = getDays(data[m])
+        if (days.length){
+         result.push({
+             month: m,
+             days: days
+         })   
+        }
+    })
+    return result;
+}
 const ExpenseList = (props)=>{
     const [userData, setUserData] = useState(null);
     useEffect(()=>{
-        const _userData = Object.keys(props.userData)
-                                .sort().reverse().map((month, i)=>{
-                                    const transformDays = ()=>{
-                                        const daysJSON = props.userData[month];
-                                        return Object.keys(daysJSON).map(day=>{
-                                            const expensesJSON = daysJSON[day]
-                                            return {
-                                                day: day,
-                                                expenses: Object.keys(expensesJSON).map(time=>{
-                                                    return {
-                                                        created: time,
-                                                        amount: expensesJSON[time].amount,
-                                                        concept: expensesJSON[time].concept,
-                                                        comment: expensesJSON[time].comment,
-                                                        currency: expensesJSON[time].currency,
-                                                        deleted: expensesJSON[time].deleted
-                                                    }
-                                                })
-                                            }
-                                        })
-                                    } 
-                                    return {
-                                        index:i,
-                                        month,
-                                        days: transformDays()
-                                    }
-                                });      
-        setUserData(_userData);
+        if (props.userData){
+            setUserData(transformObjectToArray(props.userData));             
+        }
     }, [])
 
     const [collapsed, setCollapsed] = useState([]);
@@ -72,7 +88,7 @@ const ExpenseList = (props)=>{
     }
     const RenderItem = ({ item }) => {
         return item.days.map((day, i)=>{
-                return day.expenses.map((exp, i)=>(
+                return  day.expenses.map((exp, i)=>(
                 <ListItem key={i} style={{
                     marginBottom: 3,
                     borderLeftWidth: 5,
@@ -88,7 +104,7 @@ const ExpenseList = (props)=>{
                     </ListItem.Content>
                     <View><Text style={{
                         color: `${exp.amount < 0?'red': color.primaryGreen}`
-                    }}>{exp.amount} {exp.currency}</Text></View>
+                    }}>{formatNumber(exp.amount)} {exp.currency}</Text></View>
                 </ListItem>
                 ))                    
             })
@@ -98,9 +114,10 @@ const ExpenseList = (props)=>{
     return (
         
         <View style={{flex:1}}>
-            { userData && 
+            { userData && userData.length ? 
                 <ScrollView>
                     {userData.map((month, i)=>{
+                        
                         const {totalUSD, totalCUP} = total(month);
                         return <View key={i}>
                             <TouchableOpacity onPress={()=>toggleExpanded(i)}>
@@ -113,10 +130,10 @@ const ExpenseList = (props)=>{
                                         <View style={{alignItems:'flex-end'}}>
                                             <Text style={{
                                                 color: `${totalUSD < 0?'red': color.primaryGreen}`
-                                            }}>{totalUSD} USD</Text>
+                                            }}>{formatNumber(totalUSD)} USD</Text>
                                             <Text style={{
                                                 color: `${totalCUP < 0?'red': color.primaryGreen}`
-                                            }}>{totalCUP} CUP</Text>
+                                            }}>{formatNumber(totalCUP)} CUP</Text>
                                         </View>                                       
                                     </ListItem.Content>
                                 </ListItem>
@@ -128,13 +145,12 @@ const ExpenseList = (props)=>{
                     })
                     }                    
                 </ScrollView>
+               :<View style={{flex:1, alignItems: 'center', justifyContent: 'center'}}><Text>No hay registros</Text></View> 
             }
-            { userData && 
             <TouchableOpacity style={styles.fab}
                 onPress={props.onChangeExpenseView} >
                 <Text style={styles.fabIcon}><MaterialCommunityIcons name="format-list-bulleted" size={30} color="white" /></Text>
             </TouchableOpacity>
-            }
         </View>
     )
 }

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { View, Text, Pressable, Vibration, TouchableOpacity} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
-import {color, monthNames, dayOfWeek } from '../utils'
+import {color, monthNames, dayOfWeek, formatNumber } from '../utils'
 
 const InnerCard = (props)=>{
   console.log('InnerCard '+ JSON.stringify(props))
@@ -27,7 +27,8 @@ const InnerCard = (props)=>{
                       <Text>{props.concept}</Text>
                       <Text style={{fontSize: 12}}>{props.comment}</Text>
                     </View>
-                    <View style={{flex:0.6, marginRight:10}}><Text style={{textAlign: 'right', color:`${props.amount < 0?'red': color.primaryGreen}`}}>{props.amount} {props.currency}</Text></View>                                            
+                    <View style={{flex:0.6, marginRight:10}}>
+                      <Text style={{textAlign: 'right', color:`${props.amount < 0?'red': color.primaryGreen}`}}>{formatNumber(props.amount)} {props.currency}</Text></View>                                            
               </View>
             </TouchableOpacity>        
     );

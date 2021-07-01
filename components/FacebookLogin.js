@@ -44,6 +44,7 @@ const FacebookLogin = (props)=>{
             // type === 'cancel'
           }
         } catch ({ message }) {
+          setLoggedinStatus(false);
           alert(`Facebook Login Error: ${message}`);
         }
       }
@@ -66,7 +67,7 @@ const FacebookLogin = (props)=>{
       ):
       ( <View style={{flex:1, justifyContent: 'center', alignItems: 'center'}}>
           <ActivityIndicator size="large" color={color.primaryGreen}/>
-          <Text style={{marginVertical: 20}}>Registrando usuario en Money Share</Text>
+          <Text style={{marginVertical: 20}}>Autenticando usuario en Money Share</Text>
         </View>
       )
         

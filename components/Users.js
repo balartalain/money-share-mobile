@@ -4,7 +4,8 @@
     import { ListItem, CheckBox } from 'react-native-elements'
     import {getUsers, setSupervisor} from '../controllers';
     import OverlayIndicator from './OverlayIndicator';
-    const Users = ()=>{
+
+    const Users = ({navigation})=>{
     const [users, setUsers] = useState(null);
     const [loading, setLoading] = useState(false);
     const mountedRef = useRef(false)
@@ -46,7 +47,9 @@
                 Object.keys(users).map((id,i)=>(                    
                 <ListItem key={i} bottomDivider>                   
                     <ListItem.Content>
-                        <ListItem.Title>{users[id].name}</ListItem.Title>
+                        <TouchableOpacity onPress={()=>navigation.navigate('Home', { changeUser: {...users[id], id} })}>
+                            <ListItem.Title>{users[id].name}</ListItem.Title>
+                        </TouchableOpacity>
                         <View>
                             <CheckBox style={{margin:0}} containerStyle={{
                                         backgroundColor: 'transparent',                                         
