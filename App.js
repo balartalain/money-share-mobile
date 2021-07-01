@@ -12,25 +12,34 @@ import {registerUser} from './controllers'
 import Users from './components/Users';
 import ExpenseList from './components/ExpenseList';
 
+function useForceUpdate(){
+  const [value, setValue] = useState(0); // integer state
+  return () => setValue(value => value + 1); // update the state to force render
+}
+
 const Stack = createStackNavigator();
 const App = () =>{
+  const forceUpdate = useForceUpdate();
   const [userInfo, setUserInfo] = useState(null);
   const success = (_userInfo)=>{    
-    AsyncStorageHelper.saveItem('token', _userInfo.token);
+       
     registerUser({
       id: _userInfo.id,
       name: _userInfo.name,
       email: _userInfo.email
     }).then(result=>{
+      AsyncStorageHelper.saveItem('token', _userInfo.token);
       AsyncStorageHelper.saveObject('me', _userInfo);
       setUserInfo(_userInfo);
-    }).catch(err=>alert('Error de conexión'));
+    }).catch(err=>{
+      alert('No tiene conexión a internet');      
+      forceUpdate();
+    });
     
   }
   useEffect(()=>{
-    const checkUser = async()=>{
-      let _userInfo = null;      
-      //const _userInfo = await AsyncStorageHelper.getObject('me');
+    const checkUser = async()=>{   
+      const _userInfo = await AsyncStorageHelper.getObject('me');
       if (_userInfo != null){
         setUserInfo(_userInfo);
       }
@@ -54,7 +63,7 @@ const App = () =>{
                 component={Users} />
               </Stack.Navigator>              
             </NavigationContainer>              
-        ):<FacebookLogin onSuccess={success} /> 
+        ):<FacebookLogin onSuccess={(userInfo)=>success(userInfo)} /> 
         } 
       </SafeAreaView>
     );  

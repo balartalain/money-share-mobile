@@ -25,6 +25,14 @@ const AddExpense = ({navigation, route}) => {
     setCurrentDate(selectedDate || currentDate);
   };
   const okButtonPressed = async()=>{
+    try{
+      if (isNaN(amount)){
+        throw new Error('Cantidad no válida')
+      }
+      console.log(concept)
+      if (!concept  || concept.trim()===""){
+        throw new Error('Tiene que introducir un concepto de gasto')
+      }
       const created = Date.now()
       const newExpense = {
         year: currentDate.getFullYear(),
@@ -39,14 +47,15 @@ const AddExpense = ({navigation, route}) => {
       }
       setAddingExpense(true);
       const {id} = await AsyncStorageHelper.getObject('currentUser');      
-      createExpense(id, newExpense).then(result=>{
-        if (result.data){
-          navigation.navigate('Home', { newExpense })
-        }
-      }).catch(err=>{
-        setAddingExpense(false);
-        alert(err);
-      })
+      const result = await createExpense(id, newExpense);
+      if (result.data){
+        navigation.navigate('Home', { newExpense })
+      }
+    }
+    catch(err){
+      setAddingExpense(false);
+      alert(err);
+    }
   }
   useEffect(() => {
     setAddingExpense(false);

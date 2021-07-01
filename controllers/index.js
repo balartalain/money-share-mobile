@@ -35,68 +35,6 @@ export const registerUser = async (userInfo)=>{
     return response;
 }
 export const getUserData = async (userId)=>{    
-    const fakeData = {
-        "2021":{
-                "6":{
-                    "30":{
-                        "156434666":{
-                            "amount": "215",
-                            "currency": "USD",
-                            "concept": "Venta de dolares",
-                            "comment": "Comentario",
-                            "updated": "156434666",
-                            'deleted': 'true'
-                        },
-                        "21212232313":{
-                            "amount": -90,
-                            "currency": "USD",
-                            "concept": "Venta de cup",
-                            "comment": "otro Comentario",
-                            "updated": "156434666",
-                            'deleted': 'true'
-                        }
-                    }
-                },
-                "2":{
-                    "3":{
-                        "156434666":{
-                            "amount": "215",
-                            "currency": "USD",
-                            "concept": "Venta de dolares",
-                            "comment": "Comentario",
-                            "updated": "156434666"
-                        },
-                        "21212232313":{
-                            "amount": 100,
-                            "currency": "USD",
-                            "concept": "Venta de cup",
-                            "comment": "otro Comentario",
-                            "updated": "156434666"
-                        },
-                        "21212232383":{
-                            "amount": 100,
-                            "currency": "USD",
-                            "concept": "Venta de cup",
-                            "comment": "otro Comentario",
-                            "updated": "156434666"
-                        },
-                        "21212237316":{
-                            "amount": 100,
-                            "currency": "USD",
-                            "concept": "Venta de cup",
-                            "comment": "otro Comentario",
-                            "updated": "156434666"
-                        }
-                        
-                    }
-                }
-            }
-        }
-    //return Promise.resolve({data: fakeData});
-    // let state = await NetInfo.fetch();
-    // if (!state.isConnected){
-    //     throw new Error(CONECTION_ERROR)
-    // }
     let response = await herokuAPI.get(`/${userId}/get-data/`)
     return response;
 }

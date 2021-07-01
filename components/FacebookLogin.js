@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, Platform,  View, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import * as Facebook from 'expo-facebook';
 import { color } from '../utils'
 
 const FacebookLogin = (props)=>{
     const [isLoggedin, setLoggedinStatus] = useState(false);
+
+    useEffect(() => {
+      setLoggedinStatus(false);
+    }, [props.onSuccess])
     async function fakeLogin(){
         const data = {
             id: '10222108852244678',
@@ -67,7 +71,7 @@ const FacebookLogin = (props)=>{
       ):
       ( <View style={{flex:1, justifyContent: 'center', alignItems: 'center'}}>
           <ActivityIndicator size="large" color={color.primaryGreen}/>
-          <Text style={{marginVertical: 20}}>Autenticando usuario en Money Share</Text>
+          <Text style={{marginVertical: 20}}>Obteniendo información del usuario</Text>
         </View>
       )
         

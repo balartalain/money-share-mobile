@@ -9,12 +9,17 @@ const Menu = (props) =>{
     const [selectedItem, setSelectedItem] = useState(props.selectedItem);
     const [selectedIndex, setSeletedIndex] = useState(-1);    
     const scrollRef = useRef();
+    const mountedRef = useRef(false);
 
     useEffect(()=>{  
+      mountedRef.current = true;
       const index = items.findIndex((e)=>equalsIntegers(e, selectedItem));  
       setSeletedIndex(index);
       setSelectedItem(props.selectedItem)
       setTimeout(()=> animateItemChanged(props.selectedItem, index), 500);
+      return () => {
+        mountedRef.current = false
+      }; 
     }, [])
     const itemChanged = (item, i)=>{
       if (i === 0 || i === items.length - 1 || item===selectedItem){
@@ -30,7 +35,8 @@ const Menu = (props) =>{
       
     }
 
-    const animateItemChanged = (item, i)=>{     
+    const animateItemChanged = (item, i)=>{ 
+      if (!mountedRef.current) return;    
       if (i === 0 || i === items.length - 1){
         return;
       }

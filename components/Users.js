@@ -13,7 +13,6 @@
         mountedRef.current = true
         setLoading(true);
         getUsers().then(_users=>{
-            console.log(_users)
                 if (mountedRef.current){
                     setUsers(_users.data);
                 }
@@ -36,7 +35,7 @@
                 setUsers(_users);
             }
         }).catch(err=>{
-            alert("Error de conexión")
+            alert("No tiene conexión a internet")
         }).finally(()=>{
             setLoading(false);
         })
@@ -47,7 +46,7 @@
                 Object.keys(users).map((id,i)=>(                    
                 <ListItem key={i} bottomDivider>                   
                     <ListItem.Content>
-                        <TouchableOpacity onPress={()=>navigation.navigate('Home', { changeUser: {...users[id], id} })}>
+                        <TouchableOpacity style={{width:'100%'}} onPress={()=>navigation.navigate('Home', { changeUser: {...users[id], id} })}>
                             <ListItem.Title>{users[id].name}</ListItem.Title>
                         </TouchableOpacity>
                         <View>

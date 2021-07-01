@@ -117,7 +117,7 @@ const MainScreen = ({navigation, route}) => {
     }, [appState.currentUser])
 
     useEffect(()=>{  
-      setExpensesView("list");
+      setExpensesView("grid");
       const init = async()=>{
         const me = await AsyncStorageHelper.getObject('me');
         setAppState({...appState, currentUser: me});        
@@ -184,7 +184,7 @@ const MainScreen = ({navigation, route}) => {
           })
           setAppState({...appState, _userData, itemsToDelete:[]});      
         }).catch(reason => {
-          console.log('Error '+ reason);
+          //console.log('Error '+ reason);
           setAppState({...appState, itemsToDelete:[]});
           setTimeout(()=> alert("No tiene conexión a internet"), 100)          
         });      
@@ -234,7 +234,7 @@ const MainScreen = ({navigation, route}) => {
                   onChangeExpenseView={onChangeExpenseView}   
                         
                 />
-              ):<ExpenseList userData={appState.userData[appState.selectedYear]} selectedYear={selectedYear}
+              ):<ExpenseList userData={userData[selectedYear]} selectedYear={selectedYear}
                   onChangeExpenseView={onChangeExpenseView}  />
               }
             </View>

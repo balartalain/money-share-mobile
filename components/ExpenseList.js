@@ -9,7 +9,7 @@ const transformObjectToArray = (data)=>{
 
     const getExpenses = (d)=>{
         let expenses = []
-        Object.keys(d).forEach(time=>{
+        Object.keys(d).sort().reverse().forEach(time=>{
             if (!d[time].deleted){
                  let expense={};
                 Object.keys(d[time]).forEach(k=>{
@@ -23,7 +23,7 @@ const transformObjectToArray = (data)=>{
     }
     const getDays = (m)=>{
         let days = []
-        Object.keys(m).forEach(d=>{
+        Object.keys(m).sort().reverse().forEach(d=>{
             const expenses = getExpenses(m[d]);
             if (expenses.length){
                 days.push({
@@ -35,7 +35,7 @@ const transformObjectToArray = (data)=>{
         return days;     
     }
     let result = []    
-    Object.keys(data).forEach(m=>{
+    Object.keys(data).sort().reverse().forEach(m=>{
         const days = getDays(data[m])
         if (days.length){
          result.push({
@@ -48,11 +48,17 @@ const transformObjectToArray = (data)=>{
 }
 const ExpenseList = (props)=>{
     const [userData, setUserData] = useState(null);
+    const [selectedYear, setSelectedYear] = useState(null);
+
     useEffect(()=>{
-        if (props.userData){
-            setUserData(transformObjectToArray(props.userData));             
-        }
-    }, [])
+        setUserData(transformObjectToArray(props.userData));  
+    }, [props.userData])
+
+    // useEffect(()=>{
+    //     if (props.userData){
+    //         setUserData(transformObjectToArray(props.userData));             
+    //     }
+    // }, [])
 
     const [collapsed, setCollapsed] = useState([]);
     const [active, setActive] = useState(-1);
@@ -111,6 +117,7 @@ const ExpenseList = (props)=>{
             
     }
       //https://github.com/oblador/react-native-collapsible
+      console.log('Expense list '+ selectedYear)
     return (
         
         <View style={{flex:1}}>
