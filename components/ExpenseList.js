@@ -51,14 +51,10 @@ const ExpenseList = (props)=>{
     const [selectedYear, setSelectedYear] = useState(null);
 
     useEffect(()=>{
-        setUserData(transformObjectToArray(props.userData));  
+        if (props.userData) {
+            setUserData(transformObjectToArray(props.userData));  
+        }
     }, [props.userData])
-
-    // useEffect(()=>{
-    //     if (props.userData){
-    //         setUserData(transformObjectToArray(props.userData));             
-    //     }
-    // }, [])
 
     const [collapsed, setCollapsed] = useState([]);
     const [active, setActive] = useState(-1);
@@ -117,7 +113,6 @@ const ExpenseList = (props)=>{
             
     }
       //https://github.com/oblador/react-native-collapsible
-      console.log('Expense list '+ selectedYear)
     return (
         
         <View style={{flex:1}}>
