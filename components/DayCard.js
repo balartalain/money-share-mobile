@@ -1,17 +1,17 @@
-import React, {useState} from 'react';
-import { View, Text, Pressable, Vibration, TouchableOpacity} from 'react-native';
+import React from 'react'
+import { View, Text, Pressable, Vibration, TouchableOpacity} from 'react-native'
 import {color, monthNames, dayOfWeek, formatNumber } from '../utils'
 
 const InnerCard = (props)=>{
-  //console.log('InnerCard '+ JSON.stringify(props))
+    //console.log('InnerCard '+ JSON.stringify(props))
     return (   
-          <TouchableOpacity activeOpacity={0.6}
+        <TouchableOpacity activeOpacity={0.6}
             onPress={()=>props.onPress(props.time)} 
             onLongPress={()=>{
-              Vibration.vibrate(50);
-              props.onLongPress(props.time)
+                Vibration.vibrate(50)
+                props.onLongPress(props.time)
             }}>                  
-              <View style={{flex:1, 
+            <View style={{flex:1, 
                 flexDirection: 'row',
                 borderLeftWidth: 5,
                 borderLeftColor: `${props.amount < 0?'red': color.primaryGreen}`,
@@ -22,65 +22,65 @@ const InnerCard = (props)=>{
                 paddingTop: 10,
                 paddingBottom: 10,
                 backgroundColor: props.selected?'rgba(185,185,190,0.2)':'white'}}>
-                  <View style={{flex:1, paddingLeft:10}}>      
-                      <Text>{props.concept}</Text>
-                      <Text style={{fontSize: 12}}>{props.comment}</Text>
-                    </View>
-                    <View style={{flex:0.6, marginRight:10}}>
-                      <Text style={{textAlign: 'right', color:`${props.amount < 0?'red': color.primaryGreen}`}}>{formatNumber(props.amount)} {props.currency}</Text></View>                                            
-              </View>
-            </TouchableOpacity>        
-    );
-  }
-  const DayCard = (props)=> {
+                <View style={{flex:1, paddingLeft:10}}>      
+                    <Text>{props.concept}</Text>
+                    <Text style={{fontSize: 12}}>{props.comment}</Text>
+                </View>
+                <View style={{flex:0.6, marginRight:10}}>
+                    <Text style={{textAlign: 'right', color:`${props.amount < 0?'red': color.primaryGreen}`}}>{formatNumber(props.amount)} {props.currency}</Text></View>                                            
+            </View>
+        </TouchableOpacity>        
+    )
+}
+const DayCard = (props)=> {
 
     const getDayOfWeek = ()=>{
-      let date = new Date();
-      date.setFullYear(props.selectedYear);
-      date.setMonth(props.month)
-      date.setDate(props.day)
-      return dayOfWeek[date.getDay()].substring(0,3);   
+        let date = new Date()
+        date.setFullYear(props.selectedYear)
+        date.setMonth(props.month)
+        date.setDate(props.day)
+        return dayOfWeek[date.getDay()].substring(0,3)   
     }
     //console.log('Render DayCard '+ props.itemsToDelete.map(i=>JSON.stringify(i)))
     return (
-      <View style={{
-        flex:0,
-        flexDirection:'row', 
-        marginTop: 10,
-      }}>
-        <View style={{flex:1, 
-        paddingTop: 2, 
-        alignItems: 'center',
-        justifyContent: 'flex-start'
+        <View style={{
+            flex:0,
+            flexDirection:'row', 
+            marginTop: 10,
+        }}>
+            <View style={{flex:1, 
+                paddingTop: 2, 
+                alignItems: 'center',
+                justifyContent: 'flex-start'
       
-        }}>
-          <Text style={{ alignItems: 'center'}}>{props.day.length === 1?("0"+props.day):props.day}</Text>
-          <Text style={{alignItems: 'center'}}>{getDayOfWeek()}</Text>
-        </View>
-        <View style={{flex:8,  flexDirection: 'column',
-          marginBottom: 10,
-        }}>
-          {
-            Object.keys(props.data).sort().reverse().map((e)=>(
-              props.data[e].deleted !== "true" && 
+            }}>
+                <Text style={{ alignItems: 'center'}}>{props.day.length === 1?('0'+props.day):props.day}</Text>
+                <Text style={{alignItems: 'center'}}>{getDayOfWeek()}</Text>
+            </View>
+            <View style={{flex:8,  flexDirection: 'column',
+                marginBottom: 10,
+            }}>
+                {
+                    Object.keys(props.data).sort().reverse().map((e)=>(
+                        props.data[e].deleted !== 'true' && 
               <InnerCard key={e} 
-                time={e} //e is the key time
-                amount={props.data[e].amount} 
-                concept={props.data[e].concept} 
-                comment={props.data[e].comment}
-                currency={props.data[e].currency}
-                selected={props.itemsToDelete.find(item=>{ return item.month === props.month + 1 && 
+                  time={e} //e is the key time
+                  amount={props.data[e].amount} 
+                  concept={props.data[e].concept} 
+                  comment={props.data[e].comment}
+                  currency={props.data[e].currency}
+                  selected={props.itemsToDelete.find(item=>{ return item.month === props.month + 1 && 
                     item.day === props.day &&
                     item.created === e
-                })?true:false}
-                onPress={(time)=>props.onPress(props.day, time)}
-                onLongPress={(time)=>props.onLongPress(props.day, time)}                
+                  })?true:false}
+                  onPress={(time)=>props.onPress(props.day, time)}
+                  onLongPress={(time)=>props.onLongPress(props.day, time)}                
               />     
               
-            ))
-          }     
-        </View>           
-      </View>
-    );
-  }
-  export default DayCard;
+                    ))
+                }     
+            </View>           
+        </View>
+    )
+}
+export default DayCard

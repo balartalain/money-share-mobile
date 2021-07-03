@@ -1,9 +1,9 @@
-import React from 'react';
-import { View,Dimensions, ActivityIndicator } from 'react-native';
+import React from 'react'
+import { View,Dimensions, ActivityIndicator } from 'react-native'
 import FadeInView from './FadeInView'
 import {color} from './../utils'
 
-const {width, height} = Dimensions.get('window');
+const {width, height} = Dimensions.get('window')
 const OverlayIndicator = ()=>{
     return (  
              
@@ -15,18 +15,18 @@ const OverlayIndicator = ()=>{
             justifyContent:'center'
         }}>
             
-                <View style={{  
-                            position: 'absolute',
-                            width: width,
-                            height: height,
-                            backgroundColor: 'black',
-                            opacity: 0.1
-                        }}>
-                </View>
-                <ActivityIndicator size="large" color={color.primaryGreen}/>                
+            <View style={{  
+                position: 'absolute',
+                width: width,
+                height: height,
+                backgroundColor: 'black',
+                opacity: 0.1
+            }}>
+            </View>
+            <ActivityIndicator size="large" color={color.primaryGreen}/>                
   
         </FadeInView>
                       
     )
 }
-export default OverlayIndicator;
+export default OverlayIndicator

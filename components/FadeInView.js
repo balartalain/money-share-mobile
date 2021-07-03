@@ -1,38 +1,40 @@
-import React from 'react';
-import { Animated, Text, View } from 'react-native';
+import React from 'react'
+import { Animated} from 'react-native'
 
 class FadeInView extends React.Component {
-  state = {
-    fadeAnim: new Animated.Value(0),  // Initial value for opacity: 0
-  }
+    constructor(props){
+        super(props)
+        this.state = {
+            fadeAnim: new Animated.Value(0),  // Initial value for opacity: 0
+        }
+    }
+    componentDidMount() {
+        Animated.timing(                  // Animate over time
+            this.state.fadeAnim,            // The animated value to drive
+            {
+                toValue: 1,                   // Animate to opacity: 1 (opaque)
+                duration: this.props.duration,              // Make it take a while
+                useNativeDriver: false
+            }
+        ).start()                        // Starts the animation
+    }
 
-  componentDidMount() {
-    Animated.timing(                  // Animate over time
-      this.state.fadeAnim,            // The animated value to drive
-      {
-        toValue: 1,                   // Animate to opacity: 1 (opaque)
-        duration: this.props.duration,              // Make it take a while
-        useNativeDriver: false
-      }
-    ).start();                        // Starts the animation
-  }
+    render() {
+        let { fadeAnim } = this.state
 
-  render() {
-    let { fadeAnim } = this.state;
-
-    return (
-      <Animated.View                 // Special animatable View
-        style={{
-          ...this.props.style,
-          opacity: fadeAnim,         // Bind opacity to animated value
-        }}
-      >
-        {this.props.children}
-      </Animated.View>
-    );
-  }
+        return (
+            <Animated.View                 // Special animatable View
+                style={{
+                    ...this.props.style,
+                    opacity: fadeAnim,         // Bind opacity to animated value
+                }}
+            >
+                {this.props.children}
+            </Animated.View>
+        )
+    }
 }
-export default FadeInView;
+export default FadeInView
 // Use
 // You can then use your `FadeInView` in place of a `View` in your components:
 // export default class App extends React.Component {

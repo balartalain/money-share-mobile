@@ -77,7 +77,7 @@ export default class MonthsTabView extends React.Component {
   }
   _handleIndexChange = index => {
     //const _selectedDate = 
-    console.log('index '+ index)
+    //console.log('index '+ index)
     this.state.selectedDate.setMonth(index);
     this.setState({ index, selectedDate: this.state.selectedDate });
     this.props.onSelectedMonth(index);
@@ -102,7 +102,7 @@ export default class MonthsTabView extends React.Component {
       return (            
           <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
             { Object.keys(data) ?
-              ( 
+              (
               <View style={{flex:1}}>                
                 <ScrollView style={{flex:1}}            
                   alwaysBounceVertical={true}
@@ -159,7 +159,6 @@ export default class MonthsTabView extends React.Component {
   };
 
   render() {
-    console.log('Month tab view')
     return (
       <TabView
         //lazy
