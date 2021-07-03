@@ -56,7 +56,7 @@ const Header = (props)=>{
             justifyContent: 'space-between',
             alignItems: 'center',            
           }}>          
-            <Text style={{fontSize:18, color: 'white'}}>Money share</Text>
+            <Text style={{fontSize:18, color: 'white'}}>Money share v1.0</Text>
             <TouchableOpacity onPress={()=>{props.navigation.navigate('Users')}}>
               <Text style={{fontSize:18, color: 'white'}}>{props.currentUser.name.split(' ')[0]}</Text>
             </TouchableOpacity>
