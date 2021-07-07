@@ -4,7 +4,7 @@ import FadeInView from './FadeInView'
 import {color} from './../utils'
 
 const {width, height} = Dimensions.get('window')
-const OverlayIndicator = ()=>{
+const OverlayIndicator = ({animated})=>{
     return (  
              
         <FadeInView duration={500} style={{  position: 'absolute',
@@ -23,7 +23,7 @@ const OverlayIndicator = ()=>{
                 opacity: 0.1
             }}>
             </View>
-            <ActivityIndicator size="large" color={color.primaryGreen}/>                
+            <ActivityIndicator size="large" animated={animated === undefined?true:animated} color={color.primaryGreen}/>                
   
         </FadeInView>
                       

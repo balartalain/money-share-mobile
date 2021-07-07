@@ -4,18 +4,19 @@ import { ListItem, CheckBox, Button } from 'react-native-elements'
 import PropTypes from 'prop-types'
 import * as Facebook from 'expo-facebook'
 import {getUsers, setSupervisor} from '../controllers'
+import AppUserConext from './AppUserContext'
 import OverlayIndicator from './OverlayIndicator'
 import AsyncStorageHelper from '../AsyncStorageHelper'
 
 const Users = (props,{navigation})=>{
-    
+
     const [users, setUsers] = useState(null)
     const [loading, setLoading] = useState(false)
     const mountedRef = useRef(false)
     useEffect(()=>{
         mountedRef.current = true
         setLoading(true)
-        const me = await AsyncStorageHelper.getObject('me')
+        //const me = await AsyncStorageHelper.getObject('me')
         getUsers().then(_users=>{
             if (mountedRef.current){
                 setUsers(_users.data)

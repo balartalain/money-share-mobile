@@ -1,0 +1,6 @@
+4/07/2021 
+- Actualización de la app usando expo-updates
+- Tener en cuenta la fecha de expiración del token de facebook
+- Poder editar gastos en ingresos
+- El usuario autenticado no puede agregar gastos a otro usuario
+- Solo los supervisores pueden ver otros gastos

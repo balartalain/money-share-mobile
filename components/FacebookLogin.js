@@ -1,28 +1,38 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { StyleSheet, Text, Platform,  View, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import * as Facebook from 'expo-facebook'
+import {useAppUser} from './AppUserContext'
 import { color } from '../utils'
 
-
-const FacebookLogin = (props)=>{
+const FacebookLogin = ()=>{
     const [isLoggedin, setLoggedinStatus] = useState(false)
+    const [errorMsg, setErrorMsg] = useState(null)
+    const {setAppUser} = useAppUser()
 
-    useEffect(() => {
-        setLoggedinStatus(false)
-    }, [props.onSuccess])
     async function fakeLogin(){
         const data = {
             id: '10222108852244678',
             name: 'Alain Pérez Balart',
             email: 'balartalain@gmail.com',
+            token: 'EAAInQQgBZBoMBAPNJy7ZBHHKXwzlC7KjRc20IddoWWdZAZAqZC9rsbpYrUZC2HpHv6VRsEr5JhIExQrT6VCQj9ZBOpJxKKV9A8Mo3kgQp2hZAduDkQnff1Ine2cfJkD8gxfHyrZCVknsPZAddOZC0OlckXwzqbhoTwZB1UWBKRsJJEoAsCc1bBATQFCPhttVrEZBS3YRKGZCvkAs4ErTZCcIGxSlZCIgDjyuVSfIF0X4CBJcaR3MUAZDZD',
             picture:{
                 data:{
                     url: '../assets/picture.png'
                 }
-            }
+            },
+            expirationDate: new Date()
         }
-        setLoggedinStatus(true)
-        props.onSuccess({ ...data, token: 'EAAInQQgBZBoMBAPNJy7ZBHHKXwzlC7KjRc20IddoWWdZAZAqZC9rsbpYrUZC2HpHv6VRsEr5JhIExQrT6VCQj9ZBOpJxKKV9A8Mo3kgQp2hZAduDkQnff1Ine2cfJkD8gxfHyrZCVknsPZAddOZC0OlckXwzqbhoTwZB1UWBKRsJJEoAsCc1bBATQFCPhttVrEZBS3YRKGZCvkAs4ErTZCcIGxSlZCIgDjyuVSfIF0X4CBJcaR3MUAZDZD' })
+   
+        setAppUser(data).then(()=>{
+            setLoggedinStatus(true)   
+        }).catch((error)=>{
+            setErrorMsg(error)
+        })
+             
+  
+        
+
+        //props.onSuccess({ ...data, token: 'EAAInQQgBZBoMBAPNJy7ZBHHKXwzlC7KjRc20IddoWWdZAZAqZC9rsbpYrUZC2HpHv6VRsEr5JhIExQrT6VCQj9ZBOpJxKKV9A8Mo3kgQp2hZAduDkQnff1Ine2cfJkD8gxfHyrZCVknsPZAddOZC0OlckXwzqbhoTwZB1UWBKRsJJEoAsCc1bBATQFCPhttVrEZBS3YRKGZCvkAs4ErTZCcIGxSlZCIgDjyuVSfIF0X4CBJcaR3MUAZDZD' })
     }
     async function logIn() {
         try {
@@ -42,8 +52,20 @@ const FacebookLogin = (props)=>{
             // Get the user's name using Facebook's Graph API
                 setLoggedinStatus(true)
                 const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,picture.height(500)`)
-                const data = await response.json()            
-                props.onSuccess({ ...data, token })
+                const data = await response.json()   
+                setAppUser({
+                    id:data.id,
+                    name: data.name,
+                    email: data.email, 
+                    token, 
+                    expirationDate
+                }).then(()=>{
+                    setLoggedinStatus(true)   
+                }).catch((error)=>{
+                    setLoggedinStatus(false)
+                    setErrorMsg(error)
+                })   
+                //props.onSuccess({ ...data, token })
             //Alert.alert('Logged in!', `Hi ${(await response.json()).name}!`);
             } else {
             // type === 'cancel'
@@ -65,6 +87,7 @@ const FacebookLogin = (props)=>{
                 <Image
                     style={{ width: 220, height: 220, borderRadius: 50, marginVertical: 20 }}
                     source={require('../assets/icons8-money-bag-100.png')} />
+                { errorMsg && <Text style={{marginBottom: 10}}>{errorMsg}</Text> }
                 <TouchableOpacity style={styles.loginBtn} onPress={()=>{ if (Platform.OS !== 'web') logIn();else fakeLogin()}}>
                     <Text style={{ color: '#fff' }}>Login with Facebook</Text>
                 </TouchableOpacity>

@@ -1,11 +1,14 @@
-import React, {useState, useEffect, useRef, memo} from 'react'
-import { View, Text, TouchableOpacity, Dimensions} from 'react-native'
+import React, {useState, useEffect, useContext, useRef, memo} from 'react'
+import { View, Text, TouchableOpacity} from 'react-native'
+import PropTypes from 'prop-types'
 import { Button } from 'react-native-elements'
 import { MaterialCommunityIcons } from '@expo/vector-icons' 
-import { color, currentMonth } from './../utils'
+import { DataUserContext } from './DataUserContext'
+import { color } from './../utils'
 import FadeInView from './FadeInView'
 
 const Delete = (props) =>{
+    const {appState} = useContext(DataUserContext)
     const [deleting, setDeleting] = useState(false)
 
     useEffect(()=>{
@@ -21,12 +24,10 @@ const Delete = (props) =>{
             justifyContent: 'space-between',
             alignItems: 'center',            
         }}>
-            <TouchableOpacity
-                onPress={props.onCancelDelete} >
+            <TouchableOpacity >
                 <Text><MaterialCommunityIcons name="arrow-left-circle-outline" size={28} color="white" /></Text>
             </TouchableOpacity>
             <Button
-                onPress={()=>{setDeleting(true); props.onDelete()}}
                 type="clear"
                 title = {<MaterialCommunityIcons name="delete" size={28} color="white" />}
                 loadingProps={{
@@ -40,15 +41,16 @@ const Delete = (props) =>{
         </FadeInView>
     )}
 const Header = (props)=>{  
-    
+    const {appState} = useContext(DataUserContext)
+    const {navigation, currentUser} = props
     return (
         <View style={{   
             backgroundColor: color.primaryGreen,        
             paddingHorizontal: 20,
             height:65
         }}>  
-            { props.deleteItems?
-                <Delete onCancelDelete={props.onCancelDelete} onDelete={props.onDelete} />
+            { appState.deleteItems?
+                <Delete />
                 :(
                     <View style={{
                         flex:1,
@@ -57,12 +59,16 @@ const Header = (props)=>{
                         alignItems: 'center',            
                     }}>          
                         <Text style={{fontSize:18, color: 'white'}}>Money share v1.0</Text>
-                        <TouchableOpacity onPress={()=>{props.navigation.navigate('Users')}}>
-                            <Text style={{fontSize:18, color: 'white'}}>{props.currentUser.name.split(' ')[0]}</Text>
+                        <TouchableOpacity onPress={()=>{navigation.navigate('Users')}}>
+                            <Text style={{fontSize:18, color: 'white'}}>{currentUser.name.split(' ')[0]}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
         </View>
     )
+}
+Header.propTypes = {
+    navigation: PropTypes.object.isRequired,
+    currentUser: PropTypes.object.isRequired
 }
 export default Header

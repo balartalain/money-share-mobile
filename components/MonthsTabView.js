@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { View, ScrollView, Text, StyleSheet, Dimensions, StatusBar, TouchableOpacity, Animated} from 'react-native';
-import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
-import { Constants } from 'expo';
+import { View, ScrollView, Text, StyleSheet, Dimensions, TouchableOpacity, Animated} from 'react-native';
+import { TabView, TabBar } from 'react-native-tab-view';
+import { DataUserContext } from './DataUserContext';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DayCard from './DayCard'
-import {color, monthNames, dayOfWeek } from '../utils'
+import {color} from '../utils'
+import DateUtils from '../DateUtils'
 import shallowCompare from '../shallowEquals'
 
 // This is our placeholder component for the tabs
@@ -20,17 +21,14 @@ export default class MonthsTabView extends React.Component {
   constructor(props){
     super(props);
     this._handleIndexChange = this._handleIndexChange.bind(this);
-    this._addExpenseBtnPress = this._addExpenseBtnPress.bind(this);
     const tabs = [];
-    monthNames.forEach((e, i)=>{
-      tabs.push({key:i+1, title:monthNames[i]});
+    DateUtils.MONTH_NAMES.forEach((month, i)=>{
+      tabs.push({key:i+1, title:month});
     })
-    const selectedDate = new Date();
     this.state = {
-      fadeAnim: new Animated.Value(1),
       index: props.index,
       routes: tabs,
-      selectedDate: selectedDate,
+      selectedDate: new Date(),
     }
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -48,57 +46,32 @@ export default class MonthsTabView extends React.Component {
   shouldComponentUpdate(nextProps, nextState){
     return shallowCompare(this, nextProps, nextState);
  }
-  fadeIn = () => {
-    // Will change fadeAnim value to 0 in 3 seconds
-    Animated.timing(this.state.fadeAnim, {
-      toValue: 1,
-      duration: 200,
-      useNativeDriver: false
-    }).start();
-  };
 
-  fadeOut = () => {
-    // Will change fadeAnim value to 0 in 3 seconds
-    Animated.timing(this.state.fadeAnim, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: false
-    }).start();
-  };
-  _addExpenseBtnPress = () =>{
-    this.props.navigation.navigate("AddExpense", {
-      year: this.props.selectedYear,
-      month: this.state.index,
-      day: new Date().getDate()
-    })
-  }
-  _changeExpenseView = ()=>{
-    this.props.onChangeExpenseView();
-  }
-  _handleIndexChange = index => {
-    //const _selectedDate = 
-    //console.log('index '+ index)
+  _handleIndexChange(index){
     this.state.selectedDate.setMonth(index);
     this.setState({ index, selectedDate: this.state.selectedDate });
-    this.props.onSelectedMonth(index);
   }
 
-  _renderLazyPlaceholder = ({ route }) => <LazyPlaceholder route={route} />;
+  _renderLazyPlaceholder({ route }){
+  return <LazyPlaceholder route={route} />;
+}
 
-  renderTabBar = props => (
-    <TabBar   
+  renderTabBar(props) {
+    return <TabBar   
       {...props}    
       scrollEnabled
       indicatorStyle={{ backgroundColor: 'white' }}
       style={{ backgroundColor: '#3EB489' }}
     />
-  );
+  }
   
    renderScene = ({ route }) => {  
     if (Math.abs(this.state.index - this.state.routes.indexOf(route)) > 0) {
       return <View />;
-    }
-      const data = this.props.data[route.key] || {}
+    }    
+      const {appState} = this.context
+      const {userData, selectedYear} = appState
+      const data = userData[selectedYear][route.key] || {}
       return (            
           <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
             { Object.keys(data) ?
@@ -127,12 +100,7 @@ export default class MonthsTabView extends React.Component {
                       <DayCard 
                         key={day+'-'+i}
                         day={day} 
-                        month={this.state.index} 
-                        selectedYear={this.props.selectedYear} 
-                        data={data[day]}
-                        itemsToDelete={this.props.itemsToDelete}
-                        onPress={(day, time)=>this.props.onPress(this.state.index, day, time)}
-                        onLongPress={(day, time)=>this.props.onLongPress(this.state.index, day, time)}
+                        month={this.state.index}                     
                       />)                 
                   )
                 }
@@ -140,8 +108,8 @@ export default class MonthsTabView extends React.Component {
               </View>
               ):<View />
             }
-            <Animated.View style={{opacity: this.state.fadeAnim}}>
-              { Object.keys(this.props.itemsToDelete).length === 0 &&
+            <View>
+              {/* Object.keys(this.props.itemsToDelete).length === 0 &&
                 <>
                 <TouchableOpacity style={styles.fab}
                     onPress={this._addExpenseBtnPress} >
@@ -152,8 +120,8 @@ export default class MonthsTabView extends React.Component {
                   <Text style={styles.fabIcon}><MaterialCommunityIcons name="format-list-bulleted" size={30} color="white" /></Text>
                 </TouchableOpacity>
                 </>
-              }
-            </Animated.View>
+              */}
+            </View>
          </View>        
       )
   };
@@ -174,7 +142,7 @@ export default class MonthsTabView extends React.Component {
     );
   }
 }
-
+MonthsTabView.contextType = DataUserContext;
 const styles = StyleSheet.create({
   scene: {
     flex: 1,
