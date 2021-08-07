@@ -1,8 +1,10 @@
 import React from 'react'
 import { View, StyleSheet, Text, Vibration, TouchableOpacity} from 'react-native'
 import { ListItem } from 'react-native-elements'
+import Ripple from 'react-native-material-ripple'
+import PropTypes from 'prop-types'
 import { useUserDataContextHook } from './UserDataContext'
-import {color, formatNumber } from '../utils'
+import {color, formatNumber, toBoolean } from '../utils'
 import DateUtils from '../DateUtils'
 
 const DayCard = (props)=> {
@@ -49,20 +51,25 @@ const DayCard = (props)=> {
     console.log('Day Card.js')
     return (
         <View style={styles.card}>
-            <View style={{width: 40, textAlign:'center', justifyContent: 'center'}}>
+            <View style={{ width: 40, textAlign:'center', alignItems: 'center', justifyContent: 'center'}}>
                 <Text>{day.length === 1?('0'+day):day}</Text>
-                <Text>{getDayOfWeek()}</Text>
+                <Text>{ getDayOfWeek() }</Text>
             </View>
            
             <View style={{flex:1}}>
-                {  Object.keys(data).sort().reverse().filter(created => !data[created].delete).map((created, i)=>(
-                    <ListItem containerStyle={{
-                        backgroundColor: isItemSelected(created) ?'rgba(185,185,190,0.2)':'white'
-                    }} key={i} style={[styles.listItem, 
-                        {borderLeftColor: `${data[created].amount < 0?'red': color.primaryGreen}`                            
-                        }]}
-                    onPress={()=>onPressItem(created)}
-                    onLongPress={()=>onLongPressItem(created)}
+                {  Object.keys(data).sort().reverse().filter(created => !data[created].delete || !toBoolean(data[created].delete) ).map((created, i)=>(
+                    <ListItem
+                        Component={Ripple} 
+                        containerStyle={{
+                            backgroundColor: isItemSelected(created) ?'rgba(185,185,190,0.2)':'white'
+                        }} 
+                        key={i} 
+                        style={[styles.listItem, 
+                            {borderLeftColor: `${data[created].amount < 0?'red': color.primaryGreen}`                            
+                            }]
+                        }
+                        onPress={()=>onPressItem(created)}
+                        onLongPress={()=>onLongPressItem(created)}
                     >
                         <ListItem.Content>
                             <ListItem.Title>{data[created].concept}</ListItem.Title>
@@ -80,6 +87,10 @@ const DayCard = (props)=> {
             </View>           
         </View>
     )
+}
+DayCard.propTypes = {
+    month: PropTypes.number,
+    day: PropTypes.string
 }
 const styles = StyleSheet.create({  
     card:{

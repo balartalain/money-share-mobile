@@ -30,11 +30,15 @@ const getEnvironment = () =>{
 const isProductionEnv = ()=>{
     return getEnvironment().envName === 'PRODUCTION'
 }
+const toBoolean = (value)=>{
+    return value === 'true' || value === 'Y'
+}
 export {
     color,
     currency,
     equalsIntegers,
     formatNumber,
     getEnvironment,
-    isProductionEnv
+    isProductionEnv,
+    toBoolean
 }
