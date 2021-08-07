@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react'
-import { SafeAreaView, StyleSheet} from 'react-native'
+import { View, SafeAreaView, StyleSheet} from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import Constants from 'expo-constants'
@@ -13,7 +13,7 @@ import OverlayIndicator from './components/OverlayIndicator'
 import { OverlayContext } from './components/OverlayContext'
 import { UserDataContext } from './components/UserDataContext'
 import Users from './components/Users'
-import {equalsIntegers} from './utils'
+import {equalsIntegers, color} from './utils'
 import DateUtils from './DateUtils'
 import {CONNECTION_ERROR} from './ErrorConstants'
 
@@ -89,7 +89,6 @@ const App = () =>{
 
     useEffect(()=>{     
         (async()=>{
-            await AsyncStorageHelper.removeObject('user')
             const user = await AsyncStorageHelper.getObject('user')
             if (user){
                 setCurrentUser(user)
@@ -116,6 +115,7 @@ const App = () =>{
     //console.log('App.js ' + overlay)
     return (
         <SafeAreaView style={styles.container}> 
+            <View style={styles.top}></View> 
             <OverlayContext.Provider value={{hideOverlay, showOverlay}}>
                 
                 { currentUser ? (
@@ -157,8 +157,11 @@ const App = () =>{
 }
 const styles = StyleSheet.create({    
     container: {
-        flex: 1,
-        marginTop: Constants.statusBarHeight,
+        flex: 1
     },
+    top:{
+        height: Constants.statusBarHeight,
+        backgroundColor: color.primaryGreen
+    }
 })
 export default App
