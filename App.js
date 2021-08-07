@@ -1,98 +1,157 @@
-import React, {useState, useEffect} from 'react'
-import { SafeAreaView, StyleSheet, Text} from 'react-native'
+import React, {useState, useEffect, useRef} from 'react'
+import { SafeAreaView, StyleSheet} from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
-import Spinner from 'react-native-loading-spinner-overlay'
 import Constants from 'expo-constants'
-import {AppUserProvider, useAppUser} from './components/AppUserContext'
+import Heroku from './controllers/index'
 import MainScreen from './components/MainScreen'
 import AddExpense from './components/AddExpense'
+import * as Facebook from 'expo-facebook'
 import FacebookLogin from './components/FacebookLogin'
 import AsyncStorageHelper  from './AsyncStorageHelper'
 import OverlayIndicator from './components/OverlayIndicator'
+import { OverlayContext } from './components/OverlayContext'
+import { UserDataContext } from './components/UserDataContext'
 import Users from './components/Users'
-
-function useForceUpdate(){
-    const [value, setValue] = useState(0) // integer state
-    return () => setValue(value + 1) // update the state to force render
-}
+import {equalsIntegers} from './utils'
+import DateUtils from './DateUtils'
+import {CONNECTION_ERROR} from './ErrorConstants'
 
 const Stack = createStackNavigator()
 const App = () =>{
-    const [appUser, setAppUser] = useState(null)
     const [overlay, setShowOverlay] = useState(false)
-    const [loading, setLoading] = useState(true)
-    //const {appUser} = useAppUser()
-    // const success = (_userInfo)=>{           
-    //     registerUser({
-    //         id: _userInfo.id,
-    //         name: _userInfo.name,
-    //         email: _userInfo.email
-    //     }).then(()=>{
-    //         //AsyncStorageHelper.saveItem('token', _userInfo.token)
-    //         AsyncStorageHelper.saveObject('me', _userInfo)
-    //         setUserInfo(_userInfo)
-    //     }).catch(()=>{
-    //         alert('No tiene conexión a internet')      
-    //         forceUpdate()
-    //     })
-    
-    // }
-    // useEffect(()=>{
-    //     const checkUser = async()=>{   
-    //         const _userInfo = await AsyncStorageHelper.getObject('me')
-    //         if (_userInfo != null){
-    //             setUserInfo(_userInfo)
-    //         }
-    //     }
-    //     checkUser()
-    // }, [])
-    // const logout = ()=>{
-    //     AsyncStorageHelper.removeObject('token')
-    //     AsyncStorageHelper.removeObject('me')
-    //     setUserInfo(null)        
-    // }
-    useEffect(()=>{        
+    const [appState, setAppState] = useState(null)
+    const [currentUser, setCurrentUser] = useState(null)
+    const [overlayLabel, setOverlayLabel] = useState(null)
+    const [markedItemsToDelete, setMarkedItemsToDelete] = useState([])
+    const mountedRef = useRef(false)
+
+    const loginSuccess = (userInfo)=>{   
+        showOverlay('Autenticando usuario en Money share')       
+        Heroku.registerUser(userInfo).then(()=>{
+            AsyncStorageHelper.saveObject('user', userInfo)
+            setCurrentUser(userInfo)
+        }).catch(()=>{
+            alert(CONNECTION_ERROR)
+        }).finally(toggleOverlay)
+    }
+    const logout = ()=>{      
+        showOverlay('Cerrando sesión...')  
+        Facebook.logOutAsync().then (async ()=>{
+            const user = await AsyncStorageHelper.getObject('user')
+            var lParams= 'access_token='+user.token
+            await fetch(
+                'https://graph.facebook.com/'+user.id+'/permissions',{
+                    method : 'DELETE',
+                    body: lParams
+                })
+            await AsyncStorageHelper.removeObject('user')
+            setCurrentUser(null)
+            setAppState(null)
+        }).catch((error)=>{
+            console.log(error)
+            alert(error)
+        }).finally(()=>{
+            hideOverlay()
+        })
+        
+    }
+    const loadData = async()=>{
+        try{
+            toggleOverlay('Obteniendo datos de '+currentUser.name.split(' ')[0])
+            const data = await Heroku.getUserData(currentUser.id)  
+            if (mountedRef.current){
+                const userData = data.data
+                const years = Object.keys(userData)  
+                const index = years.findIndex((e)=>equalsIntegers(e, DateUtils.CURRENT_YEAR))  
+                if (index === -1){
+                    years.push(DateUtils.CURRENT_YEAR)
+                }
+                years.sort()   
+                setAppState({
+                    ...appState,
+                    userData,
+                    years,
+                    selectedMonth: DateUtils.CURRENT_MONTH,
+                    selectedYear: DateUtils.CURRENT_YEAR
+                })
+            
+            }   
+        } 
+        catch(error){
+            throw new Error(error)
+        }
+        finally{
+            toggleOverlay()
+        }
+
+    }
+
+    useEffect(()=>{     
         (async()=>{
-            const _appUser = await AsyncStorageHelper.getObject('appUser')
-            if (_appUser){
-                setAppUser(_appUser)
+            await AsyncStorageHelper.removeObject('user')
+            const user = await AsyncStorageHelper.getObject('user')
+            if (user){
+                setCurrentUser(user)
             }
         })()
+        mountedRef.current = true           
+        return ()=>{
+            mountedRef.current = false
+        }
     }, [])
-    const _setAppUser = (user)=>{
-        setAppUser(user)
+
+    const showOverlay =(info)=>{
+        setOverlayLabel(info)
+        setShowOverlay(true)
     }
-    const showOverlay =(show)=>{
-        setShowOverlay(show)
+    const hideOverlay = ()=>{
+        setShowOverlay(false)
     }
-    const toggleOverlay = ()=>{
-        setShowOverlay(!overlay)
+    const toggleOverlay = (info)=>{
+        setOverlayLabel(info)
+        setShowOverlay(prevState=>!prevState)
     }
+
+    //console.log('App.js ' + overlay)
     return (
         <SafeAreaView style={styles.container}> 
-            <AppUserProvider updatedUser={_setAppUser}>
-                { appUser ?
-                    <NavigationContainer>
-                        <Stack.Navigator
-                        >
-                            <Stack.Screen name="Home" component={MainScreen} 
-                                options={{  headerShown: false }}              
-                            />
-                            <Stack.Screen name="AddExpense" 
-                                options={{ title: 'Nuevo Gasto' }}
-                                component={AddExpense} />
-                            <Stack.Screen name="Users" 
-                                options={{ title: 'Usuarios' }}  
-                            > 
-                                {(props) => <Users  {...props} onLogout={logout}/>}
-                            </Stack.Screen>
-                        </Stack.Navigator>              
-                    </NavigationContainer>                
-                    : <FacebookLogin />
+            <OverlayContext.Provider value={{hideOverlay, showOverlay}}>
+                
+                { currentUser ? (
+                    <UserDataContext.Provider 
+                        value={{currentUser, 
+                            appState, 
+                            setAppState, 
+                            markedItemsToDelete, 
+                            setMarkedItemsToDelete,
+                            loadData,
+                            logout,
+                            setCurrentUser
+                        }} >
+                        <NavigationContainer>
+                            <Stack.Navigator
+                            >
+                                <Stack.Screen name="Home" component={MainScreen} 
+                                    options={{  headerShown: false }}              
+                                />
+                                <Stack.Screen name="AddExpense" 
+                                    options={{ title: 'Nuevo Gasto' }}
+                                    component={AddExpense} />
+                                <Stack.Screen name="Users" 
+                                    options={{ title: 'Usuarios' }}  
+                                > 
+                                    {(props) => <Users  {...props} onLogout={logout}/>}
+                                </Stack.Screen>
+                            </Stack.Navigator>              
+                        </NavigationContainer> 
+                    </UserDataContext.Provider>
+                )               
+                    : <FacebookLogin loginSuccess={loginSuccess} />
                 } 
-            </AppUserProvider>
-            {overlay && <OverlayIndicator/> }
+                {overlay && <OverlayIndicator overlayLabel={overlayLabel} /> }
+                
+            </OverlayContext.Provider>
         </SafeAreaView>
     )  
 }

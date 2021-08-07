@@ -1,22 +1,16 @@
-import React, {useState, useEffect, useContext, useRef, memo} from 'react'
+import React, {useContext} from 'react'
 import { View, Text, TouchableOpacity} from 'react-native'
 import PropTypes from 'prop-types'
 import { Button } from 'react-native-elements'
 import { MaterialCommunityIcons } from '@expo/vector-icons' 
-import { DataUserContext } from './DataUserContext'
+import { UserDataContext, useUserDataContextHook } from './UserDataContext'
 import { color } from './../utils'
 import FadeInView from './FadeInView'
+import { getEnvironment } from '../utils'
+const ENV = getEnvironment().envName
 
-const Delete = (props) =>{
-    const {appState} = useContext(DataUserContext)
-    const [deleting, setDeleting] = useState(false)
-
-    useEffect(()=>{
-        setDeleting(false)
-        return ()=>{
-            setDeleting(false)
-        }
-    }, [])
+const Delete = () =>{
+    const {deleteItems, setMarkedItemsToDelete} = useUserDataContextHook()
     return (
         <FadeInView duration={500} style={{
             flex:1,
@@ -24,7 +18,7 @@ const Delete = (props) =>{
             justifyContent: 'space-between',
             alignItems: 'center',            
         }}>
-            <TouchableOpacity >
+            <TouchableOpacity onPress={()=>setMarkedItemsToDelete([])} >
                 <Text><MaterialCommunityIcons name="arrow-left-circle-outline" size={28} color="white" /></Text>
             </TouchableOpacity>
             <Button
@@ -34,22 +28,23 @@ const Delete = (props) =>{
                     color: 'white',
             
                 }} 
-                loading={deleting}
+                onPress={()=>deleteItems()}
+                //loading={deleting}
             >
             
             </Button>
         </FadeInView>
     )}
 const Header = (props)=>{  
-    const {appState} = useContext(DataUserContext)
-    const {navigation, currentUser} = props
+    const {currentUser, markedItemsToDelete} = useContext(UserDataContext)
+    const {navigation} = props
     return (
         <View style={{   
             backgroundColor: color.primaryGreen,        
             paddingHorizontal: 20,
             height:65
         }}>  
-            { appState.deleteItems?
+            { markedItemsToDelete.length?
                 <Delete />
                 :(
                     <View style={{
@@ -58,7 +53,7 @@ const Header = (props)=>{
                         justifyContent: 'space-between',
                         alignItems: 'center',            
                     }}>          
-                        <Text style={{fontSize:18, color: 'white'}}>Money share v1.0</Text>
+                        <Text style={{fontSize:18, color: 'white'}}>Money share {ENV !== 'PRODUCTION'?ENV.substring(0, 3):''}</Text>
                         <TouchableOpacity onPress={()=>{navigation.navigate('Users')}}>
                             <Text style={{fontSize:18, color: 'white'}}>{currentUser.name.split(' ')[0]}</Text>
                         </TouchableOpacity>

@@ -1,38 +1,36 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { StyleSheet, Text, Platform,  View, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import * as Facebook from 'expo-facebook'
-import {useAppUser} from './AppUserContext'
+import { OverlayContext } from './OverlayContext'
 import { color } from '../utils'
 
-const FacebookLogin = ()=>{
+const FacebookLogin = ({loginSuccess})=>{
+    const {toggleOverlay, showOverlay} = useContext(OverlayContext)
     const [isLoggedin, setLoggedinStatus] = useState(false)
     const [errorMsg, setErrorMsg] = useState(null)
-    const {setAppUser} = useAppUser()
 
     async function fakeLogin(){
-        const data = {
-            id: '10222108852244678',
-            name: 'Alain Pérez Balart',
-            email: 'balartalain@gmail.com',
-            token: 'EAAInQQgBZBoMBAPNJy7ZBHHKXwzlC7KjRc20IddoWWdZAZAqZC9rsbpYrUZC2HpHv6VRsEr5JhIExQrT6VCQj9ZBOpJxKKV9A8Mo3kgQp2hZAduDkQnff1Ine2cfJkD8gxfHyrZCVknsPZAddOZC0OlckXwzqbhoTwZB1UWBKRsJJEoAsCc1bBATQFCPhttVrEZBS3YRKGZCvkAs4ErTZCcIGxSlZCIgDjyuVSfIF0X4CBJcaR3MUAZDZD',
-            picture:{
-                data:{
-                    url: '../assets/picture.png'
-                }
-            },
-            expirationDate: new Date()
+        try {
+            const data = {
+                id: '10222108852244678',
+                name: 'Alain Pérez Balart',
+                email: 'balartalain@gmail.com',
+                token: 'EAAInQQgBZBoMBAPNJy7ZBHHKXwzlC7KjRc20IddoWWdZAZAqZC9rsbpYrUZC2HpHv6VRsEr5JhIExQrT6VCQj9ZBOpJxKKV9A8Mo3kgQp2hZAduDkQnff1Ine2cfJkD8gxfHyrZCVknsPZAddOZC0OlckXwzqbhoTwZB1UWBKRsJJEoAsCc1bBATQFCPhttVrEZBS3YRKGZCvkAs4ErTZCcIGxSlZCIgDjyuVSfIF0X4CBJcaR3MUAZDZD',
+                picture:{
+                    data:{
+                        url: '../assets/picture.png'
+                    }
+                },
+                expirationDate: new Date()
+            }
+            setLoggedinStatus(true)
+            showOverlay('Recuerpando información de facebook')
+            setTimeout(()=>{
+                loginSuccess({ ...data })}, 3000)     
+        } catch ({ message }) {
+            setLoggedinStatus(false)
+            alert(`Facebook Login Error: ${message}`)
         }
-   
-        setAppUser(data).then(()=>{
-            setLoggedinStatus(true)   
-        }).catch((error)=>{
-            setErrorMsg(error)
-        })
-             
-  
-        
-
-        //props.onSuccess({ ...data, token: 'EAAInQQgBZBoMBAPNJy7ZBHHKXwzlC7KjRc20IddoWWdZAZAqZC9rsbpYrUZC2HpHv6VRsEr5JhIExQrT6VCQj9ZBOpJxKKV9A8Mo3kgQp2hZAduDkQnff1Ine2cfJkD8gxfHyrZCVknsPZAddOZC0OlckXwzqbhoTwZB1UWBKRsJJEoAsCc1bBATQFCPhttVrEZBS3YRKGZCvkAs4ErTZCcIGxSlZCIgDjyuVSfIF0X4CBJcaR3MUAZDZD' })
     }
     async function logIn() {
         try {
@@ -50,23 +48,10 @@ const FacebookLogin = ()=>{
             })
             if (type === 'success') {
             // Get the user's name using Facebook's Graph API
-                setLoggedinStatus(true)
+                showOverlay('Recuerpando información de facebook')
                 const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,picture.height(500)`)
                 const data = await response.json()   
-                setAppUser({
-                    id:data.id,
-                    name: data.name,
-                    email: data.email, 
-                    token, 
-                    expirationDate
-                }).then(()=>{
-                    setLoggedinStatus(true)   
-                }).catch((error)=>{
-                    setLoggedinStatus(false)
-                    setErrorMsg(error)
-                })   
-                //props.onSuccess({ ...data, token })
-            //Alert.alert('Logged in!', `Hi ${(await response.json()).name}!`);
+                loginSuccess({ ...data, token, expirationDate }) 
             } else {
             // type === 'cancel'
             }
@@ -75,14 +60,8 @@ const FacebookLogin = ()=>{
             alert(`Facebook Login Error: ${message}`)
         }
     }
-    const logout = () => {
-        Facebook.logOutAsync()
-        setLoggedinStatus(false)
-        setUserInfo(null)
-        setImageLoadStatus(false)
-    }
     return (
-        !isLoggedin ? (
+        !isLoggedin && (
             <View style={styles.container}>
                 <Image
                     style={{ width: 220, height: 220, borderRadius: 50, marginVertical: 20 }}
@@ -92,14 +71,8 @@ const FacebookLogin = ()=>{
                     <Text style={{ color: '#fff' }}>Login with Facebook</Text>
                 </TouchableOpacity>
             </View>
-        ):
-            ( <View style={{flex:1, justifyContent: 'center', alignItems: 'center'}}>
-                <ActivityIndicator size="large" color={color.primaryGreen}/>
-                <Text style={{marginVertical: 20}}>Obteniendo información del usuario</Text>
-            </View>
-            )
         
-    )
+        ))
 }
   
 const styles = StyleSheet.create({

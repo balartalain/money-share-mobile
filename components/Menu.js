@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef, useContext, memo} from 'react'
 import { ScrollView, View, TouchableOpacity, Pressable, Text, StyleSheet, Dimensions } from 'react-native'
 import PropTypes from 'prop-types'
-import { DataUserContext, useDataUserContextHook } from './DataUserContext'
+import { UserDataContext, useUserDataContextHook } from './UserDataContext'
 import Constants from 'expo-constants'
 import {equalsIntegers} from '../utils'
 import DateUtils from '../DateUtils'
@@ -9,8 +9,7 @@ const { width } = Dimensions.get('window')
 
 const Menu = () =>{
 
-    //const {appState, setAppState} = useContext(DataUserContext)
-    const {appState, changeYear} = useDataUserContextHook()
+    const {appState, changeYear} = useUserDataContextHook()
     const {selectedYear, years} = appState
 
     const transformItems = ()=>{
@@ -25,40 +24,26 @@ const Menu = () =>{
     const selectedItem = items.find(item=>item.selected).item
     useEffect(()=>{  
         mountedRef.current = true
-        // const index = items.findIndex((e)=>equalsIntegers(e, selectedItem))  
-        // setSeletedIndex(index)
-        // setSelectedItem(props.selectedItem)
         setTimeout(()=> animateItemChanged(selectedItem), 500)
-        //animateItemChanged(DateUtils.CURRENT_YEAR)
         return () => {
             mountedRef.current = false
         } 
     }, [])
     const itemChanged = (_item)=>{
         if (_item === selectedItem)
-            return
-        //animateItemChanged(item, i);
-        //props.onSelectedItem(item);        
+            return     
         setItems(items.map(e=>({
             item: e.item,
             selected: e.item === _item
         })))
         animateItemChanged(_item)
         changeYear(_item)
-        //setAppState({ ...appState, selectedYear: _item})
-        //props.onSelectedItem(item)
-        //setTimeout(()=> props.onSelectedItem(item), 400);
       
     }
 
     const animateItemChanged = (_item)=>{ 
         if (!mountedRef.current) return    
-        // if (i === 0 || i === items.length - 1){
-        //     return
-        // }  
         const i = items.findIndex(e=>e.item === _item)
-     
-        //console.log({item, i})
         scrollRef.current.scrollTo({
             x: (width/3 * (i-1)),
             animated: true    
@@ -94,8 +79,6 @@ export default React.memo(Menu)
 
 const styles = StyleSheet.create({    
     menu: {    
-    //paddingLeft:10,
-    //paddingRight:10,
         backgroundColor: '#3EB489',    
         flexGrow: 0      
     },

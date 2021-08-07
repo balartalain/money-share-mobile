@@ -1,12 +1,13 @@
-import React, {useState, useEffect, Platform} from 'react'
+import React, {useState, useContext, Platform} from 'react'
 import { View, StyleSheet, Text, TextInput, TouchableOpacity} from 'react-native'
 import PropTypes from 'prop-types'
 import { Button } from 'react-native-elements'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import {Picker} from '@react-native-picker/picker'
-import {color, monthNames, dayOfWeek } from '../utils'
-import { createExpense } from '../controllers/index'
-import AsyncStorageHelper from '../AsyncStorageHelper'
+import {color} from '../utils'
+import { useUserDataContextHook } from './UserDataContext'
+import DateUtils from '../DateUtils'
+import { OverlayContext } from './OverlayContext'
 
 const AddExpense = ({navigation, route}) => {
     const {params} = route
@@ -16,7 +17,8 @@ const AddExpense = ({navigation, route}) => {
     const [amount, setAmount] = useState()
     const [concept, setConcept] = useState()
     const [comment, setComment] = useState()
-    const [addingExpense, setAddingExpense] = useState(false)
+    const {showOverlay, hideOverlay} = useContext(OverlayContext)
+    const {addExpense} = useUserDataContextHook()
     const onChange = (event, selectedDate) => {
     //const currentDate = selectedDate || currentDate;
         setshowDatePicker(Platform.OS === 'ios')
@@ -42,30 +44,23 @@ const AddExpense = ({navigation, route}) => {
                 comment: comment,
                 currency: selectedCurrency        
             }
-            setAddingExpense(true)
-            const {id} = await AsyncStorageHelper.getObject('currentUser')      
-            const result = await createExpense(id, newExpense)
-            if (result.data){
-                navigation.navigate('Home', { newExpense })
-            }
+            showOverlay('Guardando...')    
+            await addExpense(newExpense)
+            hideOverlay(false)
+            navigation.navigate('Home', { newExpense })
         }
         catch(err){
-            setAddingExpense(false)
+            hideOverlay(false)
             alert(err)
         }
     }
-    useEffect(() => {
-        setAddingExpense(false)
-        return () => {
-            setAddingExpense(false)
-        }
-    }, [])
+
     return (
         <View style={{flex:1}}>
             <View style={{flex:1}}>
                 <View style={{flex:0, alignItems:'center'}}>
                     <TouchableOpacity style={{paddingVertical:15}} onPress={()=>setshowDatePicker(true)} >
-                        <Text>{`${dayOfWeek[currentDate.getDay()]}, ${currentDate.getDate()} ${monthNames[currentDate.getMonth()]}`}</Text>
+                        <Text>{`${DateUtils.DAYS_OF_WEEK[currentDate.getDay()]}, ${currentDate.getDate()} ${DateUtils.MONTH_NAMES[currentDate.getMonth()]}`}</Text>
                         {showDatePicker && (
                             <DateTimePicker style={{backgroundColor: 'green'}}
                                 locale={'es'}
@@ -123,7 +118,6 @@ const AddExpense = ({navigation, route}) => {
                         backgroundColor:'red',
                         paddingVertical: 15
                     }}
-                    loading = {addingExpense? true: false}
                 />
                 <Button title="Cancelar" type='clear' 
                     buttonStyle={{

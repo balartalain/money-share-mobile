@@ -4,10 +4,10 @@ import PropTypes from 'prop-types'
 import { ListItem } from 'react-native-elements'
 import { MaterialCommunityIcons } from '@expo/vector-icons' 
 import Collapsible from 'react-native-collapsible'
-import {monthNames, dayOfWeek, color, formatNumber} from '../utils'
-
-const transformObjectToArray = (data)=>{
-
+import {color, formatNumber} from '../utils'
+import DateUtils from '../DateUtils'
+import { useUserDataContextHook } from './UserDataContext'
+const transformObjectToArray = (data)=>{    
     const getExpenses = (d)=>{
         let expenses = []
         Object.keys(d).sort().reverse().forEach(time=>{
@@ -48,13 +48,14 @@ const transformObjectToArray = (data)=>{
     return result
 }
 const ExpenseList = (props)=>{
+    const {appState} =  useUserDataContextHook()
     const [userData, setUserData] = useState(null)
-
+    const {onChangeExpenseView} = props
     useEffect(()=>{
-        if (props.userData) {
-            setUserData(transformObjectToArray(props.userData))  
+        if (appState.userData) {
+            setUserData(transformObjectToArray(appState.userData[appState.selectedYear]))  
         }
-    }, [props.userData])
+    }, [appState.userData])
 
     const [active, setActive] = useState(-1)
     const toggleExpanded = (index)=>{
@@ -85,7 +86,7 @@ const ExpenseList = (props)=>{
         date.setFullYear(year)
         date.setMonth(month)
         date.setDate(day)
-        return dayOfWeek[date.getDay()].substring(0,3)   
+        return DateUtils.DAYS_OF_WEEK[date.getDay()].substring(0,3)   
     }
     const RenderItem = ({ item }) => {
         return item.days.map((day)=>{
@@ -97,7 +98,7 @@ const ExpenseList = (props)=>{
                 }}>
                     <View style={{alignItems: 'center'}}>
                         <Text>{('0' + day.day).slice(-2)}</Text>
-                        <Text>{getDayOfWeek(props.selectedYear, item.month-1, day.day)}</Text>
+                        <Text>{getDayOfWeek(appState.selectedYear, item.month-1, day.day)}</Text>
                     </View>
                     <ListItem.Content>
                         <ListItem.Title>{exp.concept}</ListItem.Title>
@@ -118,7 +119,6 @@ const ExpenseList = (props)=>{
             { userData && userData.length ? 
                 <ScrollView>
                     {userData.map((month, i)=>{
-                        
                         const {totalUSD, totalCUP} = total(month)
                         return <View key={i}>
                             <TouchableOpacity onPress={()=>toggleExpanded(i)}>
@@ -127,7 +127,7 @@ const ExpenseList = (props)=>{
                                         flexDirection:'row',
                                         justifyContent: 'space-between'
                                     }}>
-                                        <ListItem.Title>{monthNames[month.month-1]}</ListItem.Title>
+                                        <ListItem.Title>{DateUtils.MONTH_NAMES[month.month-1]}</ListItem.Title>
                                         <View style={{alignItems:'flex-end'}}>
                                             <Text style={{
                                                 color: `${totalUSD < 0?'red': color.primaryGreen}`
@@ -149,16 +149,14 @@ const ExpenseList = (props)=>{
                 :<View style={{flex:1, alignItems: 'center', justifyContent: 'center'}}><Text>No hay registros</Text></View> 
             }
             <TouchableOpacity style={styles.fab}
-                onPress={props.onChangeExpenseView} >
+                onPress={onChangeExpenseView} >
                 <Text style={styles.fabIcon}><MaterialCommunityIcons name="format-list-bulleted" size={30} color="white" /></Text>
             </TouchableOpacity>
         </View>
     )
 }
 ExpenseList.propTypes = {
-    userData: PropTypes.Object,
-    onChangeExpenseView: PropTypes.func.isRequired,
-    selectedYear: PropTypes.func.isRequired
+    onChangeExpenseView: PropTypes.func
 }
 const styles = StyleSheet.create({
     fab: {

@@ -1,39 +1,38 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useContext} from 'react'
 import {  View, TouchableOpacity, ScrollView } from 'react-native'
 import { ListItem, CheckBox, Button } from 'react-native-elements'
-import PropTypes from 'prop-types'
-import * as Facebook from 'expo-facebook'
-import {getUsers, setSupervisor} from '../controllers'
-import AppUserConext from './AppUserContext'
-import OverlayIndicator from './OverlayIndicator'
-import AsyncStorageHelper from '../AsyncStorageHelper'
+import Heroku from '../controllers/index'
+import { OverlayContext } from './OverlayContext'
+import { useUserDataContextHook } from './UserDataContext'
 
 const Users = (props,{navigation})=>{
 
+    const {showOverlay, hideOverlay} = useContext(OverlayContext)
+    const {currentUser, setCurrentUser, logout} = useUserDataContextHook()
     const [users, setUsers] = useState(null)
-    const [loading, setLoading] = useState(false)
     const mountedRef = useRef(false)
     useEffect(()=>{
         mountedRef.current = true
-        setLoading(true)
+        showOverlay('Obteniendo usuarios...')
         //const me = await AsyncStorageHelper.getObject('me')
-        getUsers().then(_users=>{
+        Heroku.getUsers().then(_users=>{
             if (mountedRef.current){
                 setUsers(_users.data)
             }
         }).catch(()=>{
             alert('Error de conexión')
         }).finally(()=>{
-            setLoading(false)
+            hideOverlay()
         })
         return () => {
             mountedRef.current = false
         } 
     }, [])
     const _setIsSupervisor = (id, isSupervisor)=>{
-        
-        setLoading(true)        
-        setSupervisor(id, {'isSupervisor': isSupervisor}).then(()=>{
+        if (!users[currentUser.id].isSupervisor)
+            return false
+        showOverlay('Cambiando permisos de usuario...')       
+        Heroku.setSupervisor(id, {'isSupervisor': isSupervisor}).then(()=>{
             if (mountedRef.current){
                 const _users = {... users}
                 _users[id].supervisor = isSupervisor
@@ -42,27 +41,14 @@ const Users = (props,{navigation})=>{
         }).catch(err=>{
             alert(err)
         }).finally(()=>{
-            setLoading(false)
+            hideOverlay()
         })
     }
-    const logout = ()=>{      
-        setLoading(true)    
-        Facebook.logOutAsync().then (async ()=>{
-            const token = await AsyncStorageHelper.getItem('token')
-            var lParams= 'access_token='+token
-            await fetch(
-                'https://graph.facebook.com/'+10222108852244678+'/permissions',{
-                    method : 'DELETE',
-                    body: lParams
-                })
-            props.onLogout()
-        }).catch((error)=>{
-            console.log(error)
-            alert(error)
-        }).finally(()=>{
-            setLoading(false)
-        })
-        
+    const changeUser = (userId)=>{
+        if (!(users[currentUser.id].isSupervisor))
+            return false
+        setCurrentUser(users[userId])
+        navigation.navigate('Home')
     }
     return (
         <View style={{flex:1}}>
@@ -71,7 +57,7 @@ const Users = (props,{navigation})=>{
                 Object.keys(users).map((id,i)=>(                                     
                     <ListItem key={i} bottomDivider>                   
                         <ListItem.Content>
-                            <TouchableOpacity style={{width:'100%'}} onPress={()=>navigation.navigate('Home', { changeUser: {...users[id], id} })}>
+                            <TouchableOpacity style={{width:'100%'}} onPress={()=>changeUser(id)}>
                                 <ListItem.Title>{users[id].name}</ListItem.Title>
                             </TouchableOpacity>
                             <View>
@@ -86,7 +72,7 @@ const Users = (props,{navigation})=>{
                                 }}
                                 textStyle={{fontWeight:'normal'}}
                                 title='Supervisor' 
-                                onPress={()=>_setIsSupervisor(id, users[id].supervisor === 'true'?'false':'true')}
+                                onPress={()=>_setIsSupervisor(id, users[id].supervisor === 'true'?'false':'true')} 
                                 checked={users[id].supervisor === 'true'} />
                             </View>
                         </ListItem.Content>
@@ -103,7 +89,6 @@ const Users = (props,{navigation})=>{
                     paddingVertical: 15
                 }}
             />
-            { loading && <OverlayIndicator />}
         </View>        
     )
 }
