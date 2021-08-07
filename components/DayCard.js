@@ -30,7 +30,7 @@ const DayCard = (props)=> {
             else{
                 setMarkedItemsToDelete([...markedItemsToDelete, {
                     year: appState.selectedYear,
-                    month,
+                    month: month+1,
                     day,
                     created
                 }])
@@ -42,7 +42,7 @@ const DayCard = (props)=> {
             Vibration.vibrate(50)
             setMarkedItemsToDelete([...markedItemsToDelete, {
                 year: appState.selectedYear,
-                month,
+                month: month+1,
                 day,
                 created
             }])
@@ -57,7 +57,7 @@ const DayCard = (props)=> {
             </View>
            
             <View style={{flex:1}}>
-                {  Object.keys(data).sort().reverse().filter(created => !data[created].delete || !toBoolean(data[created].delete) ).map((created, i)=>(
+                {  Object.keys(data).sort().reverse().filter(created => !data[created].deleted || !toBoolean(data[created].deleted) ).map((created, i)=>(
                     <ListItem
                         Component={Ripple} 
                         containerStyle={{

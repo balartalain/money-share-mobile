@@ -45,7 +45,7 @@ export const useUserDataContextHook = ()=>{
             const _userData = {...appState.userData}
             markedItemsToDelete.forEach(expense=>{
                 const {year, month, day, created} = expense
-                _userData[year][month+1][day][created].deleted = 'true'
+                _userData[year][month][day][created].deleted = 'true'
             })
             setAppState({...appState, _userData}) 
             setMarkedItemsToDelete([])     

@@ -16,8 +16,7 @@ const Heroku = {
         return response
     },
     getUserData : async (userId)=>{  
-        let response = await herokuAPI.get(`/${userId}/get-data?env=${ENV}`, 
-            { params: { ENV: getEnvironment().envName }})
+        let response = await herokuAPI.get(`/${userId}/get-data?env=${ENV}`)
         return response
     },
     createExpense: async(userId, data)=>{  
