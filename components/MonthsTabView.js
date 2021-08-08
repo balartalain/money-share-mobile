@@ -3,6 +3,7 @@ import { View, ScrollView, Text, StyleSheet, Dimensions, TouchableOpacity, Anima
 import { TabView, TabBar } from 'react-native-tab-view'
 import { UserDataContext } from './UserDataContext'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import Ripple from 'react-native-material-ripple'
 import DayCard from './DayCard'
 import {color} from '../utils'
 import DateUtils from '../DateUtils'
@@ -123,14 +124,14 @@ export default class MonthsTabView extends React.Component {
                 <View>
                     {this.context.markedItemsToDelete.length === 0 &&
                 <>
-                    <TouchableOpacity style={styles.fab}
+                    <Ripple style={styles.fab}
                         onPress={this._addExpenseBtnPress} >
                         <Text style={styles.fabIcon}><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.fab, {left: 30}]}
+                    </Ripple>
+                    <Ripple style={[styles.fab, {left: 30}]}
                         onPress={this._changeExpenseView} >
                         <Text style={styles.fabIcon}><MaterialCommunityIcons name="format-list-bulleted" size={30} color="white" /></Text>
-                    </TouchableOpacity>
+                    </Ripple>
                 </>
                     }
                 </View>

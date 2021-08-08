@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import { ScrollView, View, TouchableOpacity, Text, StyleSheet } from 'react-native'
 import PropTypes from 'prop-types'
 import { ListItem } from 'react-native-elements'
+import Ripple from 'react-native-material-ripple'
 import { MaterialCommunityIcons } from '@expo/vector-icons' 
 import Collapsible from 'react-native-collapsible'
 import {color, formatNumber} from '../utils'
@@ -147,10 +148,10 @@ const ExpenseList = (props)=>{
                 </ScrollView>
                 :<View style={{flex:1, alignItems: 'center', justifyContent: 'center'}}><Text>No hay registros</Text></View> 
             }
-            <TouchableOpacity style={styles.fab}
+            <Ripple style={styles.fab}
                 onPress={onChangeExpenseView} >
                 <Text style={styles.fabIcon}><MaterialCommunityIcons name="format-list-bulleted" size={30} color="white" /></Text>
-            </TouchableOpacity>
+            </Ripple>
         </View>
     )
 }

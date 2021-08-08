@@ -1,7 +1,7 @@
 import React, {useContext} from 'react'
 import { View, Text, TouchableOpacity} from 'react-native'
 import PropTypes from 'prop-types'
-import { Button } from 'react-native-elements'
+import Ripple from 'react-native-material-ripple'
 import { MaterialCommunityIcons } from '@expo/vector-icons' 
 import { UserDataContext, useUserDataContextHook } from './UserDataContext'
 import { color } from './../utils'
@@ -18,21 +18,12 @@ const Delete = () =>{
             justifyContent: 'space-between',
             alignItems: 'center',            
         }}>
-            <TouchableOpacity onPress={()=>setMarkedItemsToDelete([])} >
-                <Text><MaterialCommunityIcons name="arrow-left-circle-outline" size={28} color="white" /></Text>
-            </TouchableOpacity>
-            <Button
-                type="clear"
-                title = {<MaterialCommunityIcons name="delete" size={28} color="white" />}
-                loadingProps={{
-                    color: 'white',
-            
-                }} 
-                onPress={()=>deleteItems()}
-                //loading={deleting}
-            >
-            
-            </Button>
+            <Ripple onPress={()=>setMarkedItemsToDelete([])} >
+                <Text><MaterialCommunityIcons name="arrow-left" size={28} color="white" /></Text>
+            </Ripple>
+            <Ripple onPress={()=>deleteItems()} >
+                <Text><MaterialCommunityIcons name="delete" size={28} color="white" /></Text>
+            </Ripple>
         </FadeInView>
     )}
 const Header = (props)=>{  

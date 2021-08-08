@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react'
 import { ScrollView, View, Pressable, Text, StyleSheet, Dimensions } from 'react-native'
+import Ripple from 'react-native-material-ripple'
 import { useUserDataContextHook } from './UserDataContext'
 
 const { width } = Dimensions.get('window')
@@ -58,11 +59,11 @@ const Menu = () =>{
                 items.map((e, i)=>(                
                     <View key={i} style={[styles.menuItem, e.selected && styles.menuItemActive]}>
                         { (i > 0 && i < items.length - 1)  && 
-                        <Pressable style={[styles.btn, e.selected?styles.btnActive:(e.item<selectedItem)?styles.btnLeft:styles.btnRight]} 
+                        <Ripple style={[styles.btn, e.selected?styles.btnActive:(e.item<selectedItem)?styles.btnLeft:styles.btnRight]} 
                             onPress={()=>itemChanged(e.item)}
-                            android_ripple={{color: '#2F5233' }}>
+                        >
                             <Text style={{color: 'white', fontWeight: 'bold'}}>{e.item}</Text>
-                        </Pressable>
+                        </Ripple>
                         }
                     </View>
                 ))
