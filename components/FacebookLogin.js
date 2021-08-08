@@ -1,14 +1,12 @@
-import React, { useState, useContext } from 'react'
-import { StyleSheet, Text, Platform,  View, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
+import React, { useState } from 'react'
+import { StyleSheet, Text, Platform,  View, Image } from 'react-native'
 import * as Facebook from 'expo-facebook'
-import { OverlayContext } from './OverlayContext'
-import { color } from '../utils'
+import { Button } from 'react-native-elements'
 
 const FacebookLogin = ({loginSuccess})=>{
-    const {toggleOverlay, showOverlay} = useContext(OverlayContext)
-    const [isLoggedin, setLoggedinStatus] = useState(false)
-    const [errorMsg, setErrorMsg] = useState(null)
-
+    const [messageInfo, setMessageInfo] = useState(null)
+    const [isLoading, setLoading] = useState(false)
+    const [isLoginSuccess, setLogingSuccess] = useState(false)
     async function fakeLogin(){
         try {
             const data = {
@@ -23,17 +21,16 @@ const FacebookLogin = ({loginSuccess})=>{
                 },
                 expirationDate: new Date()
             }
-            setLoggedinStatus(true)
-            showOverlay('Recuerpando información de facebook')
             setTimeout(()=>{
                 loginSuccess({ ...data })}, 3000)     
         } catch ({ message }) {
-            setLoggedinStatus(false)
+            setMessageInfo(null)
             alert(`Facebook Login Error: ${message}`)
         }
     }
     async function logIn() {
         try {
+            setLoading(true)
             await Facebook.initializeAsync({
                 appId: '606110214126211',
             })
@@ -48,31 +45,44 @@ const FacebookLogin = ({loginSuccess})=>{
             })
             if (type === 'success') {
             // Get the user's name using Facebook's Graph API
-                showOverlay('Recuerpando información de facebook')
+                setMessageInfo('Recuperando información de facebook')
                 const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,picture.height(500)`)
-                const data = await response.json()   
+                const data = await response.json()  
+                setLogingSuccess(true) 
                 loginSuccess({ ...data, token, expirationDate }) 
             } else {
             // type === 'cancel'
             }
         } catch ({ message }) {
-            setLoggedinStatus(false)
+            setLogingSuccess(false)
             alert(`Facebook Login Error: ${message}`)
         }
+        finally{
+            setLoading(false)
+            setMessageInfo(null)                        
+        }
     }
-    return (
-        !isLoggedin && (
-            <View style={styles.container}>
-                <Image
-                    style={{ width: 220, height: 220, borderRadius: 50, marginVertical: 20 }}
-                    source={require('../assets/icons8-money-bag-100.png')} />
-                { errorMsg && <Text style={{marginBottom: 10}}>{errorMsg}</Text> }
-                <TouchableOpacity style={styles.loginBtn} onPress={()=>{ if (Platform.OS !== 'web') logIn();else fakeLogin()}}>
-                    <Text style={{ color: '#fff' }}>Login with Facebook</Text>
-                </TouchableOpacity>
-            </View>
-        
-        ))
+    return (     
+        !isLoginSuccess &&
+        <View style={styles.container}>
+            <Image
+                style={{ width: 220, height: 220, borderRadius: 50, marginVertical: 10 }}
+                source={require('../assets/icons8-money-bag-100.png')} />
+            { messageInfo && <Text style={{marginBottom: 10}}>{messageInfo}</Text> }
+            <Button 
+                title='Login with Facebook'
+                loading={isLoading}
+                onPress={()=>{ if (!isLoading){ 
+                    if (Platform.OS !== 'web') logIn();else fakeLogin()
+                }
+                }}
+                buttonStyle={{
+                    width: 200
+                }}                 
+            >
+            </Button>
+        </View>        
+    )
 }
   
 const styles = StyleSheet.create({
@@ -86,7 +96,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#4267b2',
         paddingVertical: 10,
         paddingHorizontal: 20,
-        borderRadius: 5
+        borderRadius: 5,
+        width: 100
+        
     },
     logoutBtn: {
         backgroundColor: 'grey',

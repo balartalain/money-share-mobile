@@ -118,7 +118,7 @@ const AddExpense = ({navigation, route}) => {
                     buttonStyle={{
                         backgroundColor:'red',
                         paddingVertical: 15
-                    }}
+                    }}                    
                 />
                 <Button title="Cancelar" type='clear' 
                     buttonStyle={{
