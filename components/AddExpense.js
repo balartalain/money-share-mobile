@@ -1,5 +1,5 @@
-import React, {useState, useContext, Platform} from 'react'
-import { View, StyleSheet, Text, TextInput, TouchableOpacity} from 'react-native'
+import React, {useState, useContext} from 'react'
+import { View, StyleSheet, Text, TextInput, TouchableOpacity, Platform} from 'react-native'
 import PropTypes from 'prop-types'
 import { Button } from 'react-native-elements'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -19,6 +19,7 @@ const AddExpense = ({navigation, route}) => {
     const [comment, setComment] = useState()
     const {showOverlay, hideOverlay} = useContext(OverlayContext)
     const {addExpense} = useUserDataContextHook()
+
     const onChange = (event, selectedDate) => {
     //const currentDate = selectedDate || currentDate;
         setshowDatePicker(Platform.OS === 'ios')

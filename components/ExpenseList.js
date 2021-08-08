@@ -51,18 +51,17 @@ const ExpenseList = (props)=>{
     const {appState} =  useUserDataContextHook()
     const [userData, setUserData] = useState(null)
     const {onChangeExpenseView} = props
+    const [active, setActive] = useState(-1)
+    
     useEffect(()=>{
         if (appState.userData) {
+            setActive(-1)
             setUserData(transformObjectToArray(appState.userData[appState.selectedYear]))  
         }
-    }, [appState.userData])
+    }, [appState.selectedYear])
 
-    const [active, setActive] = useState(-1)
     const toggleExpanded = (index)=>{
         setActive( active === index?-1:index)
-        // const _collapsed = [];
-        // _collapsed[index] = _collapsed[index] === undefined?false:!_collapsed[index]; 
-        // setCollapsed(_collapsed);
     }
     const total = (month)=>{
         let totalUSD = 0,

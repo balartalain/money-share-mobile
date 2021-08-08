@@ -1,10 +1,7 @@
-import React, {useState, useEffect, useRef, useContext, memo} from 'react'
-import { ScrollView, View, TouchableOpacity, Pressable, Text, StyleSheet, Dimensions } from 'react-native'
-import PropTypes from 'prop-types'
-import { UserDataContext, useUserDataContextHook } from './UserDataContext'
-import Constants from 'expo-constants'
-import {equalsIntegers} from '../utils'
-import DateUtils from '../DateUtils'
+import React, {useState, useEffect, useRef} from 'react'
+import { ScrollView, View, Pressable, Text, StyleSheet, Dimensions } from 'react-native'
+import { useUserDataContextHook } from './UserDataContext'
+
 const { width } = Dimensions.get('window')
 
 const Menu = () =>{

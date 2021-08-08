@@ -10,7 +10,7 @@ import ExpenseList from './ExpenseList'
 
 const MainScreen = ({navigation}) => {
     //const { params } = route
-    const {currentUser, appState, setAppState, markedItemsToDelete, setMarkedItemsToDelete, loadData} = useUserDataContextHook()
+    const {currentUser, appState, loadData} = useUserDataContextHook()
     const [expensesView, setExpensesView] = useState('grid')
     const [errorMsg, setErrorMsg] = useState(null)
     const [status, setStatus] = useState('') // loading, loaded, error

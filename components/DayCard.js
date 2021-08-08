@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, StyleSheet, Text, Vibration, TouchableOpacity} from 'react-native'
+import { View, StyleSheet, Text, Vibration } from 'react-native'
 import { ListItem } from 'react-native-elements'
 import Ripple from 'react-native-material-ripple'
 import PropTypes from 'prop-types'
