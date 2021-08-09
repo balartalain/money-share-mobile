@@ -25,7 +25,8 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.fullstacksoft.mobileshare"
+      "package": "com.fullstacksoft.mobileshare",
+      "enableDangerousExperimentalLeanBuilds": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
