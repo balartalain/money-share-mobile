@@ -3,7 +3,7 @@ import { ScrollView, View, TouchableOpacity, Text, StyleSheet } from 'react-nati
 import PropTypes from 'prop-types'
 import { ListItem } from 'react-native-elements'
 import Ripple from 'react-native-material-ripple'
-import { MaterialCommunityIcons } from '@expo/vector-icons' 
+import { AntDesign } from '@expo/vector-icons' 
 import Collapsible from 'react-native-collapsible'
 import {color, formatNumber} from '../utils'
 import DateUtils from '../DateUtils'
@@ -150,7 +150,7 @@ const ExpenseList = (props)=>{
             }
             <Ripple style={styles.fab}
                 onPress={onChangeExpenseView} >
-                <Text style={styles.fabIcon}><MaterialCommunityIcons name="format-list-bulleted" size={30} color="white" /></Text>
+                <AntDesign name="bars" size={24} color="white" />
             </Ripple>
         </View>
     )
