@@ -2,7 +2,7 @@ import * as React from 'react'
 import { View, ScrollView, Text, StyleSheet, Dimensions, TouchableOpacity, Animated} from 'react-native'
 import { TabView, TabBar } from 'react-native-tab-view'
 import { UserDataContext } from './UserDataContext'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { AntDesign } from '@expo/vector-icons'
 import Ripple from 'react-native-material-ripple'
 import DayCard from './DayCard'
 import {color} from '../utils'
@@ -126,11 +126,11 @@ export default class MonthsTabView extends React.Component {
                 <>
                     <Ripple style={styles.fab}
                         onPress={this._addExpenseBtnPress} >
-                        <Text style={styles.fabIcon}><MaterialCommunityIcons name="plus" size={30} color="white" /></Text>
+                        <AntDesign name="plus" size={24} color="white" />
                     </Ripple>
                     <Ripple style={[styles.fab, {left: 30}]}
                         onPress={this._changeExpenseView} >
-                        <Text style={styles.fabIcon}><MaterialCommunityIcons name="format-list-bulleted" size={30} color="white" /></Text>
+                        <AntDesign name="bars" size={24} color="white" />
                     </Ripple>
                 </>
                     }
