@@ -7,13 +7,14 @@ class FadeInView extends React.Component {
         this.state = {
             fadeAnim: new Animated.Value(0),  // Initial value for opacity: 0
         }
+        this.duration = this.props.duration || 500
     }
     componentDidMount() {
         Animated.timing(                  // Animate over time
             this.state.fadeAnim,            // The animated value to drive
             {
                 toValue: 1,                   // Animate to opacity: 1 (opaque)
-                duration: this.props.duration,              // Make it take a while
+                duration: this.duration,              // Make it take a while
                 useNativeDriver: false
             }
         ).start()                        // Starts the animation
@@ -21,7 +22,7 @@ class FadeInView extends React.Component {
 
     render() {
         let { fadeAnim } = this.state
-        let scale = this.props.scaleAnim?fadeAnim.interpolate({
+        let scale = this.props.scale?fadeAnim.interpolate({
             inputRange: [0, 1],
             outputRange: [0, 1],
         }):1
