@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { View, ScrollView, Text, StyleSheet, Dimensions, TouchableOpacity, Animated} from 'react-native'
 import { TabView, TabBar } from 'react-native-tab-view'
+import { View as MotiView, AnimatePresence } from 'moti'
 import { UserDataContext } from './UserDataContext'
 import { AntDesign } from '@expo/vector-icons'
 import Ripple from 'react-native-material-ripple'
@@ -122,17 +123,18 @@ export default class MonthsTabView extends React.Component {
                     ):<View />
                 }
                 <View>
-                    {this.context.markedItemsToDelete.length === 0 &&
-                <>
-                    <Ripple style={styles.fab}
-                        onPress={this._addExpenseBtnPress} >
-                        <AntDesign name="plus" size={24} color="white" />
-                    </Ripple>
-                    <Ripple style={[styles.fab, {left: 30}]}
-                        onPress={this._changeExpenseView} >
-                        <AntDesign name="bars" size={24} color="white" />
-                    </Ripple>
-                </>
+                    {this.context.markedItemsToDelete.length === 0 && 
+                    
+                        <View>
+                            <Ripple style={styles.fab}
+                                onPress={this._addExpenseBtnPress} >
+                                <AntDesign name="plus" size={24} color="white" />
+                            </Ripple>
+                            <Ripple style={[styles.fab, {left: 30}]}
+                                onPress={this._changeExpenseView} >
+                                <AntDesign name="bars" size={24} color="white" />
+                            </Ripple>
+                        </View>
                     }
                 </View>
             </View>        

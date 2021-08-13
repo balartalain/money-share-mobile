@@ -33,6 +33,46 @@ const isProductionEnv = ()=>{
 const toBoolean = (value)=>{
     return value === 'true' || value === 'Y'
 }
+/**
+ * 
+ * import * as Updates from 'expo-updates';
+
+try {
+  const update = await Updates.checkForUpdateAsync();
+  if (update.isAvailable) {
+    await Updates.fetchUpdateAsync();
+    // ... notify user of update ...
+    await Updates.reloadAsync();
+  }
+} catch (e) {
+  // handle or log error
+}
+
+ */
+
+const checkForUpdate = async ()=>{
+    const update = await Updates.checkForUpdateAsync()
+    return update.isAvailable
+}
+const updateAppAsync = async(callbacks)=>{
+    try {
+        callbacks.onFinishCheckForUpdate = callbacks.onFinishCheckForUpdate || (()=>{})
+        callbacks.onFinishDownloadUpdate = callbacks.onFinishDownloadUpdate || (()=>{})
+        callbacks.onInitCheckForUpdate = callbacks.onInitCheckForUpdate || (()=>{})        
+        callbacks.onInitCheckForUpdate()
+        const update = await Updates.checkForUpdateAsync()
+        callbacks.onFinishCheckForUpdate(update.isAvailable)
+        if (update.isAvailable) {            
+            await Updates.fetchUpdateAsync()
+            callbacks.onFinishDownloadUpdate()
+            // ... notify user of update ...
+            await Updates.reloadAsync()
+        }
+        else return 0
+    } catch (e) {
+        throw new Error(e)
+    } 
+}
 export {
     color,
     currency,
@@ -40,5 +80,6 @@ export {
     formatNumber,
     getEnvironment,
     isProductionEnv,
-    toBoolean
+    toBoolean,
+    updateAppAsync
 }

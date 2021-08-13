@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react'
-import { View, SafeAreaView, StyleSheet} from 'react-native'
+import { View, SafeAreaView, StyleSheet, Text} from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import Constants from 'expo-constants'
@@ -13,7 +13,7 @@ import OverlayIndicator from './components/OverlayIndicator'
 import { OverlayContext } from './components/OverlayContext'
 import { UserDataContext } from './components/UserDataContext'
 import Users from './components/Users'
-import {equalsIntegers, color} from './utils'
+import {equalsIntegers, color, updateAppAsync} from './utils'
 import DateUtils from './DateUtils'
 import {CONNECTION_ERROR} from './ErrorConstants'
 
@@ -24,6 +24,8 @@ const App = () =>{
     const [currentUser, setCurrentUser] = useState(null)
     const [overlayLabel, setOverlayLabel] = useState(null)
     const [markedItemsToDelete, setMarkedItemsToDelete] = useState([])
+    
+    const [updateAppInfo, setUpdateAppInfo] = useState('DEV')
     const mountedRef = useRef(false)
 
     const loginSuccess = (userInfo)=>{   
@@ -87,14 +89,33 @@ const App = () =>{
 
     }
 
-    useEffect(()=>{     
+    useEffect(()=>{    
         (async()=>{
             const user = await AsyncStorageHelper.getObject('user')
             if (user){
                 setCurrentUser(user)
             }
         })()
-        mountedRef.current = true           
+        mountedRef.current = true        
+        if (!__DEV__){
+            updateAppAsync({
+                onInitCheckForUpdate: function(){
+                    setUpdateAppInfo('Searching Updates')
+                },
+                onFinishCheckForUpdate: function(updateAvailable){
+                    setUpdateAppInfo(updateAvailable?'Downloading updates': 'No updates')
+                },
+                onFinishDownloadUpdate: function(){
+                    setUpdateAppInfo('Finished updates. App restart...')
+                }
+            }).then(result=>{
+                if (result === 0){                    
+                    setUpdateAppInfo('No updates')
+                }
+            }).catch(e=>{
+                alert(e)
+            }) 
+        }          
         return ()=>{
             mountedRef.current = false
         }
@@ -117,7 +138,7 @@ const App = () =>{
         <SafeAreaView style={styles.container}> 
             <View style={styles.top}></View> 
             <OverlayContext.Provider value={{hideOverlay, showOverlay}}>
-                
+                <Text>{updateAppInfo}</Text>
                 { currentUser ? (
                     <UserDataContext.Provider 
                         value={{currentUser, 

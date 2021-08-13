@@ -24,7 +24,7 @@ class FadeInView extends React.Component {
         let { fadeAnim } = this.state
         let scale = this.props.scale?fadeAnim.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, 1],
+            outputRange: [0.5, 1],
         }):1
         return (
             <Animated.View                 // Special animatable View
