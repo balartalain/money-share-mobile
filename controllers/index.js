@@ -1,6 +1,5 @@
 import { herokuAPI } from '../herokuAPI'
-import { getEnvironment } from '../utils'
-const ENV = getEnvironment().envName
+import { ENV } from '../utils'
 const Heroku = {
     registerUser : async (userInfo)=>{     
         let response = await herokuAPI.put(`/${userInfo.id}/register-user?env=${ENV}`, userInfo)

@@ -1,17 +1,14 @@
-import React, {useContext, useEffect, useState, useRef} from 'react'
-import { View, Text, TouchableOpacity, Dimensions, Animated} from 'react-native'
+import React, {useContext, useEffect, useState} from 'react'
+import { View, Text, TouchableOpacity, Dimensions} from 'react-native'
 import PropTypes from 'prop-types'
 import Ripple from 'react-native-material-ripple'
 import { AntDesign } from '@expo/vector-icons' 
 import { UserDataContext, useUserDataContextHook } from './UserDataContext'
 import { color } from './../utils'
-import { getEnvironment } from '../utils'
-import FadeInView from './FadeInView'
-import { useAnimation } from '../hooks/useAnimation'
+import { ENV } from '../utils'
 import AnimatedView from './AnimatedView'
 
 const { width } = Dimensions.get('window')
-const ENV = getEnvironment().envName
 
 const Delete = (props) =>{
     const {deleteItems, markedItemsToDelete, setMarkedItemsToDelete} = useUserDataContextHook()
@@ -75,7 +72,7 @@ const Header = (props)=>{
                 justifyContent: 'space-between',
                 alignItems: 'center',            
             }}>          
-                <Text style={{fontSize:18, color: 'white'}}>Money share 11 {ENV !== 'PRODUCTION'?ENV.substring(0, 3):''}</Text>
+                <Text style={{fontSize:18, color: 'white'}}>Money share ({ENV !== 'PRODUCTION'?ENV.substring(0, 3):''})</Text>
                 <TouchableOpacity onPress={()=>{navigation.navigate('Users')}}>
                     <Text style={{fontSize:18, color: 'white'}}>{currentUser.name.split(' ')[0]}</Text>
                 </TouchableOpacity>
