@@ -11,7 +11,7 @@ const Heroku = {
         //     throw new Error(CONECTION_ERROR)
         // }, 
 
-        let response = await herokuAPI.get('/get-users?env=${ENV}')
+        let response = await herokuAPI.get(`/get-users?env=${ENV}`)
         return response
     },
     getUserData : async (userId)=>{  
