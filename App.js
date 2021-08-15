@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react'
-import { View, SafeAreaView, StyleSheet, Text} from 'react-native'
+import { View, SafeAreaView, StyleSheet, Text, Dimensions} from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import Constants from 'expo-constants'
@@ -13,9 +13,12 @@ import OverlayIndicator from './components/OverlayIndicator'
 import { OverlayContext } from './components/OverlayContext'
 import { UserDataContext } from './components/UserDataContext'
 import Users from './components/Users'
-import {equalsIntegers, color, updateAppAsync} from './utils'
+import useOTAUpdate from './hooks/useOTAUpdate'
+import {equalsIntegers, color} from './utils'
 import DateUtils from './DateUtils'
 import {CONNECTION_ERROR} from './ErrorConstants'
+
+const { width } = Dimensions.get('window')
 
 const Stack = createStackNavigator()
 const App = () =>{
@@ -23,9 +26,8 @@ const App = () =>{
     const [appState, setAppState] = useState(null)
     const [currentUser, setCurrentUser] = useState(null)
     const [overlayLabel, setOverlayLabel] = useState(null)
-    const [markedItemsToDelete, setMarkedItemsToDelete] = useState([])
-    
-    const [updateAppInfo, setUpdateAppInfo] = useState('DEV')
+    const [markedItemsToDelete, setMarkedItemsToDelete] = useState([])    
+    const otaUpdateStatus = useOTAUpdate()
     const mountedRef = useRef(false)
 
     const loginSuccess = (userInfo)=>{   
@@ -96,26 +98,7 @@ const App = () =>{
                 setCurrentUser(user)
             }
         })()
-        mountedRef.current = true        
-        if (!__DEV__){
-            updateAppAsync({
-                onInitCheckForUpdate: function(){
-                    setUpdateAppInfo('Searching Updates')
-                },
-                onFinishCheckForUpdate: function(updateAvailable){
-                    setUpdateAppInfo(updateAvailable?'Downloading updates': 'No updates')
-                },
-                onFinishDownloadUpdate: function(){
-                    setUpdateAppInfo('Finished updates. App restart...')
-                }
-            }).then(result=>{
-                if (result === 0){                    
-                    setUpdateAppInfo('No updates')
-                }
-            }).catch(e=>{
-                alert(e)
-            }) 
-        }          
+        mountedRef.current = true                  
         return ()=>{
             mountedRef.current = false
         }
@@ -131,14 +114,11 @@ const App = () =>{
     const toggleOverlay = (info)=>{
         setOverlayLabel(info)
         setShowOverlay(prevState=>!prevState)
-    }
-
-    //console.log('App.js ' + overlay)
+    } 
     return (
-        <SafeAreaView style={styles.container}> 
+        <SafeAreaView style={styles.container}>             
             <View style={styles.top}></View> 
             <OverlayContext.Provider value={{hideOverlay, showOverlay}}>
-                <Text>{updateAppInfo}</Text>
                 { currentUser ? (
                     <UserDataContext.Provider 
                         value={{currentUser, 
@@ -173,6 +153,20 @@ const App = () =>{
                 {overlay && <OverlayIndicator overlayLabel={overlayLabel} /> }
                 
             </OverlayContext.Provider>
+            {otaUpdateStatus && <View style={{
+                //flex:1,
+                position: 'absolute',
+                bottom: 4,
+                left: 0,
+                width,
+                paddingVertical: 15,
+                paddingLeft: 10,
+                backgroundColor: 'black',
+                zIndex: 20000                             
+            }}>
+                <Text style={{color: 'white'}}>{otaUpdateStatus}</Text>
+            </View> 
+            } 
         </SafeAreaView>
     )  
 }
