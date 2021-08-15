@@ -17,7 +17,7 @@ const Users = (props,{navigation})=>{
         //const me = await AsyncStorageHelper.getObject('me')
         Heroku.getUsers().then(_users=>{
             if (mountedRef.current){
-                setUsers(_users.data)
+                setUsers(_users.data)                
             }
         }).catch(()=>{
             alert('Error de conexión')
@@ -45,7 +45,7 @@ const Users = (props,{navigation})=>{
         })
     }
     const changeUser = (userId)=>{
-        if (!(users[currentUser.id].isSupervisor))
+        if (!(users[currentUser.id].supervisor))
             return false
         setCurrentUser(users[userId])
         navigation.navigate('Home')
@@ -60,6 +60,7 @@ const Users = (props,{navigation})=>{
                             <TouchableOpacity style={{width:'100%'}} onPress={()=>changeUser(id)}>
                                 <ListItem.Title>{users[id].name}</ListItem.Title>
                             </TouchableOpacity>
+                            { users[currentUser.id].supervisor &&
                             <View>
                                 <CheckBox style={{margin:0}} containerStyle={{
                                     backgroundColor: 'transparent',                                         
@@ -75,6 +76,7 @@ const Users = (props,{navigation})=>{
                                 onPress={()=>_setIsSupervisor(id, users[id].supervisor === 'true'?'false':'true')} 
                                 checked={users[id].supervisor === 'true'} />
                             </View>
+                            }
                         </ListItem.Content>
                     </ListItem>
                     
