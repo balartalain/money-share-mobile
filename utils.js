@@ -15,7 +15,7 @@ const formatNumber = amount => {
         .replace(/\d(?=(\d{3})+\.)/g, '$&,')
 }
 const toBoolean = (value)=>{
-    return value === 'true' || value === 'Y'
+    return value===true || value === 'true' || value === 'Y'
 }
 const ENV = Constants.manifest.extra?.env
 export {

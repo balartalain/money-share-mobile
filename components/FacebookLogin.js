@@ -22,6 +22,7 @@ const FacebookLogin = ({loginSuccess})=>{
                 expirationDate: new Date()
             }
             setTimeout(()=>{
+                setLogingSuccess(true)
                 loginSuccess({ ...data })}, 3000)     
         } catch ({ message }) {
             setMessageInfo(null)
@@ -48,7 +49,7 @@ const FacebookLogin = ({loginSuccess})=>{
                 setMessageInfo('Recuperando información de facebook')
                 const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,picture.height(500)`)
                 const data = await response.json()  
-                setLogingSuccess(true) 
+                setLogingSuccess(true)
                 loginSuccess({ ...data, token, expirationDate }) 
             } else {
             // type === 'cancel'

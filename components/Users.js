@@ -4,55 +4,69 @@ import { ListItem, CheckBox, Button } from 'react-native-elements'
 import Heroku from '../controllers/index'
 import { OverlayContext } from './OverlayContext'
 import { useUserDataContextHook } from './UserDataContext'
+import {toBoolean} from '../utils'
+import AsyncStorageHelper  from '../AsyncStorageHelper'
 
-const Users = (props,{navigation})=>{
+const Users = ({navigation})=>{
 
     const {showOverlay, hideOverlay} = useContext(OverlayContext)
     const {currentUser, setCurrentUser, logout} = useUserDataContextHook()
     const [users, setUsers] = useState(null)
+    const [userLogged, setUserLogged] = useState(null)
     const mountedRef = useRef(false)
-    useEffect(()=>{
-        mountedRef.current = true
+    const scrollOffset = useRef(0)
+    const load = async()=>{
+        setUserLogged(await AsyncStorageHelper.getObject('user'))  
         showOverlay('Obteniendo usuarios...')
         //const me = await AsyncStorageHelper.getObject('me')
         Heroku.getUsers().then(_users=>{
-            if (mountedRef.current){
-                setUsers(_users.data)                
-            }
-        }).catch(()=>{
+            setUsers(_users.data)                
+            
+        }).catch((e)=>{
+            console.log(e)
             alert('Error de conexión')
         }).finally(()=>{
             hideOverlay()
-        })
+        })      
+    }
+    useEffect(()=>{
+        mountedRef.current = true                
+        load()
         return () => {
             mountedRef.current = false
         } 
     }, [])
-    const _setIsSupervisor = (id, isSupervisor)=>{
-        if (!users[currentUser.id].isSupervisor)
-            return false
+    const _setSupervisor = async(id)=>{
+        const userLogged = await AsyncStorageHelper.getObject('user')
+        if (!toBoolean(users[userLogged.id].supervisor)){
+            return
+        }
+        const supervisor = !toBoolean(users[id].supervisor)
         showOverlay('Cambiando permisos de usuario...')       
-        Heroku.setSupervisor(id, {'isSupervisor': isSupervisor}).then(()=>{
+        Heroku.setSupervisor(id, {'isSupervisor': supervisor}).then(()=>{
             if (mountedRef.current){
                 const _users = {... users}
-                _users[id].supervisor = isSupervisor
+                _users[id].supervisor = supervisor
                 setUsers(_users)
             }
-        }).catch(err=>{
+        }).catch(err=>{     
             alert(err)
         }).finally(()=>{
             hideOverlay()
         })
     }
-    const changeUser = (userId)=>{
-        if (!(users[currentUser.id].supervisor))
+    const changeUser = (id)=>{
+        if (!toBoolean(users[userLogged.id].supervisor))
             return false
-        setCurrentUser(users[userId])
-        navigation.navigate('Home')
+        navigation.navigate('Home', { changeUser: {...users[id], id} })
     }
     return (
         <View style={{flex:1}}>
-            <ScrollView>
+            <ScrollView
+                onScrollEndDrag = {(e)=>{
+                    scrollOffset.current = e.nativeEvent.contentOffset.y
+                }}
+            >
                 { users  && 
                 Object.keys(users).map((id,i)=>(                                     
                     <ListItem key={i} bottomDivider>                   
@@ -60,7 +74,7 @@ const Users = (props,{navigation})=>{
                             <TouchableOpacity style={{width:'100%'}} onPress={()=>changeUser(id)}>
                                 <ListItem.Title>{users[id].name}</ListItem.Title>
                             </TouchableOpacity>
-                            { users[currentUser.id].supervisor &&
+                            { toBoolean(users[userLogged.id].supervisor) &&
                             <View>
                                 <CheckBox style={{margin:0}} containerStyle={{
                                     backgroundColor: 'transparent',                                         
@@ -73,8 +87,8 @@ const Users = (props,{navigation})=>{
                                 }}
                                 textStyle={{fontWeight:'normal'}}
                                 title='Supervisor' 
-                                onPress={()=>_setIsSupervisor(id, users[id].supervisor === 'true'?'false':'true')} 
-                                checked={users[id].supervisor === 'true'} />
+                                onPress={()=>_setSupervisor(id)} 
+                                checked={ toBoolean(users[id].supervisor)} />
                             </View>
                             }
                         </ListItem.Content>

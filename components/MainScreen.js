@@ -8,9 +8,9 @@ import TotalAmount from './TotalAmount'
 import MonthsTabView from './MonthsTabView'
 import ExpenseList from './ExpenseList'
 
-const MainScreen = ({navigation}) => {
-    //const { params } = route
-    const {currentUser, appState, loadData} = useUserDataContextHook()
+const MainScreen = ({navigation, route}) => {
+    const { params } = route
+    const {currentUser, setCurrentUser, appState, loadData} = useUserDataContextHook()
     const [expensesView, setExpensesView] = useState('grid')
     const [errorMsg, setErrorMsg] = useState(null)
     const [status, setStatus] = useState('') // loading, loaded, error
@@ -28,12 +28,20 @@ const MainScreen = ({navigation}) => {
         })
     }
     useEffect(()=>{
+        if (params && params.changeUser && params.changeUser.id !== currentUser.id){ 
+            const changeToUser = params.changeUser         
+            setCurrentUser(changeToUser)
+            params.changeUser = null
+        }
+    }, [params] )
+    useEffect(()=>{
         mountedRef.current = true
         _loadData()
         return()=>{
             mountedRef.current = false
         } 
-    }, [])
+    }, [currentUser])
+
     const onChangeExpenseView = ()=>{
         setExpensesView(expensesView==='list'?'grid':'list')
     }

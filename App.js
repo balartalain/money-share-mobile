@@ -26,12 +26,13 @@ const App = () =>{
     const [appState, setAppState] = useState(null)
     const [currentUser, setCurrentUser] = useState(null)
     const [overlayLabel, setOverlayLabel] = useState(null)
+    const [overlayTop, setOverLayTop] = useState(0)
     const [markedItemsToDelete, setMarkedItemsToDelete] = useState([])    
     const otaUpdateStatus = useOTAUpdate()
     const mountedRef = useRef(false)
 
     const loginSuccess = (userInfo)=>{   
-        showOverlay('Autenticando usuario en Money share')       
+        showOverlay('Autenticando usuario en Money share') 
         Heroku.registerUser(userInfo).then(()=>{
             AsyncStorageHelper.saveObject('user', userInfo)
             setCurrentUser(userInfo)
@@ -93,7 +94,7 @@ const App = () =>{
 
     useEffect(()=>{    
         (async()=>{
-            const user = await AsyncStorageHelper.getObject('user')
+            const user = await AsyncStorageHelper.getObject('user')            
             if (user){
                 setCurrentUser(user)
             }
@@ -104,8 +105,9 @@ const App = () =>{
         }
     }, [])
 
-    const showOverlay =(info)=>{
+    const showOverlay =(info, top)=>{
         setOverlayLabel(info)
+        setOverLayTop(top)
         setShowOverlay(true)
     }
     const hideOverlay = ()=>{
@@ -141,8 +143,8 @@ const App = () =>{
                                     component={AddExpense} />
                                 <Stack.Screen name="Users" 
                                     options={{ title: 'Usuarios' }}  
-                                > 
-                                    {(props) => <Users  {...props} onLogout={logout}/>}
+                                    component={Users}
+                                >                                     
                                 </Stack.Screen>
                             </Stack.Navigator>              
                         </NavigationContainer> 
@@ -150,7 +152,7 @@ const App = () =>{
                 )               
                     : <FacebookLogin loginSuccess={loginSuccess} />
                 } 
-                {overlay && <OverlayIndicator overlayLabel={overlayLabel} /> }
+                {overlay && <OverlayIndicator overlayLabel={overlayLabel} top={overlayTop} /> }
                 
             </OverlayContext.Provider>
             {otaUpdateStatus && <View style={{

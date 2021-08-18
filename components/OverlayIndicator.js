@@ -4,7 +4,7 @@ import FadeInView from './FadeInView'
 import {color} from './../utils'
 
 const {width, height} = Dimensions.get('window')
-const OverlayIndicator = ({animated, overlayLabel})=>{
+const OverlayIndicator = ({animated, overlayLabel, top})=>{
     return (  
              
         <FadeInView duration={500} style={{  position: 'absolute',
@@ -12,7 +12,8 @@ const OverlayIndicator = ({animated, overlayLabel})=>{
             height: height,
             zIndex: 2,
             alignItems: 'center',
-            justifyContent:'center'
+            justifyContent:'center',
+            top: top || 0
         }}>
             
             <View style={{  
