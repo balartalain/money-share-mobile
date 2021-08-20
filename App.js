@@ -17,7 +17,14 @@ import useOTAUpdate from './hooks/useOTAUpdate'
 import {equalsIntegers, color} from './utils'
 import DateUtils from './DateUtils'
 import {CONNECTION_ERROR} from './ErrorConstants'
+import whyDidYouRender from '@welldone-software/why-did-you-render'
 
+whyDidYouRender(React, {
+    //onlyLogs: true,
+    titleColor: 'green',
+    diffNameColor: 'darkturquoise'
+})
+  
 const { width } = Dimensions.get('window')
 
 const Stack = createStackNavigator()
@@ -117,6 +124,7 @@ const App = () =>{
         setOverlayLabel(info)
         setShowOverlay(prevState=>!prevState)
     } 
+    console.log('App')
     return (
         <SafeAreaView style={styles.container}>             
             <View style={styles.top}></View> 
@@ -182,3 +190,4 @@ const styles = StyleSheet.create({
     }
 })
 export default App
+App.whyDidYouRender = true

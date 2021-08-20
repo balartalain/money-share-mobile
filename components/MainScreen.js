@@ -7,8 +7,17 @@ import Menu from './Menu'
 import TotalAmount from './TotalAmount'
 import MonthsTabView from './MonthsTabView'
 import ExpenseList from './ExpenseList'
+import useWhyDidYouUpdate from '../hooks/useWhyDidYouUpdate'
+import whyDidYouRender from '@welldone-software/why-did-you-render'
+
+whyDidYouRender(React, {
+    //onlyLogs: true,
+    titleColor: 'green',
+    diffNameColor: 'darkturquoise'
+})
 
 const MainScreen = ({navigation, route}) => {
+    useWhyDidYouUpdate('Main Screen', {navigation, route})
     const { params } = route
     const {currentUser, setCurrentUser, appState, loadData} = useUserDataContextHook()
     const [expensesView, setExpensesView] = useState('grid')
@@ -45,6 +54,7 @@ const MainScreen = ({navigation, route}) => {
     const onChangeExpenseView = ()=>{
         setExpensesView(expensesView==='list'?'grid':'list')
     }
+    console.log('Main Screen')
     return (      
         <View style={{flex:1}}>
             { currentUser && 
@@ -84,3 +94,4 @@ MainScreen.propTypes = {
     navigation: PropTypes.any
 }
 export default MainScreen
+MainScreen.whyDidYouRender

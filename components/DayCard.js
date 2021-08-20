@@ -6,8 +6,9 @@ import PropTypes from 'prop-types'
 import { useUserDataContextHook } from './UserDataContext'
 import {color, formatNumber, toBoolean } from '../utils'
 import DateUtils from '../DateUtils'
-
+import useWhyDidYouUpdate from '../hooks/useWhyDidYouUpdate'
 const DayCard = (props)=> {
+    useWhyDidYouUpdate('DayCard', props)
     const {month, day} = props
     const {appState, markedItemsToDelete, setMarkedItemsToDelete} = useUserDataContextHook()
     const data = appState.userData[appState.selectedYear][month+1][day]
@@ -106,4 +107,5 @@ const styles = StyleSheet.create({
         marginTop: 4
     },
 })
-export default DayCard
+export default React.memo(DayCard)
+// export default DayCard
