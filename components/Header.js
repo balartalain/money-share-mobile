@@ -3,22 +3,42 @@ import { View, Text, TouchableOpacity, Dimensions} from 'react-native'
 import PropTypes from 'prop-types'
 import Ripple from 'react-native-material-ripple'
 import { AntDesign } from '@expo/vector-icons' 
-import { UserDataContext, useUserDataContextHook } from './UserDataContext'
 import { color, ENV } from './../utils'
 import AnimatedView from './AnimatedView'
-
+import { Context } from '../Store'
 const { width } = Dimensions.get('window')
 
 const Delete = (props) =>{
-    const {deleteItems, markedItemsToDelete, setMarkedItemsToDelete} = useUserDataContextHook()
+    const [state, distpatch] = useContext(Context) 
+    // const {deleteItems, markedItemsToDelete, setMarkedItemsToDelete} = useUserDataContextHook()
     const [trashColor, setTrashColor] = useState('white')
-    
+    const { currentUser, itemsToDelete } = state
+
+    const deleteItems = ()=>{        
+        // const deleteAsync = itemsToDelete.map(expense=>{            
+        //     return Heroku.deleteExpense(currentUser.id, expense)
+        // })
+
+        // Promise.all(deleteAsync).then(() => {
+        //     const _userData = {...appState.userData}
+        //     itemsToDelete.forEach(expense=>{
+        //         const {year, month, day, created} = expense
+        //         _userData[year][month][day][created].deleted = 'true'
+        //     })
+        //     setAppState({...appState, _userData}) 
+        //     setMarkedItemsToDelete([])     
+        // }).catch((err) => {
+        //     console.log(err)
+        //     setMarkedItemsToDelete([])     
+        //     setTimeout(()=> alert(CONNECTION_ERROR), 100)          
+        // }) 
+    }
     useEffect(() => {
-        if (markedItemsToDelete.length > 0){
+        if (itemsToDelete.length > 0){
             setTrashColor('orange')
             setTimeout(()=>{setTrashColor('white')}, 200)
         }
-    }, [markedItemsToDelete.length])
+    }, [itemsToDelete.length])
 
     return (        
         <View            
@@ -37,7 +57,7 @@ const Delete = (props) =>{
                 backgroundColor: color.primaryGreen
                                
             }}>
-            <Ripple onPress={()=>setMarkedItemsToDelete([])} >
+            <Ripple onPress={()=>distpatch({type:'CLEAR_ITEMS_TO_DELETE'})} >
                 <AntDesign name="arrowleft" size={24} color='white' />
             </Ripple>
             <Ripple onPress={()=>deleteItems()} >
@@ -47,8 +67,10 @@ const Delete = (props) =>{
         
     )}
 const Header = (props)=>{  
-    const {currentUser, markedItemsToDelete} = useContext(UserDataContext)
+    const [state] = useContext(Context) 
+    //const {currentUser, markedItemsToDelete} = useContext(UserDataContext)
     const {navigation} = props
+    const { currentUser, itemsToDelete } = state
     return (
         <View style={{   
             backgroundColor: color.primaryGreen,        
@@ -64,7 +86,7 @@ const Header = (props)=>{
                 position: 'absolute',
                 zIndex:1
                 
-            }} visible={ markedItemsToDelete.length > 0}><Delete/></AnimatedView> 
+            }} visible={ itemsToDelete.length > 0}><Delete/></AnimatedView> 
             <View style={{
                 flex:1,
                 flexDirection: 'row',   
@@ -81,7 +103,6 @@ const Header = (props)=>{
     )
 }
 Header.propTypes = {
-    navigation: PropTypes.object.isRequired,
-    currentUser: PropTypes.object.isRequired
+    navigation: PropTypes.object.isRequired
 }
 export default React.memo(Header)

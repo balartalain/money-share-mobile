@@ -8,7 +8,9 @@ const awaitAsync = async(delay)=>{
 }
 
 const Heroku = {
-    registerUser : async (userInfo)=>{     
+    registerUser : async (userInfo)=>{  
+        await awaitAsync(1000)
+        return userInfo   
         let response = await herokuAPI.put(`/${userInfo.id}/register-user?env=${ENV}`, userInfo)
         return response
     },
@@ -17,11 +19,12 @@ const Heroku = {
         // if (!state.isConnected){
         //     throw new Error(CONECTION_ERROR)
         // }, 
-        await awaitAsync(1000)
+        await awaitAsync(2000)
         return Promise.resolve({data:{
             '10222108852244678' : {
                 'email' : 'balartalain@gmail.com',
-                'name' : 'Alain Pérez Balart'
+                'name' : 'Alain Pérez Balart',
+                'supervisor' : 'true'
             },
             '1103254433491655' : {
                 'email' : 'yosnaudisruiz.27@gmail.com',
@@ -64,7 +67,7 @@ const Heroku = {
         return response
     },
     getUserData : async (userId)=>{  
-        await awaitAsync(1000)        
+        await awaitAsync(2000)        
         return Promise.resolve({ data:{
             '2021' : {
                 '8' : {
@@ -85,6 +88,32 @@ const Heroku = {
                         },
                         '1625233769319' : {
                             'amount' : 400,
+                            'comment' : '',
+                            'concept' : 'Me pago henry una tranfrecia ',
+                            'currency' : 'USD',
+                            'updated' : 1625233769319
+                        }
+                    }
+                }
+            }, '2020' : {
+                '6' : {
+                    '01' : {
+                        '1625233340980' : {
+                            'amount' : 1000,
+                            'comment' : '',
+                            'concept' : 'Me dio Henry para pago de remesas',
+                            'currency' : 'CUP',
+                            'updated' : 1625233340980
+                        },
+                        '1625233614348' : {
+                            'amount' : -1000,
+                            'comment' : '',
+                            'concept' : 'Pago de 300 CUP puesto en la cuenga de Dairon',
+                            'currency' : 'CUP',
+                            'updated' : 1625233614348
+                        },
+                        '1625233769319' : {
+                            'amount' : 800,
                             'comment' : '',
                             'concept' : 'Me pago henry una tranfrecia ',
                             'currency' : 'USD',

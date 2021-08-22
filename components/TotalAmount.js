@@ -1,11 +1,30 @@
-import React,{memo} from 'react'
+import React,{memo, useContext, useCallback} from 'react'
 import { View, Text} from 'react-native'
 import { Divider } from 'react-native-elements'
-import { useUserDataContextHook } from './UserDataContext'
-import { color, formatNumber } from './../utils'
-
+import { color, formatNumber, toBoolean } from './../utils'
+import { Context } from '../Store'
 const TotalAmount = memo(()=>{
-    const {totalAmount} = useUserDataContextHook()
+    const [gloabalState] = useContext(Context)
+    const { data, currentYear } = gloabalState
+    const totalAmount = useCallback(()=>{
+        let totalUSD = 0,
+            totalCUP = 0
+        
+        if (data && Object.keys(data).length > 0){
+            Object.keys(data[currentYear]).forEach(m=>{
+                const monthData = data[currentYear][m]
+                Object.keys(monthData).forEach(d=>{          
+                    Object.keys(monthData[d]).forEach(time=>{   
+                        if (!toBoolean(monthData[d][time].deleted)){
+                            let { currency, amount} = monthData[d][time];
+                            (currency == 'USD')?totalUSD += parseFloat(amount): totalCUP += parseFloat(amount)
+                        }
+                    })
+                })
+            })
+        }
+        return {totalUSD, totalCUP}        
+    }, [currentYear])
     const {totalUSD, totalCUP} = totalAmount()
     return (
         <>

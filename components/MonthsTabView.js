@@ -2,11 +2,11 @@ import * as React from 'react'
 import { View, ScrollView, Text, StyleSheet, Dimensions, TouchableOpacity, Animated} from 'react-native'
 import { TabView, TabBar } from 'react-native-tab-view'
 import { View as MotiView, AnimatePresence } from 'moti'
-import { UserDataContext } from './UserDataContext'
+import { Context } from '../Store'
 import { AntDesign } from '@expo/vector-icons'
 import Ripple from 'react-native-material-ripple'
 import DayCard from './DayCard'
-import {color} from '../utils'
+import {color, toBoolean} from '../utils'
 import DateUtils from '../DateUtils'
 import shallowCompare from '../shallowEquals'
 
@@ -53,7 +53,8 @@ export default class MonthsTabView extends React.Component {
     }
 
     _handleIndexChange(index){
-        this.context.setAppState({...this.context.appState, selectedMonth: index})
+        // this.context.setAppState({...this.context.appState, selectedMonth: index})
+        this.context.dispatch({type: 'SET_CURRENT_MONTH', currentMonth: index})
         this.setState({ index })
     }
 
@@ -83,9 +84,8 @@ export default class MonthsTabView extends React.Component {
         if (Math.abs(this.state.index - this.state.routes.indexOf(route)) > 0) {
             return <View />
         }    
-        const {appState} = this.context
-        const {userData, selectedYear} = appState
-        const data = userData ?.[selectedYear] ?.[route.key] || {}
+        const {state} = this.context
+        const data = state.data ?.[state.currentYear] ?.[route.key] || {}
         return (            
             <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
                 { Object.keys(data) ?
@@ -108,7 +108,7 @@ export default class MonthsTabView extends React.Component {
                             > 
                                 {    
                                     Object.keys(data).filter(day=> {                   
-                                        return Object.keys(data[day]).filter(time=>data[day][time].deleted!=='true').length > 0
+                                        return Object.keys(data[day]).filter(time=>toBoolean(data[day][time].deleted)).length > 0
                                     })
                                         .sort().reverse().map((day, i)=>(                                                            
                                             <DayCard 
@@ -123,8 +123,7 @@ export default class MonthsTabView extends React.Component {
                     ):<View />
                 }
                 <View>
-                    {this.context.markedItemsToDelete.length === 0 && 
-                    
+                    {state.itemsToDelete.length === 0 &&                     
                         <View>
                             <Ripple style={styles.fab}
                                 onPress={this._addExpenseBtnPress} >
@@ -158,7 +157,7 @@ export default class MonthsTabView extends React.Component {
         )
     }
 }
-MonthsTabView.contextType = UserDataContext
+MonthsTabView.contextType = Context
 const styles = StyleSheet.create({
     scene: {
         flex: 1,

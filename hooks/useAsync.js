@@ -5,7 +5,13 @@ and then display either a success or error message when it completes. */
 
 // https://usehooks.com/
 import { useState, useEffect, useCallback } from 'react'
-export default function useAsync(asyncFunction, immediate = true){
+
+function dispatch(fn, args) {
+    fn = (typeof fn == 'function') ? fn : window[fn]  // Allow fn to be a function object or the name of a global function
+    return fn.apply(this, args || [])  // args is optional, use an empty array by default
+}
+
+export default function useAsync(){
     const [status, setStatus] = useState('idle')
     const [value, setValue] = useState(null)
     const [error, setError] = useState(null)
@@ -13,29 +19,32 @@ export default function useAsync(asyncFunction, immediate = true){
     // handles setting state for pending, value, and error.
     // useCallback ensures the below useEffect is not called
     // on every render, but only if asyncFunction changes.
-    const execute = useCallback(() => {
+    const execute = useCallback((asyncFunction, params, onSuccessCallback=null) => {
         setStatus('pending')
         setValue(null)
         setError(null)
-        return asyncFunction()
+        return dispatch(asyncFunction, params)
             .then((response) => {
+                if (onSuccessCallback){
+                    onSuccessCallback(response)
+                }
                 setValue(response)
                 setStatus('success')
             })
-            .catch((error) => {
+            .catch((error) => {                             
                 setError(error)
                 setStatus('error')
             })
-    }, [asyncFunction])
+    }, [execute])
     // Call execute if we want to fire it right away.
     // Otherwise execute can be called later, such as
     // in an onClick handler.
-    useEffect(() => {
-        if (immediate) {
-            execute()
-        }
-    }, [execute, immediate])
-    return { execute, status, value, error }
+    // useEffect(() => {
+    //     if (immediate) {
+    //         execute(paramsArray)
+    //     }
+    // }, [execute, immediate])
+    return [ execute, status, value, error ]
 }
 
 // Usage

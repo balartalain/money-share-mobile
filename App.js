@@ -1,4 +1,5 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useContext} from 'react'
+import { StatusBar } from 'expo-status-bar'
 import { View, SafeAreaView, StyleSheet, Text, Dimensions} from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
@@ -11,30 +12,32 @@ import FacebookLogin from './components/FacebookLogin'
 import AsyncStorageHelper  from './AsyncStorageHelper'
 import OverlayIndicator from './components/OverlayIndicator'
 import { OverlayContext } from './components/OverlayContext'
-import { UserDataContext } from './components/UserDataContext'
 import Users from './components/Users'
 import useOTAUpdate from './hooks/useOTAUpdate'
 import {equalsIntegers, color} from './utils'
 import DateUtils from './DateUtils'
 import {CONNECTION_ERROR} from './ErrorConstants'
 import whyDidYouRender from '@welldone-software/why-did-you-render'
+import Store, { Context } from './Store'
+import { TouchableOpacity } from 'react-native'
 
 whyDidYouRender(React, {
     //onlyLogs: true,
     titleColor: 'green',
     diffNameColor: 'darkturquoise'
 })
-  
+
 const { width } = Dimensions.get('window')
 
 const Stack = createStackNavigator()
-const App = () =>{
+const WrapperApp = () =>{   
+    const [state, dispatch] = useContext(Context) 
     const [overlay, setShowOverlay] = useState(false)
-    const [appState, setAppState] = useState(null)
-    const [currentUser, setCurrentUser] = useState(null)
+    //const [appState, setAppState] = useState(null)
+    //const [currentUser, setCurrentUser] = useState(null)
     const [overlayLabel, setOverlayLabel] = useState(null)
     const [overlayTop, setOverLayTop] = useState(0)
-    const [markedItemsToDelete, setMarkedItemsToDelete] = useState([])    
+    //const [markedItemsToDelete, setMarkedItemsToDelete] = useState([])    
     const otaUpdateStatus = useOTAUpdate()
     const mountedRef = useRef(false)
 
@@ -42,7 +45,8 @@ const App = () =>{
         showOverlay('Autenticando usuario en Money share') 
         Heroku.registerUser(userInfo).then(()=>{
             AsyncStorageHelper.saveObject('user', userInfo)
-            setCurrentUser(userInfo)
+            //setCurrentUser(userInfo)
+            dispatch({type: 'SET_LOGGED_USER', loggedUser: userInfo})
         }).catch(()=>{
             alert(CONNECTION_ERROR)
         }).finally(toggleOverlay)
@@ -58,8 +62,9 @@ const App = () =>{
                     body: lParams
                 })
             await AsyncStorageHelper.removeObject('user')
-            setCurrentUser(null)
-            setAppState(null)
+            // setCurrentUser(null)
+            // setAppState(null)
+            dispatch({type: 'SET_LOGGED_USER', user: null})
         }).catch((error)=>{
             console.log(error)
             alert(error)
@@ -67,44 +72,15 @@ const App = () =>{
             hideOverlay()
         })
         
-    }
-    const loadData = async()=>{
-        try{
-            toggleOverlay('Obteniendo datos de '+currentUser.name.split(' ')[0])
-            const data = await Heroku.getUserData(currentUser.id)  
-            if (mountedRef.current){
-                const userData = data.data
-                const years = Object.keys(userData)  
-                const index = years.findIndex((e)=>equalsIntegers(e, DateUtils.CURRENT_YEAR))  
-                if (index === -1){
-                    years.push(DateUtils.CURRENT_YEAR)
-                }
-                years.sort()   
-                setAppState({
-                    ...appState,
-                    userData,
-                    years,
-                    selectedMonth: DateUtils.CURRENT_MONTH,
-                    selectedYear: DateUtils.CURRENT_YEAR
-                })
-            
-            }   
-        } 
-        catch(error){
-            throw new Error(error)
-        }
-        finally{
-            toggleOverlay()
-        }
-
-    }
+    }    
 
     useEffect(()=>{    
         (async()=>{
             const user = await AsyncStorageHelper.getObject('user')            
             if (user){
-                setCurrentUser(user)
+                dispatch({type: 'SET_LOGGED_USER', loggedUser: user })
             }
+            dispatch({type: 'SET_RENDER_APP', renderApp: true })
         })()
         mountedRef.current = true                  
         return ()=>{
@@ -124,44 +100,32 @@ const App = () =>{
         setOverlayLabel(info)
         setShowOverlay(prevState=>!prevState)
     } 
-    console.log('App')
-    return (
-        <SafeAreaView style={styles.container}>             
+    console.log('Wrapper App')
+    return ( 
+        <>                 
             <View style={styles.top}></View> 
             <OverlayContext.Provider value={{hideOverlay, showOverlay}}>
-                { currentUser ? (
-                    <UserDataContext.Provider 
-                        value={{currentUser, 
-                            appState, 
-                            setAppState, 
-                            markedItemsToDelete, 
-                            setMarkedItemsToDelete,
-                            loadData,
-                            logout,
-                            setCurrentUser
-                        }} >
-                        <NavigationContainer>
-                            <Stack.Navigator
-                            >
-                                <Stack.Screen name="Home" component={MainScreen} 
-                                    options={{  headerShown: false }}              
-                                />
-                                <Stack.Screen name="AddExpense" 
-                                    options={{ title: 'Nuevo Gasto' }}
-                                    component={AddExpense} />
-                                <Stack.Screen name="Users" 
-                                    options={{ title: 'Usuarios' }}  
-                                    component={Users}
-                                >                                     
-                                </Stack.Screen>
-                            </Stack.Navigator>              
-                        </NavigationContainer> 
-                    </UserDataContext.Provider>
-                )               
-                    : <FacebookLogin loginSuccess={loginSuccess} />
+                { state.loggedUser && (                    
+                    <NavigationContainer>
+                        <Stack.Navigator
+                        >
+                            <Stack.Screen name="Home" component={MainScreen} 
+                                options={{  headerShown: false }}              
+                            />
+                            <Stack.Screen name="AddExpense" 
+                                options={{ title: 'Nuevo Gasto' }}
+                                component={AddExpense} />
+                            <Stack.Screen name="Users" 
+                                options={{ title: 'Usuarios' }}  
+                                component={Users}
+                            >                                     
+                            </Stack.Screen>
+                        </Stack.Navigator>              
+                    </NavigationContainer> 
+                )                                
                 } 
-                {overlay && <OverlayIndicator overlayLabel={overlayLabel} top={overlayTop} /> }
-                
+                { (state.renderApp && !state.loggedUser) && <FacebookLogin loginSuccess={loginSuccess} /> }
+                {overlay && <OverlayIndicator overlayLabel={overlayLabel} top={overlayTop} /> }                
             </OverlayContext.Provider>
             {otaUpdateStatus && <View style={{
                 //flex:1,
@@ -177,8 +141,23 @@ const App = () =>{
                 <Text style={{color: 'white'}}>{otaUpdateStatus}</Text>
             </View> 
             } 
-        </SafeAreaView>
+        </>
     )  
+}
+WrapperApp.whyDidYouRender = {
+    logOnDifferentValues: true
+}
+const App = () =>{
+    //const [state, dispatch] = useContext(Context) 
+    console.log('App')   
+    return (
+        <SafeAreaView style={styles.container}>  
+            <Store>
+                <WrapperApp/>                         
+            </Store>      
+            <StatusBar style="light" />      
+        </SafeAreaView>
+    )
 }
 const styles = StyleSheet.create({    
     container: {
@@ -190,4 +169,3 @@ const styles = StyleSheet.create({
     }
 })
 export default App
-App.whyDidYouRender = true

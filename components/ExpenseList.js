@@ -177,3 +177,9 @@ const styles = StyleSheet.create({
     }
 })
 export default ExpenseList
+//Convertir realtime DB a un lista de items
+// const messageList = Object.keys(messageObject).map(key => ({
+//     ...messageObject[key],
+//     uid: key,
+// }))
+
