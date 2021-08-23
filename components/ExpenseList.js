@@ -1,18 +1,18 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import { ScrollView, View, TouchableOpacity, Text, StyleSheet } from 'react-native'
 import PropTypes from 'prop-types'
 import { ListItem } from 'react-native-elements'
 import Ripple from 'react-native-material-ripple'
 import { AntDesign } from '@expo/vector-icons' 
 import Collapsible from 'react-native-collapsible'
-import {color, formatNumber} from '../utils'
+import {Context} from '../Store'
+import {color, formatNumber, toBoolean} from '../utils'
 import DateUtils from '../DateUtils'
-import { useUserDataContextHook } from './UserDataContext'
 const transformObjectToArray = (data)=>{    
     const getExpenses = (d)=>{
         let expenses = []
         Object.keys(d).sort().reverse().forEach(time=>{
-            if (!d[time].deleted){
+            if (!toBoolean(d[time].deleted)){
                 let expense={}
                 Object.keys(d[time]).forEach(k=>{
                     expense[k] = d[time][k]
@@ -49,17 +49,17 @@ const transformObjectToArray = (data)=>{
     return result
 }
 const ExpenseList = (props)=>{
-    const {appState} =  useUserDataContextHook()
-    const [userData, setUserData] = useState(null)
+    const [globalState, dispatch] = useContext(Context)
+    const [data, setData] = useState(null)
     const {onChangeExpenseView} = props
     const [active, setActive] = useState(-1)
     
     useEffect(()=>{
-        if (appState.userData) {
+        if (globalState.data) {
             setActive(-1)
-            setUserData(transformObjectToArray(appState.userData[appState.selectedYear]))  
+            setData(transformObjectToArray(globalState.data[globalState.currentYear]))  
         }
-    }, [appState.selectedYear])
+    }, [globalState.currentYear])
 
     const toggleExpanded = (index)=>{
         setActive( active === index?-1:index)
@@ -81,13 +81,6 @@ const ExpenseList = (props)=>{
             totalUSD, totalCUP
         }
     }
-    const getDayOfWeek = (year, month, day)=>{
-        let date = new Date()
-        date.setFullYear(year)
-        date.setMonth(month)
-        date.setDate(day)
-        return DateUtils.DAYS_OF_WEEK[date.getDay()].substring(0,3)   
-    }
     const RenderItem = ({ item }) => {
         return item.days.map((day)=>{
             return  day.expenses.map((exp, i)=>(
@@ -98,7 +91,7 @@ const ExpenseList = (props)=>{
                 }}>
                     <View style={{alignItems: 'center'}}>
                         <Text>{('0' + day.day).slice(-2)}</Text>
-                        <Text>{getDayOfWeek(appState.selectedYear, item.month-1, day.day)}</Text>
+                        <Text>{DateUtils.getDayOfWeek(globalState.currentYear, globalState.currentMonth, day.day).substring(0,3)}</Text>
                     </View>
                     <ListItem.Content>
                         <ListItem.Title>{exp.concept}</ListItem.Title>
@@ -116,9 +109,9 @@ const ExpenseList = (props)=>{
     return (
         
         <View style={{flex:1}}>
-            { userData && userData.length ? 
+            { data && data.length ? 
                 <ScrollView>
-                    {userData.map((month, i)=>{
+                    {data.map((month, i)=>{
                         const {totalUSD, totalCUP} = total(month)
                         return <View key={i}>
                             <TouchableOpacity onPress={()=>toggleExpanded(i)}>
