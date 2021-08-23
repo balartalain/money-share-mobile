@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { View, ScrollView, Text, StyleSheet, Dimensions, TouchableOpacity, Animated} from 'react-native'
 import { TabView, TabBar } from 'react-native-tab-view'
 import { View as MotiView, AnimatePresence } from 'moti'
@@ -18,119 +18,81 @@ const LazyPlaceholder = ({ route }) => (
         <Text>Loading {route.title}…</Text>
     </View>
 )
+const Data = ({data})=>{
+    return (
+        <>
+            { Object.keys(data) ?
+                (
+                    <View style={{flex:1}}>                
+                        <ScrollView style={{flex:1}}            
+                            alwaysBounceVertical={true}
+                            bouncesZoom={true}                            
+                        > 
+                            {    
+                                Object.keys(data).filter(day=> {                   
+                                    return Object.keys(data[day]).filter(created=>!toBoolean(data[day][created].deleted)).length > 0
+                                })
+                                    .sort().reverse().map((day, i)=>(                                                            
+                                        <DayCard 
+                                            key={day+'-'+i}
+                                            day={day}                   
+                                        />)                 
+                                    )
+                            }
+                        </ScrollView>
+                    </View>
+                ):<View />
+            }
+        </>
+    )
+}
+const  renderTabBar = (props)=>{
+    return <TabBar   
+        {...props}    
+        scrollEnabled
+        indicatorStyle={{ backgroundColor: 'white' }}
+        style={{ backgroundColor: '#3EB489' }}
+        onTabPress={({ route, preventDefault }) => {
+            if (route.key === 'route-16') {
+                preventDefault()
+        
+                // Do something else
+            }
+        }}
+    />
+}
+const routes = DateUtils.MONTH_NAMES.map((month, i)=>({key:`route-${i}`, title:month}))
 
-export default class MonthsTabView extends React.Component {
-    constructor(props){
-        super(props)
-        this._handleIndexChange = this._handleIndexChange.bind(this)
-        this._addExpenseBtnPress = this._addExpenseBtnPress.bind(this)
-        this._changeExpenseView = this._changeExpenseView.bind(this)
-        this.renderScene = this.renderScene.bind(this)
-    
-        const tabs = []
-        DateUtils.MONTH_NAMES.forEach((month, i)=>{
-            tabs.push({key:i+1, title:month})
-        })
-        this.state = {
-            index: props.index,
-            routes: tabs
-        }
-    }
-    UNSAFE_componentWillReceiveProps(nextProps) {
-    // You don't have to do this check first, but it can help prevent an unneeded render
-        if (nextProps.index !== this.state.index) {
-            this.setState({ index: nextProps.index })
-        }
-    }
-    // componentDidUpdate(prevProps, prevState) {
-    //   if (prevState.pokemons !== this.state.pokemons) {
-    //     console.log('pokemons state has changed.')
-    //   }
-    // }
-  
-    shouldComponentUpdate(nextProps, nextState){
-        return shallowCompare(this, nextProps, nextState)
-    }
+export default function MonthsTabView(props) {
+    const [globalState, dispatch] = React.useContext(Context)
+    const index = globalState.currentMonth - 1 
 
-    _handleIndexChange(index){
-        // this.context.setAppState({...this.context.appState, selectedMonth: index})
-        this.context.dispatch({type: 'SET_CURRENT_MONTH', currentMonth: index})
-        this.setState({ index })
+    const _handleIndexChange = (index)=>{
+        dispatch({type: 'SET_CURRENT_MONTH', month: index+1})
     }
-
-    _renderLazyPlaceholder({ route }){
-        return <LazyPlaceholder route={route} />
+    const _addExpenseBtnPress = ()=>{
+        props.navigation.navigate('AddExpense')
     }
-
-    renderTabBar(props) {
-        return <TabBar   
-            {...props}    
-            scrollEnabled
-            indicatorStyle={{ backgroundColor: 'white' }}
-            style={{ backgroundColor: '#3EB489' }}
-        />
+    const _changeExpenseView = ()=>{
+        props.onChangeExpenseView()
     }
-    _addExpenseBtnPress(){
-        this.props.navigation.navigate('AddExpense', {
-            year: this.context.appState.selectedYear,
-            month: this.state.index,
-            day: new Date().getDate()
-        })
-    }
-    _changeExpenseView(){
-        this.props.onChangeExpenseView()
-    }
-    renderScene({ route }){  
-        if (Math.abs(this.state.index - this.state.routes.indexOf(route)) > 0) {
+    const renderScene = ({ route })=>{  
+        if (Math.abs(index - routes.indexOf(route)) > 0) {
             return <View />
         }    
-        const {state} = this.context
-        const data = state.data ?.[state.currentYear] ?.[route.key] || {}
+        const data = globalState.data ?.[globalState.currentYear] ?.[globalState.currentMonth] || {}
         return (            
             <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
-                { Object.keys(data) ?
-                    (
-                        <View style={{flex:1}}>                
-                            <ScrollView style={{flex:1}}            
-                                alwaysBounceVertical={true}
-                                bouncesZoom={true}
-                                //scrollEventThrottle={10}
-                                // onMomentumScrollBegin = {()=>{
-                                //   this.fadeOut();
-                                // }}
-                  
-                                onMomentumScrollEnd = {(e)=>{
-                                    //this.fadeIn();
-                                }}
-                                onScrollBeginDrag={(e)=>{
-                                    //this.fadeOut();
-                                }}
-                            > 
-                                {    
-                                    Object.keys(data).filter(day=> {                   
-                                        return Object.keys(data[day]).filter(time=>toBoolean(data[day][time].deleted)).length > 0
-                                    })
-                                        .sort().reverse().map((day, i)=>(                                                            
-                                            <DayCard 
-                                                key={day+'-'+i}
-                                                day={day} 
-                                                month={this.state.index}                     
-                                            />)                 
-                                        )
-                                }
-                            </ScrollView>
-                        </View>
-                    ):<View />
-                }
+                <Data data={data}/>
                 <View>
-                    {state.itemsToDelete.length === 0 &&                     
+                    {globalState.itemsToDelete.length === 0 &&                     
                         <View>
                             <Ripple style={styles.fab}
-                                onPress={this._addExpenseBtnPress} >
+                                onPress={_addExpenseBtnPress} >
                                 <AntDesign name="plus" size={24} color="white" />
                             </Ripple>
                             <Ripple style={[styles.fab, {left: 30}]}
-                                onPress={this._changeExpenseView} >
+                                onPress={_changeExpenseView} >
                                 <AntDesign name="bars" size={24} color="white" />
                             </Ripple>
                         </View>
@@ -139,25 +101,22 @@ export default class MonthsTabView extends React.Component {
             </View>        
         )
     }
-
-    render() {
-        console.log('Month Tab View.js')
-        return (
-            <TabView
-                //lazy
-                tabBarPosition='bottom' 
-                renderTabBar={this.renderTabBar}
-                navigationState={this.state}
-                renderScene={this.renderScene}
-                //renderLazyPlaceholder={this._renderLazyPlaceholder}
-                onIndexChange={this._handleIndexChange}
-                initialLayout={{ width: Dimensions.get('window').width }}
-                style={styles.container}
-            />
-        )
-    }
+    console.log('Month Tab View.js')
+        
+    return (
+        <TabView
+            //lazy
+            tabBarPosition='bottom' 
+            renderTabBar={renderTabBar}
+            navigationState={{index, routes }}
+            renderScene={renderScene}       
+            swipeEnabled = { true }
+            onIndexChange={_handleIndexChange}
+            initialLayout={{ width: Dimensions.get('window').width }}
+            style={styles.container}
+        />
+    )    
 }
-MonthsTabView.contextType = Context
 const styles = StyleSheet.create({
     scene: {
         flex: 1,

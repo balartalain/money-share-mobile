@@ -29,7 +29,7 @@ const Reducer = (state, action) => {
         const newState = {
             ...state,
             currentYear: action.year,
-            currentMonth: DateUtils.CURRENT_MONTH            
+            currentMonth: DateUtils.CURRENT_MONTH                        
         } 
         if (newState.itemsToDelete.length > 0){
             newState.itemsToDelete = []
@@ -62,12 +62,12 @@ const Reducer = (state, action) => {
     case 'ADD_ITEM_TO_DELETE':
         return {
             ...state,
-            itemsToDelete: [...state.itemsToDelete, action.item]
+            itemsToDelete: [...state.itemsToDelete, action.created]
         }
     case 'REMOVE_ITEM_TO_DELETE':
         return {
             ...state,
-            itemsToDelete: [...state.itemsToDelete, action.item]
+            itemsToDelete: state.filter(item=>item!==action.created)
         }
     case 'CLEAR_ITEMS_TO_DELETE':
         return {

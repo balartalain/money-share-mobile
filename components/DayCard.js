@@ -3,58 +3,43 @@ import { View, StyleSheet, Text, Vibration } from 'react-native'
 import { ListItem } from 'react-native-elements'
 import Ripple from 'react-native-material-ripple'
 import PropTypes from 'prop-types'
-import { useUserDataContextHook } from './UserDataContext'
+import { Context } from '../Store'
 import {color, formatNumber, toBoolean } from '../utils'
 import DateUtils from '../DateUtils'
 import useWhyDidYouUpdate from '../hooks/useWhyDidYouUpdate'
 const DayCard = (props)=> {
     useWhyDidYouUpdate('DayCard', props)
-    const {month, day} = props
-    const {appState, markedItemsToDelete, setMarkedItemsToDelete} = useUserDataContextHook()
-    const data = appState.userData[appState.selectedYear][month+1][day]
+    const {day} = props
+    const [globalState, dispatch] = React.useContext(Context)
     
-    const getDayOfWeek = ()=>{
-        let date = new Date()
-        date.setFullYear(appState.selectedYear)
-        date.setMonth(month)
-        date.setDate(day)
-        return DateUtils.DAYS_OF_WEEK[date.getDay()].substring(0,3)   
-    }    
+    const data = globalState.data[globalState.currentYear][globalState.currentMonth][day]
+   
     const isItemSelected = (created)=>{
-        return markedItemsToDelete.find(e=>e.created === created) !== undefined
+        return globalState.itemsToDelete.includes(created)
     }
     const onPressItem=(created)=>{
-        if (markedItemsToDelete.length > 0){
+        if (globalState.itemsToDelete.length > 0){
             if (isItemSelected(created)){
-                setMarkedItemsToDelete([...markedItemsToDelete.filter(e=>e.created!==created)])
+                dispatch({type: 'REMOVE_ITEM_TO_DELETE',  created})
             }
             else{
-                setMarkedItemsToDelete([...markedItemsToDelete, {
-                    year: appState.selectedYear,
-                    month: month+1,
-                    day,
-                    created
-                }])
+                dispatch({type: 'ADD_ITEM_TO_DELETE',  created})                
             }            
         }
     }
     const onLongPressItem=(created)=>{
         if (!isItemSelected(created)){
             Vibration.vibrate(50)
-            setMarkedItemsToDelete([...markedItemsToDelete, {
-                year: appState.selectedYear,
-                month: month+1,
-                day,
-                created
-            }])
+            dispatch({type: 'ADD_ITEM_TO_DELETE',  created}) 
         }        
     }
+    const dayOfWeek = DateUtils.getDayOfWeek(globalState.currentYear, globalState.currentMonth, props.day).substring(0,3)   
     console.log('Day Card.js')
     return (
         <View style={styles.card}>
             <View style={{ width: 40, textAlign:'center', alignItems: 'center', justifyContent: 'center'}}>
                 <Text>{day.length === 1?('0'+day):day}</Text>
-                <Text>{ getDayOfWeek() }</Text>
+                <Text>{ dayOfWeek }</Text>
             </View>
            
             <View style={{flex:1}}>
