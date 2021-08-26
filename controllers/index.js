@@ -75,7 +75,7 @@ const Heroku = {
                         '1625233340980' : {
                             'amount' : 100000,
                             'comment' : '',
-                            'concept' : 'Me dio Henry para pago de remesas',
+                            'concept' : ' Agosto Me dio Henry para pago de remesas',
                             'currency' : 'CUP',
                             'updated' : 1625233340980
                         },
@@ -85,13 +85,23 @@ const Heroku = {
                             'concept' : 'Pago de 300 CUP puesto en la cuenga de Dairon',
                             'currency' : 'CUP',
                             'updated' : 1625233614348
-                        },
-                        '1625233769319' : {
-                            'amount' : 400,
+                        }
+                    }
+                }, '6' : {
+                    '02' : {
+                        '1625233340980' : {
+                            'amount' : 100000,
                             'comment' : '',
-                            'concept' : 'Me pago henry una tranfrecia ',
-                            'currency' : 'USD',
-                            'updated' : 1625233769319
+                            'concept' : ' Junio 2021 Me dio Henry para pago de remesas',
+                            'currency' : 'CUP',
+                            'updated' : 1625233340980
+                        },
+                        '1625233614348' : {
+                            'amount' : -15000,
+                            'comment' : '',
+                            'concept' : 'Pago de 300 CUP puesto en la cuenga de Dairon',
+                            'currency' : 'CUP',
+                            'updated' : 1625233614348
                         }
                     }
                 }
@@ -101,23 +111,18 @@ const Heroku = {
                         '1625233340980' : {
                             'amount' : 1000,
                             'comment' : '',
-                            'concept' : 'Me dio Henry para pago de remesas',
+                            'concept' : 'Junio  2020 Me dio Henry para pago de remesas',
                             'currency' : 'CUP',
                             'updated' : 1625233340980
-                        },
+                        }
+                    },
+                    '02':{
                         '1625233614348' : {
                             'amount' : -1000,
                             'comment' : '',
                             'concept' : 'Pago de 300 CUP puesto en la cuenga de Dairon',
                             'currency' : 'CUP',
                             'updated' : 1625233614348
-                        },
-                        '1625233769319' : {
-                            'amount' : 800,
-                            'comment' : '',
-                            'concept' : 'Me pago henry una tranfrecia ',
-                            'currency' : 'USD',
-                            'updated' : 1625233769319
                         }
                     }
                 }

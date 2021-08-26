@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, ScrollView, Text, StyleSheet, Dimensions, TouchableOpacity, Animated} from 'react-native'
+import { View, ScrollView, Text, StyleSheet, Dimensions, TouchableOpacity, Animated, FlatList} from 'react-native'
 import { TabView, TabBar } from 'react-native-tab-view'
 import { View as MotiView, AnimatePresence } from 'moti'
 import { Context } from '../Store'
@@ -61,6 +61,12 @@ const  renderTabBar = (props)=>{
         }}
     />
 }
+const renderItem = ({item}) => {
+    return <DayCard day={item} />               
+}
+const keyExtractor=(item) =>{
+    return item.id.toString()
+} 
 const routes = DateUtils.MONTH_NAMES.map((month, i)=>({key:`route-${i}`, title:month}))
 
 export default function MonthsTabView(props) {
@@ -76,14 +82,24 @@ export default function MonthsTabView(props) {
     const _changeExpenseView = ()=>{
         props.onChangeExpenseView()
     }
+    
     const renderScene = ({ route })=>{  
         if (Math.abs(index - routes.indexOf(route)) > 0) {
             return <View />
-        }    
-        const data = globalState.data ?.[globalState.currentYear] ?.[globalState.currentMonth] || {}
+        }   
+
+        //let data = globalState.data ?.[globalState.currentYear] ?.[globalState.currentMonth] ?.days || []
+        const data = globalState.data.find(year=>parseInt(year.id) === globalState.currentYear).months
+            .find(month=>parseInt(month.id)===globalState.currentMonth) ?.days || []
+        //data = data.filter(day=>!toBoolean(day.deleted))
+        //const data = globalState.data.find(year=>year.id===globalState.currentYear).months[globalState.currentMonth]
         return (            
             <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
-                <Data data={data}/>
+                <FlatList
+                    data={data}
+                    renderItem={renderItem}
+                    keyExtractor={keyExtractor}
+                />
                 <View>
                     {globalState.itemsToDelete.length === 0 &&                     
                         <View>

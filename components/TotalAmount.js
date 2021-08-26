@@ -10,19 +10,15 @@ const TotalAmount = memo(()=>{
         let totalUSD = 0,
             totalCUP = 0
         
-        if (data && Object.keys(data).length > 0){
-            Object.keys(data[currentYear]).forEach(m=>{
-                const monthData = data[currentYear][m]
-                Object.keys(monthData).forEach(d=>{          
-                    Object.keys(monthData[d]).forEach(time=>{   
-                        if (!toBoolean(monthData[d][time].deleted)){
-                            let { currency, amount} = monthData[d][time];
-                            (currency == 'USD')?totalUSD += parseFloat(amount): totalCUP += parseFloat(amount)
-                        }
-                    })
+        data.find(year=>parseInt(year.id) === currentYear).months.forEach(m=>{
+            m.days.forEach(d=>{          
+                const {expenses} = d
+                Object.keys(d.expenses).filter(created=>!toBoolean(expenses[created].delete)).forEach(created=>{   
+                    let { currency, amount} = expenses[created];
+                    (currency == 'USD')?totalUSD += parseFloat(amount): totalCUP += parseFloat(amount)                   
                 })
             })
-        }
+        })
         return {totalUSD, totalCUP}        
     }, [currentYear])
     const {totalUSD, totalCUP} = totalAmount()

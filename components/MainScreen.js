@@ -19,14 +19,27 @@ whyDidYouRender(React, {
     titleColor: 'green',
     diffNameColor: 'darkturquoise'
 })
-
+const keys = ['months', 'days', 'expenses']
+const objectToArray = (obj, level)=>{ 
+    if (level > 2){
+        return Object.keys(obj).map(key=>({
+            id:key, 
+            ...obj[key]}
+        ))
+    }                   
+    return Object.keys(obj).map(key=>{
+        return {
+            id:key,
+            [keys[level]]: objectToArray(obj[key], level+1)
+        }
+    }
+        
+    )
+}
 const MainScreen = ({navigation, route}) => {    
     const { params } = route
     const [globalState, dispatch] = useContext(Context) 
     const [state, setState] = useState({status: 'idle', error: null})
-    //const [myState, setMyState] = useState({})
-    // const { execute, status, value, error } = useAsync(Heroku.getUserData, [], false)
-    //const {currentUser, setCurrentUser, appState, loadData} = useUserDataContextHook()
     const [expensesView, setExpensesView] = useState('grid')
     //const [errorMsg, setErrorMsg] = useState(null)
     const mountedRef = useRef(false)
@@ -42,9 +55,24 @@ const MainScreen = ({navigation, route}) => {
                 const index = years.findIndex((e)=>equalsIntegers(e, DateUtils.CURRENT_YEAR))  
                 if (index === -1){
                     years.push(DateUtils.CURRENT_YEAR)
+                    data[DateUtils.CURRENT_YEAR] = {}
                 }
-                years.sort()  
-                dispatch({type: 'LOAD_DATA', data, years})
+                years.sort()
+
+                // Object.keys(data).forEach(year => {                    
+                //     Object.keys(data[year]).forEach(month=>{
+                //         data[year][month] = {
+                //             id: month,
+                //             days: Object.keys(data[year][month]).map(day=>({
+                //                 id: day,
+                //                 ...data[year][month][day]
+                //             }))                         
+                //         }
+                            
+                //     })
+                // })
+                                     
+                dispatch({type: 'LOAD_DATA',data: objectToArray(data, 0), years})
                 setState({...state, status: 'success'})           
             }   
         } 
@@ -118,3 +146,18 @@ export default MainScreen
 MainScreen.whyDidYouRender  = {
     logOnDifferentValues: true
 }
+
+// const keys = ['months', 'days']
+// const objectToArray = (obj, level)=>{ 
+//     if (level > 1){
+//         return obj
+//     }                   
+//     return Object.keys(obj).map(key=>{
+//         return {
+//             id:key,
+//             [keys[level]]: objectToArray(obj[key], level+1)
+//         }
+//     }
+                        
+//     )
+// }

@@ -12,8 +12,6 @@ const DayCard = (props)=> {
     const {day} = props
     const [globalState, dispatch] = React.useContext(Context)
     
-    const data = globalState.data[globalState.currentYear][globalState.currentMonth][day]
-   
     const isItemSelected = (created)=>{
         return globalState.itemsToDelete.includes(created)
     }
@@ -33,17 +31,20 @@ const DayCard = (props)=> {
             dispatch({type: 'ADD_ITEM_TO_DELETE',  created}) 
         }        
     }
-    const dayOfWeek = DateUtils.getDayOfWeek(globalState.currentYear, globalState.currentMonth, props.day).substring(0,3)   
-    console.log('Day Card.js')
+    console.log('Day Card.js') 
+    const dayOfWeek = DateUtils.getDayOfWeek(globalState.currentYear, globalState.currentMonth, parseInt(day.id)).substring(0,3)   
+    //const dayObj = globalState.data[globalState.currentYear][globalState.currentMonth].days.find(d=>d.id===day)
+    ///const data = Object.keys(dayObj).filter(key=>key!== 'id').sort().reverse().map(created=>)
+    const { expenses } = day
     return (
         <View style={styles.card}>
             <View style={{ width: 40, textAlign:'center', alignItems: 'center', justifyContent: 'center'}}>
-                <Text>{day.length === 1?('0'+day):day}</Text>
-                <Text>{ dayOfWeek }</Text>
+                <Text>{day.id}</Text>
+                <Text>{dayOfWeek}</Text>
             </View>
            
             <View style={{flex:1}}>
-                {  Object.keys(data).sort().reverse().filter(created => !data[created].deleted || !toBoolean(data[created].deleted) ).map((created, i)=>(
+                {  Object.keys(expenses).sort().reverse().map((created, i)=>(
                     <ListItem
                         Component={Ripple} 
                         containerStyle={{
@@ -51,32 +52,30 @@ const DayCard = (props)=> {
                         }} 
                         key={i} 
                         style={[styles.listItem, 
-                            {borderLeftColor: `${data[created].amount < 0?'red': color.primaryGreen}`                            
+                            {borderLeftColor: `${expenses[created].amount < 0?'red': color.primaryGreen}`                            
                             }]
                         }
                         onPress={()=>onPressItem(created)}
                         onLongPress={()=>onLongPressItem(created)}
                     >
                         <ListItem.Content>
-                            <ListItem.Title>{data[created].concept}</ListItem.Title>
-                            <ListItem.Subtitle>{data[created].comment}</ListItem.Subtitle>
+                            <ListItem.Title>{expenses[created].concept}</ListItem.Title>
+                            <ListItem.Subtitle>{expenses[created].comment}</ListItem.Subtitle>
                         </ListItem.Content>
                         <View style={styles.total}>
-                            <Text style={{textAlign: 'right', color:`${data[created].amount < 0?'red': color.primaryGreen}`}}>
-                                {formatNumber(data[created].amount)} {data[created].currency}
+                            <Text style={{textAlign: 'right', color:`${expenses[created].amount < 0?'red': color.primaryGreen}`}}>
+                                {formatNumber(expenses[created].amount)} {expenses[created].currency}
                             </Text>                                          
                         </View>
                     </ListItem>
-                ))
-                
-                }
+                ))}
+                                
             </View>           
         </View>
     )
 }
 DayCard.propTypes = {
-    month: PropTypes.number,
-    day: PropTypes.string
+    day: PropTypes.object
 }
 const styles = StyleSheet.create({  
     card:{
