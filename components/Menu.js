@@ -10,10 +10,6 @@ const transformItems = (years, currentYear)=>{
         selected: parseInt(item) === currentYear 
     }))
 }
-export const Menu1 = ()=>(
-    <View><Text>ABC</Text></View>
-)
-
 const Menu = () =>{
     const [state, distpatch] = useContext(Context)
     //    const {appState, changeYear} = useUserDataContextHook()
@@ -31,7 +27,7 @@ const Menu = () =>{
             mountedRef.current = false
         } 
     }, [])
-    const itemChanged = useCallback((_item)=>{
+    const itemChanged = (_item)=>{
         if (_item === selectedItem)
             return     
         setItems(items.map(e=>({
@@ -41,7 +37,7 @@ const Menu = () =>{
         animateItemChanged(_item)
         distpatch({type:'SET_CURRENT_YEAR', year: _item})
       
-    }, [state.currentYear])
+    }
 
     const animateItemChanged = (_item)=>{ 
         if (!mountedRef.current) return    
@@ -51,34 +47,31 @@ const Menu = () =>{
             animated: true    
         })
     } 
-    const screenHeight = Dimensions.get('screen').height
-    const windowHeight = Dimensions.get('window').height
-    console.log('screenHeight '+screenHeight)
-    console.log('windowHeight '+windowHeight)
-    
-    return (
-        <ScrollView ref={scrollRef}
-            showsHorizontalScrollIndicator={false}
-            horizontal={true}
-            alwaysBounceHorizontal={true}
-            //contentContainerStyle={{flex: 1, justifyContent:'flex-start'}}
-            style={styles.menu}>
-            {                
-                items.map((e, i)=>(                
-                    <View key={i} style={[styles.menuItem, e.selected && styles.menuItemActive]}>
-                        { (i > 0 && i < items.length - 1)  && 
+    return React.useMemo(()=>{    
+        console.log('Menu')
+        return (
+            <ScrollView ref={scrollRef}
+                showsHorizontalScrollIndicator={false}
+                horizontal={true}
+                alwaysBounceHorizontal={true}
+                //contentContainerStyle={{flex: 1, justifyContent:'flex-start'}}
+                style={styles.menu}>
+                {                
+                    items.map((e, i)=>(                
+                        <View key={i} style={[styles.menuItem, e.selected && styles.menuItemActive]}>
+                            { (i > 0 && i < items.length - 1)  && 
                             <Ripple style={[styles.btn, e.selected?styles.btnActive:(e.item<selectedItem)?styles.btnLeft:styles.btnRight]} 
                                 onPress={()=>itemChanged(e.item)}
                             >
                                 <Text style={{color: 'white', fontWeight: 'bold'}}>{e.item}</Text>
                             </Ripple>
-                        }
-                    </View>
-                ))
-            }
+                            }
+                        </View>
+                    ))
+                }
             
-        </ScrollView>     
-    )  
+            </ScrollView>     
+        )}, [years, items])
     
 }
 

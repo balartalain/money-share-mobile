@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, ScrollView, Text, StyleSheet, Dimensions, TouchableOpacity, Animated, FlatList} from 'react-native'
 import { TabView, TabBar } from 'react-native-tab-view'
+import { useNavigation } from '@react-navigation/native' 
 import { View as MotiView, AnimatePresence } from 'moti'
 import { Context } from '../Store'
 import { AntDesign } from '@expo/vector-icons'
@@ -9,6 +10,7 @@ import DayCard from './DayCard'
 import {color, toBoolean} from '../utils'
 import DateUtils from '../DateUtils'
 import shallowCompare from '../shallowEquals'
+import { useAnimation } from '../hooks/useAnimation'
 
 // This is our placeholder component for the tabs
 // This will be rendered when a tab isn't loaded yet
@@ -18,34 +20,6 @@ const LazyPlaceholder = ({ route }) => (
         <Text>Loading {route.title}…</Text>
     </View>
 )
-const Data = ({data})=>{
-    return (
-        <>
-            { Object.keys(data) ?
-                (
-                    <View style={{flex:1}}>                
-                        <ScrollView style={{flex:1}}            
-                            alwaysBounceVertical={true}
-                            bouncesZoom={true}                            
-                        > 
-                            {    
-                                Object.keys(data).filter(day=> {                   
-                                    return Object.keys(data[day]).filter(created=>!toBoolean(data[day][created].deleted)).length > 0
-                                })
-                                    .sort().reverse().map((day, i)=>(                                                            
-                                        <DayCard 
-                                            key={day+'-'+i}
-                                            day={day}                   
-                                        />)                 
-                                    )
-                            }
-                        </ScrollView>
-                    </View>
-                ):<View />
-            }
-        </>
-    )
-}
 const  renderTabBar = (props)=>{
     return <TabBar   
         {...props}    
@@ -70,6 +44,7 @@ const keyExtractor=(item) =>{
 const routes = DateUtils.MONTH_NAMES.map((month, i)=>({key:`route-${i}`, title:month}))
 
 export default function MonthsTabView(props) {
+    const navigation = useNavigation()
     const [globalState, dispatch] = React.useContext(Context)
     const index = globalState.currentMonth - 1 
 
@@ -77,22 +52,19 @@ export default function MonthsTabView(props) {
         dispatch({type: 'SET_CURRENT_MONTH', month: index+1})
     }
     const _addExpenseBtnPress = ()=>{
-        props.navigation.navigate('AddExpense')
+        navigation.navigate('AddExpense')
     }
     const _changeExpenseView = ()=>{
         props.onChangeExpenseView()
     }
     
-    const renderScene = ({ route })=>{  
+    const renderScene =  ({ route })=>{
         if (Math.abs(index - routes.indexOf(route)) > 0) {
             return <View />
         }   
+        console.log('Render Scene '+ index)
+        let data = globalState.data ?.[globalState.currentYear] ?.[globalState.currentMonth] ?.days || []
 
-        //let data = globalState.data ?.[globalState.currentYear] ?.[globalState.currentMonth] ?.days || []
-        const data = globalState.data.find(year=>parseInt(year.id) === globalState.currentYear).months
-            .find(month=>parseInt(month.id)===globalState.currentMonth) ?.days || []
-        //data = data.filter(day=>!toBoolean(day.deleted))
-        //const data = globalState.data.find(year=>year.id===globalState.currentYear).months[globalState.currentMonth]
         return (            
             <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
                 <FlatList
@@ -117,21 +89,21 @@ export default function MonthsTabView(props) {
             </View>        
         )
     }
-    console.log('Month Tab View.js')
-        
-    return (
-        <TabView
+    return React.useMemo(()=>{   
+        console.log('Month Tab View.js '+ globalState.currentMonth)
+        return (
+            <TabView
             //lazy
-            tabBarPosition='bottom' 
-            renderTabBar={renderTabBar}
-            navigationState={{index, routes }}
-            renderScene={renderScene}       
-            swipeEnabled = { true }
-            onIndexChange={_handleIndexChange}
-            initialLayout={{ width: Dimensions.get('window').width }}
-            style={styles.container}
-        />
-    )    
+                tabBarPosition='bottom' 
+                renderTabBar={renderTabBar}
+                navigationState={{index, routes }}
+                renderScene={renderScene}       
+                swipeEnabled = { true }
+                onIndexChange={_handleIndexChange}
+                initialLayout={{ width: Dimensions.get('window').width }}
+                style={styles.container}
+            />
+        )},[globalState.currentMonth, globalState.currentYear, globalState.currenUser])
 }
 const styles = StyleSheet.create({
     scene: {
@@ -156,3 +128,6 @@ const styles = StyleSheet.create({
         color: 'white',
     }
 })
+MonthsTabView.whyDidYouRender  = {
+    logOnDifferentValues: true
+}

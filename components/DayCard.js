@@ -18,7 +18,7 @@ const DayCard = (props)=> {
     const onPressItem=(created)=>{
         if (globalState.itemsToDelete.length > 0){
             if (isItemSelected(created)){
-                dispatch({type: 'REMOVE_ITEM_TO_DELETE',  created})
+                dispatch({type: 'UNDO_ITEM_TO_DELETE',  created})
             }
             else{
                 dispatch({type: 'ADD_ITEM_TO_DELETE',  created})                
@@ -33,9 +33,8 @@ const DayCard = (props)=> {
     }
     console.log('Day Card.js') 
     const dayOfWeek = DateUtils.getDayOfWeek(globalState.currentYear, globalState.currentMonth, parseInt(day.id)).substring(0,3)   
-    //const dayObj = globalState.data[globalState.currentYear][globalState.currentMonth].days.find(d=>d.id===day)
-    ///const data = Object.keys(dayObj).filter(key=>key!== 'id').sort().reverse().map(created=>)
-    const { expenses } = day
+    const dayData = Object.values(day).find(exp=>typeof exp ==='object' && !toBoolean(exp.deleted)) !== undefined
+    if (!dayData) return null
     return (
         <View style={styles.card}>
             <View style={{ width: 40, textAlign:'center', alignItems: 'center', justifyContent: 'center'}}>
@@ -44,7 +43,7 @@ const DayCard = (props)=> {
             </View>
            
             <View style={{flex:1}}>
-                {  Object.keys(expenses).sort().reverse().map((created, i)=>(
+                {  Object.keys(day).filter(k=>k!=='id' && !toBoolean(day[k].deleted)).sort().reverse().map((created, i)=>(
                     <ListItem
                         Component={Ripple} 
                         containerStyle={{
@@ -52,19 +51,19 @@ const DayCard = (props)=> {
                         }} 
                         key={i} 
                         style={[styles.listItem, 
-                            {borderLeftColor: `${expenses[created].amount < 0?'red': color.primaryGreen}`                            
+                            {borderLeftColor: `${day[created].amount < 0?'red': color.primaryGreen}`                            
                             }]
                         }
                         onPress={()=>onPressItem(created)}
                         onLongPress={()=>onLongPressItem(created)}
                     >
                         <ListItem.Content>
-                            <ListItem.Title>{expenses[created].concept}</ListItem.Title>
-                            <ListItem.Subtitle>{expenses[created].comment}</ListItem.Subtitle>
+                            <ListItem.Title>{day[created].concept}</ListItem.Title>
+                            <ListItem.Subtitle>{day[created].comment}</ListItem.Subtitle>
                         </ListItem.Content>
                         <View style={styles.total}>
-                            <Text style={{textAlign: 'right', color:`${expenses[created].amount < 0?'red': color.primaryGreen}`}}>
-                                {formatNumber(expenses[created].amount)} {expenses[created].currency}
+                            <Text style={{textAlign: 'right', color:`${day[created].amount < 0?'red': color.primaryGreen}`}}>
+                                {formatNumber(day[created].amount)} {day[created].currency}
                             </Text>                                          
                         </View>
                     </ListItem>
@@ -92,4 +91,7 @@ const styles = StyleSheet.create({
     },
 })
 export default React.memo(DayCard)
+DayCard.whyDidYouRender  = {
+    logOnDifferentValues: true
+}
 // export default DayCard

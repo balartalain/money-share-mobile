@@ -1,31 +1,27 @@
 import React, {useState, useEffect, useRef, useContext, useCallback} from 'react'
 import { View, Text, Button} from 'react-native'
+import { useNavigation } from '@react-navigation/native'
 import PropTypes from 'prop-types'
 import { Context } from '../Store'
 import Heroku from '../controllers'
 import {equalsIntegers} from '../utils'
 import DateUtils from '../DateUtils'
 import Header from './Header'
-import Menu, {Menu1} from './Menu'
+import Menu from './Menu'
 import TotalAmount from './TotalAmount'
 import MonthsTabView from './MonthsTabView'
 import ExpenseList from './ExpenseList'
 import useAsync from '../hooks/useAsync'
 import OverlayIndicator from './OverlayIndicator'
-import whyDidYouRender from '@welldone-software/why-did-you-render'
+//import whyDidYouRender from '@welldone-software/why-did-you-render'
 
-whyDidYouRender(React, {
-    //onlyLogs: true,
-    titleColor: 'green',
-    diffNameColor: 'darkturquoise'
-})
 const keys = ['months', 'days', 'expenses']
 const objectToArray = (obj, level)=>{ 
     if (level > 2){
         return Object.keys(obj).map(key=>({
             id:key, 
-            ...obj[key]}
-        ))
+            ...obj[key]
+        }))
     }                   
     return Object.keys(obj).map(key=>{
         return {
@@ -36,14 +32,15 @@ const objectToArray = (obj, level)=>{
         
     )
 }
-const MainScreen = ({navigation, route}) => {    
+const MainScreen = ({route}) => {    
+    const navigation = useNavigation()
     const { params } = route
     const [globalState, dispatch] = useContext(Context) 
     const [state, setState] = useState({status: 'idle', error: null})
     const [expensesView, setExpensesView] = useState('grid')
     //const [errorMsg, setErrorMsg] = useState(null)
     const mountedRef = useRef(false)
-    const {currentUser} = globalState
+    const {currentUser, currentMonth, itemsToDelete} = globalState
     const _loadData = useCallback(async()=>{        
         try{
             //toggleOverlay('Obteniendo datos de '+currentUser.name.split(' ')[0])
@@ -59,20 +56,20 @@ const MainScreen = ({navigation, route}) => {
                 }
                 years.sort()
 
-                // Object.keys(data).forEach(year => {                    
-                //     Object.keys(data[year]).forEach(month=>{
-                //         data[year][month] = {
-                //             id: month,
-                //             days: Object.keys(data[year][month]).map(day=>({
-                //                 id: day,
-                //                 ...data[year][month][day]
-                //             }))                         
-                //         }
+                Object.keys(data).forEach(year => {                    
+                    Object.keys(data[year]).forEach(month=>{
+                        data[year][month] = {
+                            id: month,
+                            days: Object.keys(data[year][month]).map(day=>({
+                                id: day,
+                                ...data[year][month][day]
+                            }))                         
+                        }
                             
-                //     })
-                // })
+                    })
+                })                
                                      
-                dispatch({type: 'LOAD_DATA',data: objectToArray(data, 0), years})
+                dispatch({type: 'LOAD_DATA', data, years})
                 setState({...state, status: 'success'})           
             }   
         } 
@@ -97,22 +94,20 @@ const MainScreen = ({navigation, route}) => {
         }
     }, [params] )
     
-    const onChangeExpenseView = ()=>{
+    const onChangeExpenseView = useCallback(()=>{
         setExpensesView(expensesView==='list'?'grid':'list')
-    }
+    }, [expensesView])
     console.log('Main Screen')
     const {status, error} = state
     return (      
         <View style={{flex:1}}>
-            <Header navigation={navigation} />
+            <Header currentUser={currentUser} itemsToDelete={itemsToDelete} />
             { status === 'success' &&
             <>
                 <Menu /> 
                 <TotalAmount />   
                 {expensesView === 'grid'? (
                     <MonthsTabView 
-                        navigation={navigation} 
-                        index={globalState.currentMonth} 
                         onChangeExpenseView={onChangeExpenseView}
                         
                     />

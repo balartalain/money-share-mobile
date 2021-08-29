@@ -1,37 +1,42 @@
 import React, {useContext, useEffect, useState} from 'react'
 import { View, Text, TouchableOpacity, Dimensions} from 'react-native'
+import { useNavigation } from '@react-navigation/native'
 import PropTypes from 'prop-types'
 import Ripple from 'react-native-material-ripple'
 import { AntDesign } from '@expo/vector-icons' 
 import { color, ENV } from './../utils'
 import AnimatedView from './AnimatedView'
 import { Context } from '../Store'
+import Heroku from '../controllers'
+import { CONNECTION_ERROR } from '../ErrorConstants'
 const { width } = Dimensions.get('window')
 
 const Delete = (props) =>{
-    const [state, distpatch] = useContext(Context) 
+    const [state, dispatch] = useContext(Context) 
     // const {deleteItems, markedItemsToDelete, setMarkedItemsToDelete} = useUserDataContextHook()
     const [trashColor, setTrashColor] = useState('white')
-    const { currentUser, itemsToDelete } = state
+    const { currentUser, currentYear, currentMonth, itemsToDelete } = state
 
-    const deleteItems = ()=>{        
-        // const deleteAsync = itemsToDelete.map(expense=>{            
-        //     return Heroku.deleteExpense(currentUser.id, expense)
-        // })
+    const deleteItems = ()=>{
+        const deleteAsync = state.itemsToDelete.map(created=>{ 
+            const day = state.data[currentYear][currentMonth].days.find(day=>Object.keys(day).find(e=>e===created)).id        
+         
+            const expense = {
+                year: currentYear,
+                month: currentMonth,
+                day,
+                created
+            }
+            return Heroku.deleteExpense(currentUser.id, expense)
+        })
 
-        // Promise.all(deleteAsync).then(() => {
-        //     const _userData = {...appState.userData}
-        //     itemsToDelete.forEach(expense=>{
-        //         const {year, month, day, created} = expense
-        //         _userData[year][month][day][created].deleted = 'true'
-        //     })
-        //     setAppState({...appState, _userData}) 
-        //     setMarkedItemsToDelete([])     
-        // }).catch((err) => {
-        //     console.log(err)
-        //     setMarkedItemsToDelete([])     
-        //     setTimeout(()=> alert(CONNECTION_ERROR), 100)          
-        // }) 
+        Promise.all(deleteAsync).then(() => {
+            dispatch({type:'DELETE_ITEMS'})    
+        }).catch((err) => {
+            console.log(err)
+            dispatch({type: 'CLEAR_ITEMS_TO_DELETE'})    
+            setTimeout(()=> alert(CONNECTION_ERROR), 100)          
+        }) 
     }
     useEffect(() => {
         if (itemsToDelete.length > 0){
@@ -57,7 +62,7 @@ const Delete = (props) =>{
                 backgroundColor: color.primaryGreen
                                
             }}>
-            <Ripple onPress={()=>distpatch({type:'CLEAR_ITEMS_TO_DELETE'})} >
+            <Ripple onPress={()=>dispatch({type:'CLEAR_ITEMS_TO_DELETE'})} >
                 <AntDesign name="arrowleft" size={24} color='white' />
             </Ripple>
             <Ripple onPress={()=>deleteItems()} >
@@ -67,10 +72,9 @@ const Delete = (props) =>{
         
     )}
 const Header = (props)=>{  
-    const [state] = useContext(Context) 
-    //const {currentUser, markedItemsToDelete} = useContext(UserDataContext)
-    const {navigation} = props
-    const { currentUser, itemsToDelete } = state
+    const navigation = useNavigation()    
+    const { currentUser, itemsToDelete } = props
+    console.log('Header')
     return (
         <View style={{   
             backgroundColor: color.primaryGreen,        
@@ -102,7 +106,12 @@ const Header = (props)=>{
         </View>
     )
 }
-Header.propTypes = {
-    navigation: PropTypes.object.isRequired
-}
+
+// function areEqual(prevProps, nextProps) {
+
+//     return prevProps.currentUser.id === nextProps.currentUser.id
+// }
 export default React.memo(Header)
+Header.whyDidYouRender  = {
+    logOnDifferentValues: true
+}

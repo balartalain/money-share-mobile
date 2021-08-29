@@ -73,34 +73,48 @@ const Heroku = {
                 '8' : {
                     '02' : {
                         '1625233340980' : {
-                            'amount' : 100000,
+                            'amount' : 10,
                             'comment' : '',
                             'concept' : ' Agosto Me dio Henry para pago de remesas',
                             'currency' : 'CUP',
                             'updated' : 1625233340980
                         },
                         '1625233614348' : {
-                            'amount' : -15000,
+                            'amount' : 10,
                             'comment' : '',
                             'concept' : 'Pago de 300 CUP puesto en la cuenga de Dairon',
                             'currency' : 'CUP',
+                            'updated' : 1625233614348
+                        },
+                        '1625233614349' : {
+                            'amount' : 5,
+                            'comment' : '',
+                            'concept' : 'Otr',
+                            'currency' : 'USD',
                             'updated' : 1625233614348
                         }
                     }
                 }, '6' : {
                     '02' : {
                         '1625233340980' : {
-                            'amount' : 100000,
+                            'amount' : 5,
                             'comment' : '',
                             'concept' : ' Junio 2021 Me dio Henry para pago de remesas',
                             'currency' : 'CUP',
                             'updated' : 1625233340980
                         },
                         '1625233614348' : {
-                            'amount' : -15000,
+                            'amount' : 5,
                             'comment' : '',
                             'concept' : 'Pago de 300 CUP puesto en la cuenga de Dairon',
                             'currency' : 'CUP',
+                            'updated' : 1625233614348
+                        },
+                        '1625233614349' : {
+                            'amount' : 5,
+                            'comment' : '',
+                            'concept' : 'Otr',
+                            'currency' : 'USD',
                             'updated' : 1625233614348
                         }
                     }
@@ -109,7 +123,7 @@ const Heroku = {
                 '6' : {
                     '01' : {
                         '1625233340980' : {
-                            'amount' : 1000,
+                            'amount' : 5,
                             'comment' : '',
                             'concept' : 'Junio  2020 Me dio Henry para pago de remesas',
                             'currency' : 'CUP',
@@ -118,7 +132,7 @@ const Heroku = {
                     },
                     '02':{
                         '1625233614348' : {
-                            'amount' : -1000,
+                            'amount' : 5,
                             'comment' : '',
                             'concept' : 'Pago de 300 CUP puesto en la cuenga de Dairon',
                             'currency' : 'CUP',

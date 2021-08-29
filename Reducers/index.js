@@ -64,11 +64,26 @@ const Reducer = (state, action) => {
             ...state,
             itemsToDelete: [...state.itemsToDelete, action.created]
         }
-    case 'REMOVE_ITEM_TO_DELETE':
+    case 'UNDO_ITEM_TO_DELETE':
         return {
             ...state,
-            itemsToDelete: state.filter(item=>item!==action.created)
+            itemsToDelete: state.itemsToDelete.filter(item=>item!==action.created)
         }
+    case 'DELETE_ITEMS':{
+        const data = {...state.data}
+        data[state.currentYear][state.currentMonth].days.forEach(element => {
+            Object.keys(element).forEach(created=>{
+                if (state.itemsToDelete.includes(created)){
+                    element[created].deleted = true
+                }
+            })
+        })
+        return {
+            ...state,
+            data,
+            itemsToDelete: []
+        }
+    }
     case 'CLEAR_ITEMS_TO_DELETE':
         return {
             ...state,

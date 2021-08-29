@@ -24,7 +24,8 @@ import { TouchableOpacity } from 'react-native'
 whyDidYouRender(React, {
     //onlyLogs: true,
     titleColor: 'green',
-    diffNameColor: 'darkturquoise'
+    diffNameColor: 'darkturquoise',
+    trackAllPureComponents: true
 })
 
 const { width } = Dimensions.get('window')
@@ -100,49 +101,50 @@ const WrapperApp = () =>{
         setOverlayLabel(info)
         setShowOverlay(prevState=>!prevState)
     } 
-    console.log('Wrapper App')
-    return ( 
-        <>                 
-            <View style={styles.top}></View> 
-            <OverlayContext.Provider value={{hideOverlay, showOverlay}}>
-                { state.loggedUser && (                    
-                    <NavigationContainer>
-                        <Stack.Navigator
-                        >
-                            <Stack.Screen name="Home" component={MainScreen} 
-                                options={{  headerShown: false }}              
-                            />
-                            <Stack.Screen name="AddExpense" 
-                                options={{ title: 'Nuevo Gasto' }}
-                                component={AddExpense} />
-                            <Stack.Screen name="Users" 
-                                options={{ title: 'Usuarios' }}  
-                                component={Users}
-                            >                                     
-                            </Stack.Screen>
-                        </Stack.Navigator>              
-                    </NavigationContainer> 
-                )                                
-                } 
-                { (state.renderApp && !state.loggedUser) && <FacebookLogin loginSuccess={loginSuccess} /> }
-                {overlay && <OverlayIndicator overlayLabel={overlayLabel} top={overlayTop} /> }                
-            </OverlayContext.Provider>
-            {otaUpdateStatus && <View style={{
+    return React.useMemo(()=>{
+        console.log('Wrapper App')
+        return ( 
+            <>                 
+                <View style={styles.top}></View> 
+                <OverlayContext.Provider value={{hideOverlay, showOverlay}}>
+                    { state.loggedUser && (                    
+                        <NavigationContainer>
+                            <Stack.Navigator
+                            >
+                                <Stack.Screen name="Home" component={MainScreen} 
+                                    options={{  headerShown: false }}              
+                                />
+                                <Stack.Screen name="AddExpense" 
+                                    options={{ title: 'Nuevo Gasto' }}
+                                    component={AddExpense} />
+                                <Stack.Screen name="Users" 
+                                    options={{ title: 'Usuarios' }}  
+                                    component={Users}
+                                >                                     
+                                </Stack.Screen>
+                            </Stack.Navigator>              
+                        </NavigationContainer> 
+                    )                                
+                    } 
+                    { (state.renderApp && !state.loggedUser) && <FacebookLogin loginSuccess={loginSuccess} /> }
+                    {overlay && <OverlayIndicator overlayLabel={overlayLabel} top={overlayTop} /> }                
+                </OverlayContext.Provider>
+                {otaUpdateStatus && <View style={{
                 //flex:1,
-                position: 'absolute',
-                bottom: 4,
-                left: 0,
-                width,
-                paddingVertical: 15,
-                paddingLeft: 10,
-                backgroundColor: 'black',
-                zIndex: 20000                             
-            }}>
-                <Text style={{color: 'white'}}>{otaUpdateStatus}</Text>
-            </View> 
-            } 
-        </>
-    )  
+                    position: 'absolute',
+                    bottom: 4,
+                    left: 0,
+                    width,
+                    paddingVertical: 15,
+                    paddingLeft: 10,
+                    backgroundColor: 'black',
+                    zIndex: 20000                             
+                }}>
+                    <Text style={{color: 'white'}}>{otaUpdateStatus}</Text>
+                </View> 
+                } 
+            </>
+        )},[state.renderApp, state.loggedUser, overlay, otaUpdateStatus]) 
 }
 WrapperApp.whyDidYouRender = {
     logOnDifferentValues: true
