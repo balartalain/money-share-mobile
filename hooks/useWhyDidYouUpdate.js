@@ -10,33 +10,42 @@ see which props changed between renders and view their previous/current values *
 
 import { useEffect, useRef } from 'react'
 
-export default function useWhyDidYouUpdate(name, props) {
+export default function useWhyDidYouUpdate(name, props, state) {
     // Get a mutable ref object where we can store props ...
     // ... for comparison next time this hook runs.
     const previousProps = useRef()
-    useEffect(() => {
-        if (previousProps.current) {
-        // Get all keys from previous and current props
-            const allKeys = Object.keys({ ...previousProps.current, ...props })
+    const previousState = useRef()
+    const logChanges = (prevObj, obj, objectName)=>{
+        if (prevObj.current) {
+            // Get all keys from previous and current props
+            const allKeys = Object.keys({ ...prevObj.current, ...obj })
             // Use this object to keep track of changed props
             const changesObj = {}
             // Iterate through keys
             allKeys.forEach((key) => {
                 // If previous is different from current
-                if (previousProps.current[key] !== props[key]) {
+                if (prevObj.current[key] !== obj[key]) {
                     // Add to changesObj
                     changesObj[key] = {
-                        from: previousProps.current[key],
-                        to: props[key],
+                        from: prevObj.current[key],
+                        to: obj[key],
                     }
                 }
             })
             // If changesObj not empty then output to console
             if (Object.keys(changesObj).length) {
-                console.log('[why-did-you-update]', name, changesObj)
+                console.log('[why-did-you-update]', name, objectName, changesObj)
             }
         }
-        // Finally update previousProps with current props for next hook call
-        previousProps.current = props
+
+    }
+    useEffect(() => {
+        if (__DEV__){
+            logChanges(previousProps, props, 'props')
+            logChanges(previousState, state, 'state')
+            // Finally update previousProps with current props for next hook call
+            previousProps.current = props
+            previousState.current = state
+        }
     })
 }
