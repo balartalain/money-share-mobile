@@ -1,7 +1,7 @@
-import React,{memo, useContext, useCallback} from 'react'
+import React,{ useContext } from 'react'
 import { View, Text} from 'react-native'
 import { Divider } from 'react-native-elements'
-import { color, formatNumber, toBoolean } from './../utils'
+import { color, formatNumber } from './../utils'
 import { Context } from '../Store'
 const TotalAmount = ()=>{
     const [gloabalState] = useContext(Context)
@@ -12,11 +12,10 @@ const TotalAmount = ()=>{
         if (data && Object.keys(data).length > 0){
             Object.values(data[currentYear]).forEach(month=>{
                 month.days.forEach(d=>{          
-                    Object.values(d).forEach(exp=>{   
-                        if (typeof exp ==='object' && !toBoolean(exp.deleted)){
-                            let { currency, amount} = exp;
-                            (currency == 'USD')?totalUSD += parseFloat(amount): totalCUP += parseFloat(amount)
-                        }                        
+                    Object.values(d.expenses).forEach(exp=>{   
+                        let { currency, amount} = exp;
+                        (currency == 'USD')?totalUSD += parseFloat(amount): totalCUP += parseFloat(amount)
+                                                
                     })
                 })
             })

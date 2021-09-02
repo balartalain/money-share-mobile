@@ -1,46 +1,30 @@
 import React, {useState, useEffect, useRef, useContext, useCallback} from 'react'
 import { View, Text, Button} from 'react-native'
-import { useNavigation } from '@react-navigation/native'
 import PropTypes from 'prop-types'
 import { Context } from '../Store'
 import Heroku from '../controllers'
-import {equalsIntegers} from '../utils'
+import {equalsIntegers, toBoolean} from '../utils'
 import DateUtils from '../DateUtils'
 import Header from './Header'
 import Menu from './Menu'
 import TotalAmount from './TotalAmount'
 import MonthsTabView from './MonthsTabView'
 import ExpenseList from './ExpenseList'
-import useAsync from '../hooks/useAsync'
 import OverlayIndicator from './OverlayIndicator'
-//import whyDidYouRender from '@welldone-software/why-did-you-render'
 
-const keys = ['months', 'days', 'expenses']
-const objectToArray = (obj, level)=>{ 
-    if (level > 2){
-        return Object.keys(obj).map(key=>({
-            id:key, 
-            ...obj[key]
-        }))
-    }                   
-    return Object.keys(obj).map(key=>{
-        return {
-            id:key,
-            [keys[level]]: objectToArray(obj[key], level+1)
-        }
-    }
-        
-    )
+const compareDays = (d1,d2)=>{
+    return parseInt(d2)-parseInt(d1)
+}
+const compareDates = (date1, date2)=>{
+    return (new Date(date2) > new Date(date1))?1:0
 }
 const MainScreen = ({route}) => {    
-    const navigation = useNavigation()
     const { params } = route
     const [globalState, dispatch] = useContext(Context) 
     const [state, setState] = useState({status: 'idle', error: null})
     const [expensesView, setExpensesView] = useState('grid')
-    //const [errorMsg, setErrorMsg] = useState(null)
     const mountedRef = useRef(false)
-    const {currentUser, currentMonth, itemsToDelete} = globalState
+    const {currentUser, itemsToDelete} = globalState
     const _loadData = useCallback(async()=>{        
         try{
             //toggleOverlay('Obteniendo datos de '+currentUser.name.split(' ')[0])
@@ -58,17 +42,23 @@ const MainScreen = ({route}) => {
 
                 Object.keys(data).forEach(year => {                    
                     Object.keys(data[year]).forEach(month=>{
+                        const daysKey = Object.keys(data[year][month]).filter(day=>Object.values(data[year][month][day])
+                            .find(exp=>!toBoolean(exp.deleted)) != undefined)
                         data[year][month] = {
                             id: month,
-                            days: Object.keys(data[year][month]).map(day=>({
+                            days: daysKey.sort(compareDays).map(day=>({
                                 id: day,
-                                ...data[year][month][day]
+                                expenses: Object.keys(data[year][month][day])
+                                    .filter(exp=>!toBoolean(data[year][month][day][exp].deleted))
+                                    .sort(compareDates).map(exp=>({
+                                        id: exp,
+                                        ...data[year][month][day][exp]
+                                    }))
                             }))                         
                         }
                             
                     })
-                })                
-                                     
+                })                 
                 dispatch({type: 'LOAD_DATA', data, years})
                 setState({...state, status: 'success'})           
             }   
@@ -135,24 +125,9 @@ const MainScreen = ({route}) => {
     )
 }  
 MainScreen.propTypes = {
-    navigation: PropTypes.any
+    route: PropTypes.object
 }
 export default MainScreen
 MainScreen.whyDidYouRender  = {
-    logOnDifferentValues: true
+    logOnDifferentValues: false
 }
-
-// const keys = ['months', 'days']
-// const objectToArray = (obj, level)=>{ 
-//     if (level > 1){
-//         return obj
-//     }                   
-//     return Object.keys(obj).map(key=>{
-//         return {
-//             id:key,
-//             [keys[level]]: objectToArray(obj[key], level+1)
-//         }
-//     }
-                        
-//     )
-// }

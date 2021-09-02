@@ -14,12 +14,10 @@ import OverlayIndicator from './components/OverlayIndicator'
 import { OverlayContext } from './components/OverlayContext'
 import Users from './components/Users'
 import useOTAUpdate from './hooks/useOTAUpdate'
-import {equalsIntegers, color} from './utils'
-import DateUtils from './DateUtils'
+import {color} from './utils'
 import {CONNECTION_ERROR} from './ErrorConstants'
 import whyDidYouRender from '@welldone-software/why-did-you-render'
 import Store, { Context } from './Store'
-import { TouchableOpacity } from 'react-native'
 
 whyDidYouRender(React, {
     //onlyLogs: true,
@@ -147,7 +145,7 @@ const WrapperApp = () =>{
         )},[state.renderApp, state.loggedUser, overlay, otaUpdateStatus]) 
 }
 WrapperApp.whyDidYouRender = {
-    logOnDifferentValues: true
+    logOnDifferentValues: false
 }
 const App = () =>{
     //const [state, dispatch] = useContext(Context) 

@@ -4,22 +4,23 @@ import PropTypes from 'prop-types'
 import { Button } from 'react-native-elements'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import {Picker} from '@react-native-picker/picker'
+import { useNavigation } from '@react-navigation/native'
 import {color} from '../utils'
-import { useUserDataContextHook } from './UserDataContext'
 import DateUtils from '../DateUtils'
-import { OverlayContext } from './OverlayContext'
-
-const AddExpense = ({navigation, route}) => {
-    const {params} = route
-    const [currentDate, setCurrentDate] = useState(new Date(params.year, params.month, params.day))
+import OverlayIndicator from './OverlayIndicator'
+import Heroku from '../controllers'
+import { Context } from '../Store'
+const AddExpense = () => {
+    const [globalState, dispatch] = useContext(Context)
+    const navigation = useNavigation()
+    const [status, setStatus] = useState('idle')
+    const [currentDate, setCurrentDate] = useState(new Date(globalState.currentYear, globalState.currentMonth-1, new Date().getDate()))
     const [showDatePicker, setshowDatePicker] = useState(false)
     const [selectedCurrency, setSelectedCurrency] = useState('CUP')
     const [amount, setAmount] = useState()
     const [concept, setConcept] = useState()
     const [comment, setComment] = useState()
-    const {showOverlay, hideOverlay} = useContext(OverlayContext)
-    const {addExpense} = useUserDataContextHook()
-
+    
     const onChange = (event, selectedDate) => {
     //const currentDate = selectedDate || currentDate;
         setshowDatePicker(Platform.OS === 'ios')
@@ -34,9 +35,7 @@ const AddExpense = ({navigation, route}) => {
                 throw new Error('Tiene que introducir un concepto de gasto')
             }
             const created = Date.now()
-            const newExpense = {
-                year: currentDate.getFullYear(),
-                month: currentDate.getMonth()+1, //("0" + (currentDate.getMonth()+1)).slice(-2),
+            const newExpense = {                
                 day: ('0' + currentDate.getDate()).slice(-2),
                 created: created,
                 updated: created,
@@ -45,17 +44,18 @@ const AddExpense = ({navigation, route}) => {
                 comment: comment,
                 currency: selectedCurrency        
             }
-            showOverlay('Guardando...')    
-            await addExpense(newExpense)
-            hideOverlay(false)
-            navigation.navigate('Home', { newExpense })
+            setStatus('pending')
+            await Heroku.createExpense(globalState.currentUser.id, newExpense)
+            dispatch({type: 'ADD_EXPENSE', expense: newExpense})
+            //setStatus('success') 
+            navigation.navigate('Home')
         }
         catch(err){
-            hideOverlay(false)
+            setStatus('error')
             alert(err)
         }
     }
-
+    
     return (
         <View style={{flex:1}}>
             <View style={{flex:1}}>
@@ -85,7 +85,7 @@ const AddExpense = ({navigation, route}) => {
                     borderTopWidth: 1,
                     borderTopColor: 'rgb(216, 216, 216)'  
                 }]} placeholder='Cantidad' 
-                onChangeText={(text) => setAmount(parseFloat(text)) }  
+                onChangeText={(text) =>setAmount(parseFloat(text)) }  
                 />
                 <TextInput style={styles.field} placeholder='Concepto'
                     onChangeText={(text) => setConcept(text) }
@@ -127,11 +127,13 @@ const AddExpense = ({navigation, route}) => {
                     onPress={()=>navigation.goBack()}
                 />
             </View>
+            { status === 'pending' && 
+                <OverlayIndicator overlayLabel='Guardando...' />
+            }
         </View>
     )
 }
 AddExpense.propTypes = {
-    navigation: PropTypes.object.isRequired,
     route: PropTypes.object
 }
 export default AddExpense 

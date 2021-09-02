@@ -1,25 +1,16 @@
 import React from 'react'
-import { View, ScrollView, Text, StyleSheet, Dimensions, TouchableOpacity, Animated, FlatList} from 'react-native'
+import { View, StyleSheet, Dimensions, FlatList} from 'react-native'
 import { TabView, TabBar } from 'react-native-tab-view'
+import PropTypes from 'prop-types'
 import { useNavigation } from '@react-navigation/native' 
-import { View as MotiView, AnimatePresence } from 'moti'
 import { Context } from '../Store'
 import { AntDesign } from '@expo/vector-icons'
 import Ripple from 'react-native-material-ripple'
 import DayCard from './DayCard'
-import {color, toBoolean} from '../utils'
+import {color} from '../utils'
 import DateUtils from '../DateUtils'
-import shallowCompare from '../shallowEquals'
-import { useAnimation } from '../hooks/useAnimation'
+import useWhyDidYouUpdate from '../hooks/useWhyDidYouUpdate'
 
-// This is our placeholder component for the tabs
-// This will be rendered when a tab isn't loaded yet
-// You could also customize it to render different content depending on the route
-const LazyPlaceholder = ({ route }) => (
-    <View style={{flex:1, justifyContent: 'center', alignItems: 'center'}}>
-        <Text>Loading {route.title}…</Text>
-    </View>
-)
 const  renderTabBar = (props)=>{
     return <TabBar   
         {...props}    
@@ -43,9 +34,10 @@ const keyExtractor=(item) =>{
 } 
 const routes = DateUtils.MONTH_NAMES.map((month, i)=>({key:`route-${i}`, title:month}))
 
-export default function MonthsTabView(props) {
+const MonthsTabView = (props)=> {
     const navigation = useNavigation()
     const [globalState, dispatch] = React.useContext(Context)
+    useWhyDidYouUpdate('MonthsTabView', props, globalState)
     const index = globalState.currentMonth - 1 
 
     const _handleIndexChange = (index)=>{
@@ -89,22 +81,27 @@ export default function MonthsTabView(props) {
             </View>        
         )
     }
-    return React.useMemo(()=>{   
-        console.log('Month Tab View.js '+ globalState.currentMonth)
-        return (
-            <TabView
+    //return React.useMemo(()=>{   
+    console.log('Month Tab View.js '+ globalState.currentMonth)
+    return (
+        <TabView
             //lazy
-                tabBarPosition='bottom' 
-                renderTabBar={renderTabBar}
-                navigationState={{index, routes }}
-                renderScene={renderScene}       
-                swipeEnabled = { true }
-                onIndexChange={_handleIndexChange}
-                initialLayout={{ width: Dimensions.get('window').width }}
-                style={styles.container}
-            />
-        )},[globalState.currentMonth, globalState.currentYear, globalState.currenUser])
+            tabBarPosition='bottom' 
+            renderTabBar={renderTabBar}
+            navigationState={{index, routes }}
+            renderScene={renderScene}       
+            swipeEnabled = { true }
+            onIndexChange={_handleIndexChange}
+            initialLayout={{ width: Dimensions.get('window').width }}
+            style={styles.container}
+        />
+    )/*},[globalState.data, globalState.currentMonth, globalState.currentYear, globalState.currenUser])*/
 }
+MonthsTabView.propTypes = {
+    onChangeExpenseView: PropTypes.func
+}
+export default MonthsTabView
+//export default React.memo(MonthsTabView)
 const styles = StyleSheet.create({
     scene: {
         flex: 1,
@@ -128,6 +125,3 @@ const styles = StyleSheet.create({
         color: 'white',
     }
 })
-MonthsTabView.whyDidYouRender  = {
-    logOnDifferentValues: true
-}

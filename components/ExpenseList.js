@@ -1,65 +1,25 @@
-import React, {useState, useEffect, useContext} from 'react'
-import { ScrollView, View, TouchableOpacity, Text, StyleSheet } from 'react-native'
+import React, {useState, useContext} from 'react'
+import { ScrollView, FlatList, View, TouchableOpacity, Text, StyleSheet } from 'react-native'
 import PropTypes from 'prop-types'
 import { ListItem } from 'react-native-elements'
 import Ripple from 'react-native-material-ripple'
 import { AntDesign } from '@expo/vector-icons' 
 import Collapsible from 'react-native-collapsible'
 import {Context} from '../Store'
-import {color, formatNumber, toBoolean} from '../utils'
+import {color, formatNumber} from '../utils'
 import DateUtils from '../DateUtils'
-const transformObjectToArray = (data)=>{    
-    const getExpenses = (d)=>{
-        let expenses = []
-        Object.keys(d).sort().reverse().forEach(time=>{
-            if (!toBoolean(d[time].deleted)){
-                let expense={}
-                Object.keys(d[time]).forEach(k=>{
-                    expense[k] = d[time][k]
-                })
-                expense.create = time
-                expenses.push(expense)
-            }
-        })  
-        return expenses  
-    }
-    const getDays = (m)=>{
-        let days = []
-        Object.keys(m).sort().reverse().forEach(d=>{
-            const expenses = getExpenses(m[d])
-            if (expenses.length){
-                days.push({
-                    day:d,
-                    expenses
-                })
-            }
-        })  
-        return days     
-    }
-    let result = []    
-    Object.keys(data).sort().reverse().forEach(m=>{
-        const days = getDays(data[m])
-        if (days.length){
-            result.push({
-                month: m,
-                days: days
-            })   
-        }
-    })
-    return result
-}
+
 const ExpenseList = (props)=>{
-    const [globalState, dispatch] = useContext(Context)
-    const [data, setData] = useState(null)
+    const [globalState] = useContext(Context)
     const {onChangeExpenseView} = props
     const [active, setActive] = useState(-1)
     
-    useEffect(()=>{
-        if (globalState.data) {
-            setActive(-1)
-            setData(transformObjectToArray(globalState.data[globalState.currentYear]))  
-        }
-    }, [globalState.currentYear])
+    // useEffect(()=>{
+    //     if (globalState.data) {
+    //         setActive(-1)
+    //         setData(transformObjectToArray(globalState.data[globalState.currentYear]))  
+    //     }
+    // }, [globalState.currentYear])
 
     const toggleExpanded = (index)=>{
         setActive( active === index?-1:index)
@@ -81,38 +41,41 @@ const ExpenseList = (props)=>{
             totalUSD, totalCUP
         }
     }
-    const RenderItem = ({ item }) => {
-        return item.days.map((day)=>{
-            return  day.expenses.map((exp, i)=>(
-                <ListItem key={i} style={{
-                    marginBottom: 3,
-                    borderLeftWidth: 5,
-                    borderLeftColor: `${exp.amount < 0?'red': color.primaryGreen}`
-                }}>
-                    <View style={{alignItems: 'center'}}>
-                        <Text>{('0' + day.day).slice(-2)}</Text>
-                        <Text>{DateUtils.getDayOfWeek(globalState.currentYear, globalState.currentMonth, day.day).substring(0,3)}</Text>
-                    </View>
-                    <ListItem.Content>
-                        <ListItem.Title>{exp.concept}</ListItem.Title>
-                        <ListItem.Subtitle>{exp.comment}</ListItem.Subtitle>
-                    </ListItem.Content>
-                    <View><Text style={{
-                        color: `${exp.amount < 0?'red': color.primaryGreen}`
-                    }}>{formatNumber(exp.amount)} {exp.currency}</Text></View>
-                </ListItem>
-            ))                    
-        })
-            
+    const renderItem = ({item}) => {
+        if (item.expenses.length === 0){
+            return <View style={{alignItems: 'center', padding: 20}}><Text>No hay registros</Text></View>
+        }
+        return item.expenses.map((exp, i)=>(
+            <ListItem key={i} style={{
+                marginBottom: 3,
+                borderLeftWidth: 5,
+                borderLeftColor: `${exp.amount < 0?'red': color.primaryGreen}`
+            }}>
+                <View style={{alignItems: 'center'}}>
+                    <Text>{('0' + item.id).slice(-2)}</Text>
+                    <Text>{DateUtils.getDayOfWeek(globalState.currentYear, globalState.currentMonth, item.id).substring(0,3)}</Text>
+                </View>
+                <ListItem.Content>
+                    <ListItem.Title>{exp.concept}</ListItem.Title>
+                    <ListItem.Subtitle>{exp.comment}</ListItem.Subtitle>
+                </ListItem.Content>
+                <View><Text style={{
+                    color: `${exp.amount < 0?'red': color.primaryGreen}`
+                }}>{formatNumber(exp.amount)} {exp.currency}</Text></View>
+            </ListItem>
+        ))
     }
+    const keyExtractor=(item) =>{
+        return item.id.toString()
+    } 
     //https://github.com/oblador/react-native-collapsible
-    return (
-        
+    const data = globalState.data[globalState.currentYear]
+    return (        
         <View style={{flex:1}}>
-            { data && data.length ? 
+            { Object.keys(data).length > 0 ? 
                 <ScrollView>
-                    {data.map((month, i)=>{
-                        const {totalUSD, totalCUP} = total(month)
+                    {Object.keys(data).sort().reverse().map((month, i)=>{
+                        const {totalUSD, totalCUP} = total(data[month])
                         return <View key={i}>
                             <TouchableOpacity onPress={()=>toggleExpanded(i)}>
                                 <ListItem bottomDivider topDivider >
@@ -120,7 +83,7 @@ const ExpenseList = (props)=>{
                                         flexDirection:'row',
                                         justifyContent: 'space-between'
                                     }}>
-                                        <ListItem.Title>{DateUtils.MONTH_NAMES[month.month-1]}</ListItem.Title>
+                                        <ListItem.Title>{DateUtils.MONTH_NAMES[month-1]}</ListItem.Title>
                                         <View style={{alignItems:'flex-end'}}>
                                             <Text style={{
                                                 color: `${totalUSD < 0?'red': color.primaryGreen}`
@@ -133,7 +96,11 @@ const ExpenseList = (props)=>{
                                 </ListItem>
                             </TouchableOpacity>
                             <Collapsible collapsed={i !== active} align="center">
-                                <RenderItem key={i+'-'+i} item={month} />                            
+                                <FlatList
+                                    data={data[month].days}
+                                    renderItem={renderItem}
+                                    keyExtractor={keyExtractor}
+                                />                           
                             </Collapsible>
                         </View>
                     })

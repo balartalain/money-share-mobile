@@ -1,5 +1,8 @@
 import DateUtils from '../DateUtils'
 
+const compareDays = (d1,d2)=>{
+    return parseInt(d2)-parseInt(d1)
+}
 
 const Reducer = (state, action) => {
     switch (action.type) {
@@ -71,12 +74,9 @@ const Reducer = (state, action) => {
         }
     case 'DELETE_ITEMS':{
         const data = {...state.data}
-        data[state.currentYear][state.currentMonth].days.forEach(element => {
-            Object.keys(element).forEach(created=>{
-                if (state.itemsToDelete.includes(created)){
-                    element[created].deleted = true
-                }
-            })
+        data[state.currentYear][state.currentMonth].days.forEach(day => {
+            const newExpenses = day.expenses.filter(exp=>!state.itemsToDelete.includes(exp.id)) 
+            day.expenses = newExpenses
         })
         return {
             ...state,
@@ -89,7 +89,36 @@ const Reducer = (state, action) => {
             ...state,
             itemsToDelete: []
         }    
-        
+    case 'ADD_EXPENSE': {
+        const _data = {...state.data}
+        const {expense} = action
+        if (!_data[state.currentYear][state.currentMonth]){
+            _data[state.currentYear][state.currentMonth] = {}
+            _data[state.currentYear][state.currentMonth].days = []
+        }
+        const days = _data[state.currentYear][state.currentMonth].days 
+        let day = days.find(d=>d.id===expense.day)
+        if (!day){
+            day = {
+                id:expense.day,
+                expenses: []
+            }            
+            days.push(day)
+            days.sort(compareDays)
+        } 
+        day.expenses.unshift({
+            id: expense.created,
+            amount: expense.amount,
+            concept: expense.concept,
+            comment: expense.comment,
+            currency: expense.currency,
+            updated: expense.created
+        })
+        return {
+            ...state,
+            data: _data
+        }
+    }    
     case 'LOGGOUT':
         return {
             ...state,

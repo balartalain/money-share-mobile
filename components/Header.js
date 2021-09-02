@@ -11,7 +11,7 @@ import Heroku from '../controllers'
 import { CONNECTION_ERROR } from '../ErrorConstants'
 const { width } = Dimensions.get('window')
 
-const Delete = (props) =>{
+const Delete = () =>{
     const [state, dispatch] = useContext(Context) 
     // const {deleteItems, markedItemsToDelete, setMarkedItemsToDelete} = useUserDataContextHook()
     const [trashColor, setTrashColor] = useState('white')
@@ -19,12 +19,12 @@ const Delete = (props) =>{
 
     const deleteItems = ()=>{
         const deleteAsync = state.itemsToDelete.map(created=>{ 
-            const day = state.data[currentYear][currentMonth].days.find(day=>Object.keys(day).find(e=>e===created)).id        
+            const day = state.data[currentYear][currentMonth].days.find(day=>day.expenses.find(exp=>exp.id===created)).id        
          
             const expense = {
                 year: currentYear,
                 month: currentMonth,
-                day,
+                day:day.id,
                 created
             }
             return Heroku.deleteExpense(currentUser.id, expense)
@@ -111,6 +111,11 @@ const Header = (props)=>{
 
 //     return prevProps.currentUser.id === nextProps.currentUser.id
 // }
+Header.propTypes = {
+    props: PropTypes.object,
+    currentUser: PropTypes.object,
+    itemsToDelete: PropTypes.array
+}
 export default React.memo(Header)
 Header.whyDidYouRender  = {
     logOnDifferentValues: true
