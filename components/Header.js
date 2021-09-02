@@ -19,12 +19,11 @@ const Delete = () =>{
 
     const deleteItems = ()=>{
         const deleteAsync = state.itemsToDelete.map(created=>{ 
-            const day = state.data[currentYear][currentMonth].days.find(day=>day.expenses.find(exp=>exp.id===created)).id        
-         
+            const day = state.data[currentYear][currentMonth].days.find(day=>day.expenses.find(exp=>exp.id===created)).id                    
             const expense = {
                 year: currentYear,
                 month: currentMonth,
-                day:day.id,
+                day,
                 created
             }
             return Heroku.deleteExpense(currentUser.id, expense)

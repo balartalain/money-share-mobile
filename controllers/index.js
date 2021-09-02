@@ -17,7 +17,6 @@ const Heroku = {
         // if (!state.isConnected){
         //     throw new Error(CONECTION_ERROR)
         // }, 
-        
         let response = await herokuAPI.get(`/get-users?env=${ENV}`)
         return response
     },
@@ -27,7 +26,6 @@ const Heroku = {
         return response
     },
     createExpense: async(userId, data)=>{  
-        
         let response = await herokuAPI.put(`/${userId}/add-expense?env=${ENV}`, data)
         return response     
     },

@@ -35,7 +35,9 @@ const AddExpense = () => {
                 throw new Error('Tiene que introducir un concepto de gasto')
             }
             const created = Date.now()
-            const newExpense = {                
+            const newExpense = {       
+                year: globalState.currentYear,
+                month: globalState.currentMonth,         
                 day: ('0' + currentDate.getDate()).slice(-2),
                 created: created,
                 updated: created,

@@ -114,6 +114,7 @@ const Reducer = (state, action) => {
             currency: expense.currency,
             updated: expense.created
         })
+        _data[state.currentYear][state.currentMonth].days = [...days]
         return {
             ...state,
             data: _data

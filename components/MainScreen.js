@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef, useContext, useCallback} from 'react'
-import { View, Text, Button} from 'react-native'
+import { View, Text } from 'react-native'
+import { Button } from 'react-native-elements'
 import PropTypes from 'prop-types'
 import { Context } from '../Store'
 import Heroku from '../controllers'
@@ -63,8 +64,8 @@ const MainScreen = ({route}) => {
                 setState({...state, status: 'success'})           
             }   
         } 
-        catch(error){            
-            setState({...state, status: 'error', error})             
+        catch(error){                        
+            setState({...state, status: 'error', error:'Error de conexión'})             
         }       
     }, [currentUser])
 
@@ -112,7 +113,7 @@ const MainScreen = ({route}) => {
                         onPress={_loadData}
                         buttonStyle={{
                             backgroundColor:'red',
-                            paddingVertical: 15
+                            paddingVertical: 10
                         }}
                     />
                 </View>                                         

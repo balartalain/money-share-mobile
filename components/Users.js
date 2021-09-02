@@ -1,12 +1,10 @@
 import React, {useState, useEffect, useRef, useContext} from 'react'
 import {  View, TouchableOpacity, ScrollView, Text } from 'react-native'
 import { ListItem, CheckBox, Button } from 'react-native-elements'
+import { useNavigation } from '@react-navigation/native' 
 import Heroku from '../controllers/index'
 import useAsync from '../hooks/useAsync'
-import { OverlayContext } from './OverlayContext'
-import { useUserDataContextHook } from './UserDataContext'
 import {toBoolean} from '../utils'
-import AsyncStorageHelper  from '../AsyncStorageHelper'
 import OverlayIndicator from './OverlayIndicator'
 import whyDidYouRender from '@welldone-software/why-did-you-render'
 import { Context } from '../Store'
@@ -17,11 +15,12 @@ whyDidYouRender(React, {
     diffNameColor: 'darkturquoise'
 })
 
-const Users = ({navigation})=>{
+const Users = ()=>{
+    const navigation = useNavigation()
     const [globalState] = useContext(Context)
     const [users, setUsers] = useState(null)
-    const [ execute, status, value, error ] = useAsync()
-    const [ setSupervisor, statusSP, valueSP, errorSP ] = useAsync()
+    const [ execute, status ] = useAsync()
+    const [ setSupervisor, statusSP, , errorSP ] = useAsync()
     //const {showOverlay, hideOverlay} = useContext(OverlayContext)
     const mountedRef = useRef(false)
     const scrollOffset = useRef(0)
@@ -31,7 +30,9 @@ const Users = ({navigation})=>{
         //showOverlay('Obteniendo usuarios...')
         //const me = await AsyncStorageHelper.getObject('me')
         await execute(Heroku.getUsers, [], (response)=>{
-            setUsers(response.data)
+            if (mountedRef.current){
+                setUsers(response.data)
+            }
         })        
               
     }
@@ -48,7 +49,7 @@ const Users = ({navigation})=>{
         }
         const supervisor = !toBoolean(users[id].supervisor)
         // showOverlay('Cambiando permisos de usuario...')p
-        await setSupervisor(Heroku.setSupervisor, [id], ()=>{
+        await setSupervisor(Heroku.setSupervisor, [id, {'isSupervisor': supervisor}], ()=>{
             const _users = {... users}
             _users[id].supervisor = supervisor
             setUsers(_users)
@@ -110,22 +111,22 @@ const Users = ({navigation})=>{
             }
             { status === 'error' && (
                 <View style={{flex:1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{marginBottom: 10}}>{error.message}</Text>
+                    <Text style={{marginBottom: 10}}>Error de conexión</Text>
                     <Button title="Volver a intentarlo" 
                         onPress={load}
                         buttonStyle={{
                             backgroundColor:'red',
-                            paddingVertical: 15
+                            paddingVertical: 10
                         }}
                     />
                 </View>                                         
             )
             }
             { statusSP === 'pending' && 
-                <OverlayIndicator overlayLabel={'Guardando cambios'} />
+                <OverlayIndicator overlayLabel={'Cambiando permisos de usuario'} />
             }
             { statusSP === 'error' && 
-                <View><Text>{alert(errorSP.message)}</Text></View>
+                <View><Text>{alert(errorSP)}</Text></View>
             }
             <Button title="Cerrar Sesión" 
                 onPress={logout}

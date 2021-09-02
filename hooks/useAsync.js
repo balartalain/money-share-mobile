@@ -4,7 +4,7 @@ Another example would be a form where you want to disable the submit button when
 and then display either a success or error message when it completes. */
 
 // https://usehooks.com/
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 
 function dispatch(fn, args) {
     fn = (typeof fn == 'function') ? fn : window[fn]  // Allow fn to be a function object or the name of a global function
@@ -31,7 +31,7 @@ export default function useAsync(){
                 setValue(response)
                 setStatus('success')
             })
-            .catch((error) => {                             
+            .catch((error) => {                   
                 setError(error)
                 setStatus('error')
             })

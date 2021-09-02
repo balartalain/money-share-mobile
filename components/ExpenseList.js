@@ -96,11 +96,15 @@ const ExpenseList = (props)=>{
                                 </ListItem>
                             </TouchableOpacity>
                             <Collapsible collapsed={i !== active} align="center">
-                                <FlatList
-                                    data={data[month].days}
-                                    renderItem={renderItem}
-                                    keyExtractor={keyExtractor}
-                                />                           
+                                { data[month].days.length === 0?
+                                    <View style={{alignItems: 'center', padding: 20}}><Text>No hay registros</Text></View>
+                                    :
+                                    <FlatList
+                                        data={data[month].days}
+                                        renderItem={renderItem}
+                                        keyExtractor={keyExtractor}
+                                    /> 
+                                }                          
                             </Collapsible>
                         </View>
                     })
