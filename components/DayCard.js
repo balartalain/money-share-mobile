@@ -10,36 +10,64 @@ import useWhyDidYouUpdate from '../hooks/useWhyDidYouUpdate'
 
 const Expense = ({expense})=>{
     const [globalState, dispatch] = React.useContext(Context)
-    //const [isSelected, setSelected] = useState(false)
-    const isItemSelected = ()=>globalState.itemsToDelete.includes(expense.id)
-    const onPressItem=()=>{
-        if (globalState.itemsToDelete.length > 0){
-            if (isItemSelected()){
-                dispatch({type: 'UNDO_ITEM_TO_DELETE', created: expense.id})
-            }
-            else{
-                dispatch({type: 'ADD_ITEM_TO_DELETE',  created: expense.id})                
-            }            
+    const [preSelect, setPreselect] = React.useState({s:false})
+    let selected = globalState.itemsToDelete.includes(expense.id)
+    React.useEffect(() => {
+        if (preSelect.s && globalState.itemsToDelete.length > 0){
+            toogleSelected()
+        }
+    }, [preSelect])
+    const toogleSelected = ()=>{
+        selected = !selected
+        if (selected){
+            dispatch({type: 'ADD_ITEM_TO_DELETE',  created: expense.id})
+        }
+        else{
+            dispatch({type: 'UNDO_ITEM_TO_DELETE', created: expense.id})
         }
     }
+    const onPress = ()=>{
+        setPreselect(preSelect=>({s:true}))
+        // debugger
+        // if (globalState.itemsToDelete.length > 0){
+        //     toogleSelected()
+        // }
+    }
+    console.log(`Expense: ${expense.concept} - ${globalState.itemsToDelete.length}`)
+    return <MemoizedExpense expense={expense} selected={selected} 
+        onPress={onPress} 
+        toogleSelected={toogleSelected}/>      
+}
+Expense.propTypes = {
+    expense: PropTypes.object
+}
+function areEqual(prevProps, nextProps) {
+    //return false
+    return prevProps.expense.id === nextProps.expense.id &&
+             prevProps.selected === nextProps.selected
+
+}
+const MemoizedExpense = React.memo(({expense, selected, toogleSelected, onPress})=>{
+    useWhyDidYouUpdate('Memoized Expense', {onPress}) 
+   
     const onLongPressItem=()=>{
-        if (!isItemSelected()){
+        if (!selected){
             Vibration.vibrate(50)
-            dispatch({type: 'ADD_ITEM_TO_DELETE', created: expense.id}) 
+            toogleSelected() 
         }        
     }
-
+    console.log('Memoize Expense '+expense.id)
     return (
         <ListItem
             Component={Ripple} 
             containerStyle={{
-                backgroundColor: isItemSelected() ?'rgba(185,185,190,0.2)':'white'
+                backgroundColor: selected ?'rgba(185,185,190,0.2)':'white'
             }} 
             style={[styles.listItem, 
                 {borderLeftColor: `${expense.amount < 0?'red': color.primaryGreen}`                            
                 }]
             }
-            onPress={onPressItem}
+            onPress={onPress}
             onLongPress={onLongPressItem}
         >
             <ListItem.Content>
@@ -53,16 +81,19 @@ const Expense = ({expense})=>{
             </View>
         </ListItem>
     )
+}, areEqual)
+MemoizedExpense.propTypes = {
+    expense: PropTypes.object,
+    selected: PropTypes.bool,
+    toogleSelected: PropTypes.func,
+    countSelected: PropTypes.number
 }
-Expense.propTypes = {
-    expense: PropTypes.object
-}
+MemoizedExpense.displayName = 'MemoizeExpense'
+
 const DayCard = (props)=> {
     const {day} = props
     const [globalState] = React.useContext(Context)
-    useWhyDidYouUpdate('DayCard', props, globalState) 
-
-    console.log('Day Card.js') 
+    
     const dayOfWeek = DateUtils.getDayOfWeek(globalState.currentYear, globalState.currentMonth-1, parseInt(day.id)).substring(0,3)   
     if (day.expenses.length === 0) return null
     return (

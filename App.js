@@ -105,7 +105,7 @@ const WrapperApp = () =>{
             <>                 
                 <View style={styles.top}></View> 
                 <OverlayContext.Provider value={{hideOverlay, showOverlay}}>
-                    { state.loggedUser && (                    
+                    { state.renderApp && state.loggedUser && (                    
                         <NavigationContainer>
                             <Stack.Navigator
                             >

@@ -11,32 +11,10 @@ import Heroku from '../controllers'
 import { CONNECTION_ERROR } from '../ErrorConstants'
 const { width } = Dimensions.get('window')
 
-const Delete = () =>{
-    const [state, dispatch] = useContext(Context) 
+const InnerDelete = ({ itemsToDelete, onDeleteItems, onCancelDelete }) =>{
     // const {deleteItems, markedItemsToDelete, setMarkedItemsToDelete} = useUserDataContextHook()
     const [trashColor, setTrashColor] = useState('white')
-    const { currentUser, currentYear, currentMonth, itemsToDelete } = state
-
-    const deleteItems = ()=>{
-        const deleteAsync = state.itemsToDelete.map(created=>{ 
-            const day = state.data[currentYear][currentMonth].days.find(day=>day.expenses.find(exp=>exp.id===created)).id                    
-            const expense = {
-                year: currentYear,
-                month: currentMonth,
-                day,
-                created
-            }
-            return Heroku.deleteExpense(currentUser.id, expense)
-        })
-
-        Promise.all(deleteAsync).then(() => {
-            dispatch({type:'DELETE_ITEMS'})    
-        }).catch((err) => {
-            console.log(err)
-            dispatch({type: 'CLEAR_ITEMS_TO_DELETE'})    
-            setTimeout(()=> alert(CONNECTION_ERROR), 100)          
-        }) 
-    }
+    
     useEffect(() => {
         if (itemsToDelete.length > 0){
             setTrashColor('orange')
@@ -61,18 +39,62 @@ const Delete = () =>{
                 backgroundColor: color.primaryGreen
                                
             }}>
-            <Ripple onPress={()=>dispatch({type:'CLEAR_ITEMS_TO_DELETE'})} >
+            <Ripple onPress={onCancelDelete} >
                 <AntDesign name="arrowleft" size={24} color='white' />
             </Ripple>
-            <Ripple onPress={()=>deleteItems()} >
+            <Ripple onPress={onDeleteItems} >
                 <AntDesign name="delete" size={24} color={trashColor} />
             </Ripple>
         </View>        
         
     )}
+InnerDelete.propTypes = {
+    onDeleteItems: PropTypes.func,
+    onCancelDelete: PropTypes.func,
+    itemsToDelete: PropTypes.array
+}
+const Delete = ()=>{
+    const [state, dispatch] = useContext(Context) 
+    const {currentUser, currentYear, currentMonth, itemsToDelete} = state
+    const onCancelDelete=()=>{
+        dispatch({type:'CLEAR_ITEMS_TO_DELETE'})
+    }
+    const onDeleteItems = ()=>{
+        const deleteAsync = state.itemsToDelete.map(created=>{ 
+            const day = state.data[currentYear][currentMonth].days.find(day=>day.expenses.find(exp=>exp.id===created)).id                    
+            const expense = {
+                year: currentYear,
+                month: currentMonth,
+                day,
+                created
+            }
+            return Heroku.deleteExpense(currentUser.id, expense)
+        })
+
+        Promise.all(deleteAsync).then(() => {
+            dispatch({type:'DELETE_ITEMS'})    
+        }).catch((err) => {
+            console.log(err)
+            dispatch({type: 'CLEAR_ITEMS_TO_DELETE'})    
+            setTimeout(()=> alert(CONNECTION_ERROR), 100)          
+        }) 
+    }
+    return <AnimatedView style={{
+        top:0, 
+        left: 0,           
+        height: 65,        
+        width: width,
+        position: 'absolute',
+        zIndex:1
+        
+    }} visible={ itemsToDelete.length > 0}>
+        <InnerDelete itemsToDelete={itemsToDelete} onDeleteItems={onDeleteItems} onCancelDelete={onCancelDelete}/>
+    </AnimatedView> 
+}
+
 const Header = (props)=>{  
     const navigation = useNavigation()    
-    const { currentUser, itemsToDelete } = props
+    const { currentUser } = props
     console.log('Header')
     return (
         <View style={{   
@@ -81,15 +103,7 @@ const Header = (props)=>{
             height:65
             
         }}>  
-            <AnimatedView style={{
-                top:0, 
-                left: 0,           
-                height: 65,        
-                width: width,
-                position: 'absolute',
-                zIndex:1
-                
-            }} visible={ itemsToDelete.length > 0}><Delete/></AnimatedView> 
+            <Delete/> 
             <View style={{
                 flex:1,
                 flexDirection: 'row',   

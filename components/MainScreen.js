@@ -12,20 +12,20 @@ import TotalAmount from './TotalAmount'
 import MonthsTabView from './MonthsTabView'
 import ExpenseList from './ExpenseList'
 import OverlayIndicator from './OverlayIndicator'
-
+import useWhyDidYouUpdate from '../hooks/useWhyDidYouUpdate'
 const compareDays = (d1,d2)=>{
     return parseInt(d2)-parseInt(d1)
 }
 const compareDates = (date1, date2)=>{
     return (new Date(date2) > new Date(date1))?1:0
 }
-const MainScreen = ({route}) => {    
-    const { params } = route
-    const [globalState, dispatch] = useContext(Context) 
+const InnerMainScreen = React.memo(({currentUser, route, onLoadData, onChangeCurrentUser})=>{
+    const {params} = route
     const [state, setState] = useState({status: 'idle', error: null})
     const [expensesView, setExpensesView] = useState('grid')
     const mountedRef = useRef(false)
-    const {currentUser, itemsToDelete} = globalState
+    useWhyDidYouUpdate('InnerMainScreen', {currentUser, route, onLoadData, onChangeCurrentUser}, state)
+
     const _loadData = useCallback(async()=>{        
         try{
             //toggleOverlay('Obteniendo datos de '+currentUser.name.split(' ')[0])
@@ -60,7 +60,7 @@ const MainScreen = ({route}) => {
                             
                     })
                 })                 
-                dispatch({type: 'LOAD_DATA', data, years})
+                onLoadData(data, years)                
                 setState({...state, status: 'success'})           
             }   
         } 
@@ -68,7 +68,6 @@ const MainScreen = ({route}) => {
             setState({...state, status: 'error', error:'Error de conexión'})             
         }       
     }, [currentUser])
-
     useEffect(()=>{
         mountedRef.current = true
         _loadData()
@@ -78,8 +77,8 @@ const MainScreen = ({route}) => {
     }, [currentUser])
 
     useEffect(()=>{
-        if (params && params.changeUser && params.changeUser.id !== currentUser.id){             
-            dispatch({type: 'SET_CURRENT_USER', user: params.changeUser })
+        if (params && params.changeUser && params.changeUser.id !== currentUser.id){ 
+            onChangeCurrentUser(params.changeUser)                        
             params.changeUser = null
             
         }
@@ -88,11 +87,12 @@ const MainScreen = ({route}) => {
     const onChangeExpenseView = useCallback(()=>{
         setExpensesView(expensesView==='list'?'grid':'list')
     }, [expensesView])
-    console.log('Main Screen')
+
+    console.log('Memoized Main Screen')
     const {status, error} = state
     return (      
         <View style={{flex:1}}>
-            <Header currentUser={currentUser} itemsToDelete={itemsToDelete} />
+            <Header currentUser={currentUser} />
             { status === 'success' &&
             <>
                 <Menu /> 
@@ -124,11 +124,34 @@ const MainScreen = ({route}) => {
             }
         </View>
     )
+}, areEqual)
+function areEqual(prevProps, nextProps) {
+    //return false
+    return prevProps.currentUser.id === nextProps.currentUser.id
+
+}
+InnerMainScreen.propTypes = {
+    route: PropTypes.object,
+    currentUser: PropTypes.object,
+    onLoadData: PropTypes.func,
+    onChangeCurrentUser: PropTypes.func
+}
+const MainScreen = ({route}) => {    
+    const [globalState, dispatch] = useContext(Context) 
+    const onLoadData = (data, years)=>{
+        dispatch({type: 'LOAD_DATA', data, years})
+    }    
+    const onChangeCurrentUser = (user)=>{
+        dispatch({type: 'SET_CURRENT_USER', user })
+    }
+    console.log('Main Screen')
+    return <InnerMainScreen currentUser={globalState.currentUser} route={route} 
+        onLoadData={onLoadData}  
+        onChangeCurrentUser={onChangeCurrentUser}
+    />
+    
 }  
 MainScreen.propTypes = {
     route: PropTypes.object
 }
 export default MainScreen
-MainScreen.whyDidYouRender  = {
-    logOnDifferentValues: false
-}

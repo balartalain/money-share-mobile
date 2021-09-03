@@ -34,20 +34,19 @@ const keyExtractor=(item) =>{
 } 
 const routes = DateUtils.MONTH_NAMES.map((month, i)=>({key:`route-${i}`, title:month}))
 
-const MonthsTabView = (props)=> {
+const InnerMonthsTabView =React.memo(({ monthData, currentYear, currentMonth, itemsToDelete, onIndexChange, onChangeExpenseView })=> {
     const navigation = useNavigation()
-    const [globalState, dispatch] = React.useContext(Context)
-    useWhyDidYouUpdate('MonthsTabView', props, globalState)
-    const index = globalState.currentMonth - 1 
+    useWhyDidYouUpdate('Inner MonthsTabView', { currentYear, currentMonth, itemsToDelete, onIndexChange, onChangeExpenseView })
+    const index = currentMonth - 1 
 
     const _handleIndexChange = (index)=>{
-        dispatch({type: 'SET_CURRENT_MONTH', month: index+1})
+        onIndexChange(index)
     }
     const _addExpenseBtnPress = ()=>{
         navigation.navigate('AddExpense')
     }
     const _changeExpenseView = ()=>{
-        props.onChangeExpenseView()
+        onChangeExpenseView()
     }
     
     const renderScene =  ({ route })=>{
@@ -55,8 +54,7 @@ const MonthsTabView = (props)=> {
             return <View />
         }   
         console.log('Render Scene '+ index)
-        let data = globalState.data ?.[globalState.currentYear] ?.[globalState.currentMonth] ?.days || []
-
+        let data = monthData || []
         return (            
             <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
                 <FlatList
@@ -65,7 +63,7 @@ const MonthsTabView = (props)=> {
                     keyExtractor={keyExtractor}
                 />
                 <View>
-                    {globalState.itemsToDelete.length === 0 &&                     
+                    {itemsToDelete.length === 0 &&                     
                         <View>
                             <Ripple style={styles.fab}
                                 onPress={_addExpenseBtnPress} >
@@ -82,7 +80,7 @@ const MonthsTabView = (props)=> {
         )
     }
     //return React.useMemo(()=>{   
-    console.log('Month Tab View.js '+ globalState.currentMonth)
+    console.log('Inner Month Tab View.js '+ currentMonth)
     return (
         <TabView
             //lazy
@@ -96,6 +94,35 @@ const MonthsTabView = (props)=> {
             style={styles.container}
         />
     )/*},[globalState.data, globalState.currentMonth, globalState.currentYear, globalState.currenUser])*/
+}, areEqual)
+function areEqual(prevProps, nextProps) {    
+    return prevProps.monthData === nextProps.monthData
+
+}
+InnerMonthsTabView.displayName = 'InnerMonthsTabView'
+InnerMonthsTabView.propTypes = {
+    monthData: PropTypes.array, 
+    currentYear: PropTypes.number, 
+    currentMonth: PropTypes.number, 
+    itemsToDelete: PropTypes.array, 
+    onIndexChange: PropTypes.func,
+    onChangeExpenseView: PropTypes.func
+}
+const MonthsTabView = ({onChangeExpenseView})=>{
+    const [globalState, dispatch] = React.useContext(Context)
+    const {data, currentYear, currentMonth, itemsToDelete} = globalState
+
+    const onIndexChange = (index)=>{
+        dispatch({type: 'SET_CURRENT_MONTH', month: index+1})
+    }
+    const monthData = data ?.[currentYear] ?.[currentMonth] ?.days || []
+    return <InnerMonthsTabView 
+        monthData={monthData} 
+        currentYear={currentYear} 
+        currentMonth={currentMonth} 
+        itemsToDelete={itemsToDelete}  
+        onChangeExpenseView={onChangeExpenseView}  
+        onIndexChange={onIndexChange} />
 }
 MonthsTabView.propTypes = {
     onChangeExpenseView: PropTypes.func
