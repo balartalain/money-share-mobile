@@ -11,7 +11,6 @@ import * as Facebook from 'expo-facebook'
 import FacebookLogin from './components/FacebookLogin'
 import AsyncStorageHelper  from './AsyncStorageHelper'
 import OverlayIndicator from './components/OverlayIndicator'
-import { OverlayContext } from './components/OverlayContext'
 import Users from './components/Users'
 import useOTAUpdate from './hooks/useOTAUpdate'
 import {color} from './utils'
@@ -32,12 +31,8 @@ const Stack = createStackNavigator()
 const WrapperApp = () =>{   
     const [state, dispatch] = useContext(Context) 
     const [overlay, setShowOverlay] = useState(false)
-    //const [appState, setAppState] = useState(null)
-    //const [currentUser, setCurrentUser] = useState(null)
-    const [overlayLabel, setOverlayLabel] = useState(null)
-    const [overlayTop, setOverLayTop] = useState(0)
-    //const [markedItemsToDelete, setMarkedItemsToDelete] = useState([])    
-    const otaUpdateStatus = useOTAUpdate()
+    const [overlayLabel, setOverlayLabel] = useState(null)  
+    const [updateStatus, updateMessage] = useOTAUpdate()
     const mountedRef = useRef(false)
 
     const loginSuccess = (userInfo)=>{   
@@ -87,9 +82,8 @@ const WrapperApp = () =>{
         }
     }, [])
 
-    const showOverlay =(info, top)=>{
+    const showOverlay =(info)=>{
         setOverlayLabel(info)
-        setOverLayTop(top)
         setShowOverlay(true)
     }
     const hideOverlay = ()=>{
@@ -104,30 +98,29 @@ const WrapperApp = () =>{
         return ( 
             <>                 
                 <View style={styles.top}></View> 
-                <OverlayContext.Provider value={{hideOverlay, showOverlay}}>
-                    { state.renderApp && state.loggedUser && (                    
-                        <NavigationContainer>
-                            <Stack.Navigator
-                            >
-                                <Stack.Screen name="Home" component={MainScreen} 
-                                    options={{  headerShown: false }}              
-                                />
-                                <Stack.Screen name="AddExpense" 
-                                    options={{ title: 'Nuevo Gasto' }}
-                                    component={AddExpense} />
-                                <Stack.Screen name="Users" 
-                                    options={{ title: 'Usuarios' }}  
-                                    component={Users}
-                                >                                     
-                                </Stack.Screen>
-                            </Stack.Navigator>              
-                        </NavigationContainer> 
-                    )                                
-                    } 
-                    { (state.renderApp && !state.loggedUser) && <FacebookLogin loginSuccess={loginSuccess} /> }
-                    {overlay && <OverlayIndicator overlayLabel={overlayLabel} top={overlayTop} /> }                
-                </OverlayContext.Provider>
-                {otaUpdateStatus && <View style={{
+                { state.renderApp && updateStatus === 'completed' && state.loggedUser && (                    
+                    <NavigationContainer>
+                        <Stack.Navigator
+                        >
+                            <Stack.Screen name="Home" component={MainScreen} 
+                                options={{  headerShown: false }}              
+                            />
+                            <Stack.Screen name="AddExpense" 
+                                options={{ title: 'Nuevo Gasto' }}
+                                component={AddExpense} />
+                            <Stack.Screen name="Users" 
+                                options={{ title: 'Usuarios' }}  
+                                component={Users}
+                            >                                     
+                            </Stack.Screen>
+                        </Stack.Navigator>              
+                    </NavigationContainer> 
+                )                                
+                } 
+                { (state.renderApp && updateStatus === 'completed' && !state.loggedUser) && <FacebookLogin loginSuccess={loginSuccess} /> }
+                {overlay && <OverlayIndicator overlayLabel={overlayLabel} /> }                
+        
+                {updateStatus !== 'completed' && <View style={{
                 //flex:1,
                     position: 'absolute',
                     bottom: 4,
@@ -138,11 +131,11 @@ const WrapperApp = () =>{
                     backgroundColor: 'black',
                     zIndex: 20000                             
                 }}>
-                    <Text style={{color: 'white'}}>{otaUpdateStatus}</Text>
+                    <Text style={{color: 'white'}}>{updateMessage}</Text>
                 </View> 
                 } 
             </>
-        )},[state.renderApp, state.loggedUser, overlay, otaUpdateStatus]) 
+        )},[state.renderApp, state.loggedUser, overlay, updateMessage, updateStatus]) 
 }
 WrapperApp.whyDidYouRender = {
     logOnDifferentValues: false
