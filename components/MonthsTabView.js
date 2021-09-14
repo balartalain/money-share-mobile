@@ -2,12 +2,8 @@ import React from 'react'
 import { View, StyleSheet, Dimensions, FlatList} from 'react-native'
 import { TabView, TabBar } from 'react-native-tab-view'
 import PropTypes from 'prop-types'
-import { useNavigation } from '@react-navigation/native' 
 import { Context } from '../Store'
-import { AntDesign } from '@expo/vector-icons'
-import Ripple from 'react-native-material-ripple'
 import DayCard from './DayCard'
-import {color} from '../utils'
 import DateUtils from '../DateUtils'
 import useWhyDidYouUpdate from '../hooks/useWhyDidYouUpdate'
 
@@ -35,18 +31,13 @@ const keyExtractor=(item) =>{
 const routes = DateUtils.MONTH_NAMES.map((month, i)=>({key:`route-${i}`, title:month}))
 
 const InnerMonthsTabView =React.memo(({ monthData, currentYear, currentMonth, itemsToDelete, onIndexChange, onChangeExpenseView })=> {
-    const navigation = useNavigation()
+    //const [index, setIndex] = React.useState(currentMonth - 1)
     useWhyDidYouUpdate('Inner MonthsTabView', { currentYear, currentMonth, itemsToDelete, onIndexChange, onChangeExpenseView })
     const index = currentMonth - 1 
 
-    const _handleIndexChange = (index)=>{
-        onIndexChange(index)
-    }
-    const _addExpenseBtnPress = ()=>{
-        navigation.navigate('AddExpense')
-    }
-    const _changeExpenseView = ()=>{
-        onChangeExpenseView()
+    const _handleIndexChange = (_index)=>{
+        //setIndex(_index)
+        onIndexChange(_index)
     }
     
     const renderScene =  ({ route })=>{
@@ -61,26 +52,12 @@ const InnerMonthsTabView =React.memo(({ monthData, currentYear, currentMonth, it
                     data={data}
                     renderItem={renderItem}
                     keyExtractor={keyExtractor}
-                />
-                <View>
-                    {itemsToDelete.length === 0 &&                     
-                        <View>
-                            <Ripple style={styles.fab}
-                                onPress={_addExpenseBtnPress} >
-                                <AntDesign name="plus" size={24} color="white" />
-                            </Ripple>
-                            <Ripple style={[styles.fab, {left: 30}]}
-                                onPress={_changeExpenseView} >
-                                <AntDesign name="bars" size={24} color="white" />
-                            </Ripple>
-                        </View>
-                    }
-                </View>
+                />                
             </View>        
         )
     }
     //return React.useMemo(()=>{   
-    console.log('Inner Month Tab View.js '+ currentMonth)
+    console.log('Inner Month Tab View '+ currentMonth)
     return (
         <TabView
             //lazy
@@ -91,13 +68,11 @@ const InnerMonthsTabView =React.memo(({ monthData, currentYear, currentMonth, it
             swipeEnabled = { true }
             onIndexChange={_handleIndexChange}
             initialLayout={{ width: Dimensions.get('window').width }}
-            style={styles.container}
         />
     )/*},[globalState.data, globalState.currentMonth, globalState.currentYear, globalState.currenUser])*/
 }, areEqual)
 function areEqual(prevProps, nextProps) {    
-    return prevProps.monthData === nextProps.monthData
-
+    return prevProps.monthData === nextProps.monthData    
 }
 InnerMonthsTabView.displayName = 'InnerMonthsTabView'
 InnerMonthsTabView.propTypes = {
@@ -112,9 +87,9 @@ const MonthsTabView = ({onChangeExpenseView})=>{
     const [globalState, dispatch] = React.useContext(Context)
     const {data, currentYear, currentMonth, itemsToDelete} = globalState
 
-    const onIndexChange = (index)=>{
+    const onIndexChange = React.useCallback((index)=>{
         dispatch({type: 'SET_CURRENT_MONTH', month: index+1})
-    }
+    },[currentYear, currentMonth])
     const monthData = data ?.[currentYear] ?.[currentMonth] ?.days || []
     return <InnerMonthsTabView 
         monthData={monthData} 
@@ -134,21 +109,5 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'stretch',
         justifyContent: 'flex-start',
-    },
-    fab: {
-        position: 'absolute',
-        width: 56,
-        height: 56,
-        alignItems: 'center',
-        justifyContent: 'center',
-        right: 30,
-        bottom: 25,
-        backgroundColor: color.primaryGreen,
-        borderRadius: 28,
-        elevation: 8,
-    },
-    fabIcon: {
-        fontSize: 30,
-        color: 'white',
     }
 })

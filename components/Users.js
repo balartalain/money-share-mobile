@@ -17,7 +17,7 @@ whyDidYouRender(React, {
 
 const Users = ()=>{
     const navigation = useNavigation()
-    const [globalState] = useContext(Context)
+    const [globalState, dispatch] = useContext(Context)
     const [users, setUsers] = useState(null)
     const [ execute, status ] = useAsync()
     const [ setSupervisor, statusSP, , errorSP ] = useAsync()
@@ -59,7 +59,8 @@ const Users = ()=>{
     const changeUser = (id)=>{
         if (!toBoolean(users[loggedUser.id].supervisor))
             return false
-        navigation.navigate('Home', { changeUser: {...users[id], id} })
+        dispatch({type: 'SET_CURRENT_USER', user: {...users[id], id}})  
+        navigation.navigate('Home')
     }
     const logout = ()=>{
 

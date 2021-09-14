@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useContext, useCallback} from 'react'
+import React, {useState, useEffect, useRef, useContext} from 'react'
 import { ScrollView, View, Text, StyleSheet, Dimensions } from 'react-native'
 import Ripple from 'react-native-material-ripple'
 import { Context } from '../Store'

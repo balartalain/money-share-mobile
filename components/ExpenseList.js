@@ -2,8 +2,6 @@ import React, {useState, useContext} from 'react'
 import { ScrollView, FlatList, View, TouchableOpacity, Text, StyleSheet } from 'react-native'
 import PropTypes from 'prop-types'
 import { ListItem } from 'react-native-elements'
-import Ripple from 'react-native-material-ripple'
-import { AntDesign } from '@expo/vector-icons' 
 import Collapsible from 'react-native-collapsible'
 import {Context} from '../Store'
 import {color, formatNumber} from '../utils'
@@ -11,7 +9,6 @@ import DateUtils from '../DateUtils'
 
 const ExpenseList = (props)=>{
     const [globalState] = useContext(Context)
-    const {onChangeExpenseView} = props
     const [active, setActive] = useState(-1)
     
     // useEffect(()=>{
@@ -111,35 +108,13 @@ const ExpenseList = (props)=>{
                     }                    
                 </ScrollView>
                 :<View style={{flex:1, alignItems: 'center', justifyContent: 'center'}}><Text>No hay registros</Text></View> 
-            }
-            <Ripple style={styles.fab}
-                onPress={onChangeExpenseView} >
-                <AntDesign name="bars" size={24} color="white" />
-            </Ripple>
+            }       
         </View>
     )
 }
 ExpenseList.propTypes = {
     onChangeExpenseView: PropTypes.func
 }
-const styles = StyleSheet.create({
-    fab: {
-        position: 'absolute',
-        width: 56,
-        height: 56,
-        alignItems: 'center',
-        justifyContent: 'center',
-        left: 30,
-        bottom: 25,
-        backgroundColor: color.primaryGreen,
-        borderRadius: 28,
-        elevation: 8,
-    },
-    fabIcon: {
-        fontSize: 30,
-        color: 'white',
-    }
-})
 export default ExpenseList
 //Convertir realtime DB a un lista de items
 // const messageList = Object.keys(messageObject).map(key => ({

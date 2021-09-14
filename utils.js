@@ -18,11 +18,13 @@ const toBoolean = (value)=>{
     return value===true || value === 'true' || value === 'Y'
 }
 const ENV = Constants.manifest.extra?.env
+const OFFLINE = Constants.manifest.extra?.offline ? true: false
 export {
     color,
     currency,
     equalsIntegers,
     formatNumber,
     ENV,
+    OFFLINE,
     toBoolean
 }
