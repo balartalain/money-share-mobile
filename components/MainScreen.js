@@ -20,7 +20,7 @@ const compareDays = (d1,d2)=>{
     return parseInt(d2)-parseInt(d1)
 }
 const compareDates = (date1, date2)=>{
-    return (new Date(date2) > new Date(date1))?1:0
+    return date2 - date1
 }
 const MainScreen = ({route})=>{
     const navigation = useNavigation()

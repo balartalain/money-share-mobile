@@ -61,23 +61,23 @@ const Heroku = {
             '2021' : {
                 '9' : {
                     '02' : {
-                        '1625233340980' : {
-                            'amount' : 10,
-                            'comment' : '',
+                        '1633147200000' : {
+                            'amount' : 2,
+                            'comment' : '10',
                             'concept' : ' Agosto Me dio Henry para pago de remesas',
                             'currency' : 'CUP',
                             'updated' : 1625233340980
                         },
-                        '1625233614348' : {
-                            'amount' : 10,
-                            'comment' : '',
+                        '1630555200000' : {
+                            'amount' : 1,
+                            'comment' : '09',
                             'concept' : 'Pago de 300 CUP puesto en la cuenga de Dairon',
                             'currency' : 'CUP',
                             'updated' : 1625233614348
                         },
-                        '1625233614349' : {
-                            'amount' : 5,
-                            'comment' : '',
+                        '1635825600000' : {
+                            'amount' : 3,
+                            'comment' : '11',
                             'concept' : 'Otr',
                             'currency' : 'USD',
                             'updated' : 1625233614348
@@ -134,6 +134,7 @@ const Heroku = {
         })
     },
     createExpense: async(userId, data)=>{  
+        return data
         let response = await herokuAPI.put(`/${userId}/add-expense?env=${ENV}`, data)
         return response     
     },

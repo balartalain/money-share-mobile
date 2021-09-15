@@ -10,13 +10,6 @@ import DateUtils from '../DateUtils'
 const ExpenseList = (props)=>{
     const [globalState] = useContext(Context)
     const [active, setActive] = useState(-1)
-    
-    // useEffect(()=>{
-    //     if (globalState.data) {
-    //         setActive(-1)
-    //         setData(transformObjectToArray(globalState.data[globalState.currentYear]))  
-    //     }
-    // }, [globalState.currentYear])
 
     const toggleExpanded = (index)=>{
         setActive( active === index?-1:index)
@@ -50,7 +43,7 @@ const ExpenseList = (props)=>{
             }}>
                 <View style={{alignItems: 'center'}}>
                     <Text>{('0' + item.id).slice(-2)}</Text>
-                    <Text>{DateUtils.getDayOfWeek(globalState.currentYear, globalState.currentMonth, item.id).substring(0,3)}</Text>
+                    <Text>{DateUtils.getDayOfWeek(globalState.currentYear, globalState.currentMonth-1, item.id).substring(0,3)}</Text>
                 </View>
                 <ListItem.Content>
                     <ListItem.Title>{exp.concept}</ListItem.Title>

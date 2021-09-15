@@ -1,7 +1,7 @@
 import DateUtils from '../DateUtils'
 
 const compareDays = (d1,d2)=>{
-    return parseInt(d2)-parseInt(d1)
+    return parseInt(d2.id)-parseInt(d1.id)
 }
 
 const Reducer = (state, action) => {

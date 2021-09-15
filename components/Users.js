@@ -21,7 +21,6 @@ const Users = ()=>{
     const [users, setUsers] = useState(null)
     const [ execute, status ] = useAsync()
     const [ setSupervisor, statusSP, , errorSP ] = useAsync()
-    //const {showOverlay, hideOverlay} = useContext(OverlayContext)
     const mountedRef = useRef(false)
     const scrollOffset = useRef(0)
     const {loggedUser} = globalState
