@@ -8,12 +8,12 @@ const awaitAsync = async(delay)=>{
 }
 
 export default function updateAppAsync(){
-    const [status, setStatus] = useState('pending')
+    const [status, setStatus] = useState(null)
     const [message, setMessage] = useState('')
     
     const update1 = useCallback(async() =>{
         try {
-            
+            setStatus('pending')                    
             setMessage('Searching updates...')
             await awaitAsync(2000)
             // const update = await Updates.checkForUpdateAsync()
@@ -40,6 +40,7 @@ export default function updateAppAsync(){
     const update = useCallback(async() =>{
         try {
             if (!__DEV__){
+                setStatus('pending')
                 setMessage('Searching updates...')
                 const update = await Updates.checkForUpdateAsync()
                 if (update.isAvailable) {

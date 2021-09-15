@@ -120,7 +120,7 @@ const WrapperApp = () =>{
                 { (state.renderApp && updateStatus === 'completed' && !state.loggedUser) && <FacebookLogin loginSuccess={loginSuccess} /> }
                 {overlay && <OverlayIndicator overlayLabel={overlayLabel} /> }                
         
-                {updateStatus !== 'completed' && <View style={{
+                {updateStatus == 'pending'  && <View style={{
                 //flex:1,
                     position: 'absolute',
                     bottom: 4,
