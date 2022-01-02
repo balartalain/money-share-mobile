@@ -20,7 +20,7 @@ export const useUserDataContextHook = ()=>{
             totalCUP = 0
         
         const {userData, selectedYear} = appState
-        if (userData && Object.keys(userData).length > 0){
+        if (userData && Object.keys(userData).length > 0 && userData[selectedYear]){
             Object.keys(userData[selectedYear]).forEach(m=>{
                 const monthData = userData[selectedYear][m]
                 Object.keys(monthData).forEach(d=>{          
