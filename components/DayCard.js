@@ -9,8 +9,10 @@ import DateUtils from '../DateUtils'
 
 const DayCard = (props)=> {
     const {month, day} = props
+    const transformedMonth = (month+1)<10?'0'+(month+1):String(month+1)
     const {appState, markedItemsToDelete, setMarkedItemsToDelete} = useUserDataContextHook()
-    const data = appState.userData[appState.selectedYear][month+1][day]
+    const monthData = appState.userData[appState.selectedYear][month+1] || appState.userData[appState.selectedYear][transformedMonth] 
+    const data = monthData[day]
     
     const getDayOfWeek = ()=>{
         let date = new Date()
@@ -30,7 +32,7 @@ const DayCard = (props)=> {
             else{
                 setMarkedItemsToDelete([...markedItemsToDelete, {
                     year: appState.selectedYear,
-                    month: month+1,
+                    month: transformedMonth,
                     day,
                     created
                 }])
@@ -42,7 +44,7 @@ const DayCard = (props)=> {
             Vibration.vibrate(50)
             setMarkedItemsToDelete([...markedItemsToDelete, {
                 year: appState.selectedYear,
-                month: month+1,
+                month: transformedMonth,
                 day,
                 created
             }])

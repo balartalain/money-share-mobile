@@ -22,7 +22,7 @@ export const useUserDataContextHook = ()=>{
         const {userData, selectedYear} = appState
         if (userData && Object.keys(userData).length > 0 && userData[selectedYear]){
             Object.keys(userData[selectedYear]).forEach(m=>{
-                const monthData = userData[selectedYear][m]
+                const monthData = userData[selectedYear][m] || {}
                 Object.keys(monthData).forEach(d=>{          
                     Object.keys(monthData[d]).forEach(time=>{   
                         if (monthData[d][time].deleted !== 'true'){
@@ -36,8 +36,7 @@ export const useUserDataContextHook = ()=>{
         return {totalUSD, totalCUP}        
     }
     const deleteItems = ()=>{        
-        const deleteAsync = markedItemsToDelete.map(expense=>{
-            
+        const deleteAsync = markedItemsToDelete.map(expense=>{           
             return Heroku.deleteExpense(currentUser.id, expense)
         })
 

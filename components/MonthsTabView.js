@@ -85,7 +85,8 @@ export default class MonthsTabView extends React.Component {
         }    
         const {appState} = this.context
         const {userData, selectedYear} = appState
-        const data = userData ?.[selectedYear] ?.[route.key] || {}
+        const m = route.key < 10 ? '0'+route.key:String(route.key)
+        const data = userData ?.[selectedYear] ?.[m] || userData ?.[selectedYear] ?.[route.key] || {}        
         return (            
             <View style={[styles.scene, { backgroundColor: '#F4F4F4' }]}>
                 { Object.keys(data) ?
@@ -123,7 +124,7 @@ export default class MonthsTabView extends React.Component {
                     ):<View />
                 }
                 <View>
-                    {this.context.markedItemsToDelete.length === 0 && 
+                    {this.context.markedItemsToDelete.length === 0 && selectedYear > 2021 &&
                     
                         <View>
                             <Ripple style={styles.fab}

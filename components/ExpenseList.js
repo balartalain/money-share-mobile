@@ -119,6 +119,7 @@ const ExpenseList = (props)=>{
             { userData && userData.length ? 
                 <ScrollView>
                     {userData.map((month, i)=>{
+                        month.month = parseInt(month.month)
                         const {totalUSD, totalCUP} = total(month)
                         return <View key={i}>
                             <TouchableOpacity onPress={()=>toggleExpanded(i)}>

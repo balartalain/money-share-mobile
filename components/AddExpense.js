@@ -36,7 +36,7 @@ const AddExpense = ({navigation, route}) => {
             const created = Date.now()
             const newExpense = {
                 year: currentDate.getFullYear(),
-                month: currentDate.getMonth()+1, //("0" + (currentDate.getMonth()+1)).slice(-2),
+                month: /*currentDate.getMonth()+1, */('0' + (currentDate.getMonth()+1)).slice(-2),
                 day: ('0' + currentDate.getDate()).slice(-2),
                 created: created,
                 updated: created,
