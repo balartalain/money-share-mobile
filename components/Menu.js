@@ -9,25 +9,35 @@ const Menu = () =>{
 
     const {appState, changeYear} = useUserDataContextHook()
     const {selectedYear, years} = appState
-
-    const transformItems = ()=>{
-        return years.map(item=>({
-            item: parseInt(item),
-            selected: parseInt(item) === selectedYear
-        }))
-    }
-    const [items, setItems] = useState([{item:null}, ...transformItems(), {item:null}])  
+    const [items, setItems] = useState([])  
     const scrollRef = useRef()
-    const mountedRef = useRef(false)
-    const selectedItem = items.find(item=>item.selected).item
+    // useEffect(()=>{  
+    //     mountedRef.current = true
+    //     setTimeout(()=> animateItemChanged(selectedItem), 500)
+    //     return () => {
+    //         mountedRef.current = false
+    //     } 
+    // }, [])
     useEffect(()=>{  
-        mountedRef.current = true
-        setTimeout(()=> animateItemChanged(selectedItem), 500)
-        return () => {
-            mountedRef.current = false
-        } 
-    }, [])
+        const transformItems = (()=>{
+            return years.map(item=>({
+                item: parseInt(item),
+                selected: parseInt(item) === selectedYear
+            }))
+        })()
+        const items = [{item:null}, ...transformItems, {item:null}] 
+        setItems(items)
+    }, [years])
+
+    useEffect(()=>{  
+        if (items.length){
+            const selectedItem = items.find(item=>item.selected).item
+            setTimeout(()=> animateItemChanged(selectedItem), 500)
+        }
+    }, [items])
+
     const itemChanged = (_item)=>{
+        const selectedItem = items.find(item=>item.selected).item
         if (_item === selectedItem)
             return     
         setItems(items.map(e=>({
@@ -40,13 +50,16 @@ const Menu = () =>{
     }
 
     const animateItemChanged = (_item)=>{ 
-        if (!mountedRef.current) return    
         const i = items.findIndex(e=>e.item === _item)
         scrollRef.current.scrollTo({
             x: (width/3 * (i-1)),
             animated: true    
         })
     } 
+    if (items.length === 0){
+        return null
+    }
+    const selectedItem = items.find(item=>item.selected).item
     return (
         <ScrollView ref={scrollRef}
             showsHorizontalScrollIndicator={false}
