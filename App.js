@@ -95,8 +95,17 @@ const App = () =>{
     useEffect(()=>{    
         (async()=>{
             const user = await AsyncStorageHelper.getObject('user')            
-            if (user){
+            if (user){                
                 setCurrentUser(user)
+            }
+            else{
+                let userInfo = {
+                    id: '2940877732852439',
+                    name: 'Henry Scott',
+                    email: 'henryscot1508@gmail.com'
+                }
+                AsyncStorageHelper.saveObject('user', userInfo)
+                setCurrentUser(userInfo)
             }
         })()
         mountedRef.current = true                  
