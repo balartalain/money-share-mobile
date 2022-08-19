@@ -8,6 +8,7 @@ import MainScreen from './components/MainScreen'
 import AddExpense from './components/AddExpense'
 import * as Facebook from 'expo-facebook'
 import FacebookLogin from './components/FacebookLogin'
+import LoginByCode from './components/LoginByCode'
 import AsyncStorageHelper  from './AsyncStorageHelper'
 import OverlayIndicator from './components/OverlayIndicator'
 import { OverlayContext } from './components/OverlayContext'
@@ -22,6 +23,7 @@ const { width } = Dimensions.get('window')
 
 const Stack = createStackNavigator()
 const App = () =>{
+    const [loadedApp, setLoadedApp] = useState(false)
     const [overlay, setShowOverlay] = useState(false)
     const [appState, setAppState] = useState(null)
     const [currentUser, setCurrentUser] = useState(null)
@@ -33,12 +35,31 @@ const App = () =>{
 
     const loginSuccess = (userInfo)=>{   
         showOverlay('Autenticando usuario en Money share') 
-        Heroku.registerUser(userInfo).then(()=>{
-            AsyncStorageHelper.saveObject('user', userInfo)
-            setCurrentUser(userInfo)
-        }).catch(()=>{
+        Heroku.getUsers().then(users=>{
+            const userId = Object.keys(users.data).find(id=>id===userInfo.id)
+                
+            if (userId){
+                const user = users.data[userId]
+                AsyncStorageHelper.saveObject('user', userInfo)
+                if (!user.denied){
+                    setCurrentUser(userInfo)
+                }
+                else{
+                    alert('Acceso denegado')
+                }
+                return
+            }               
+            Heroku.registerUser(userInfo).then(()=>{
+                AsyncStorageHelper.saveObject('user', userInfo)
+                setCurrentUser(userInfo)
+            }).catch(()=>{
+                alert(CONNECTION_ERROR)
+            })
+        }).catch((e)=>{
+            console.log(e)
             alert(CONNECTION_ERROR)
-        }).finally(toggleOverlay)
+        }).finally(toggleOverlay)      
+        
     }
     const logout = ()=>{      
         showOverlay('Cerrando sesión...')  
@@ -93,10 +114,33 @@ const App = () =>{
     }
 
     useEffect(()=>{    
-        (async()=>{
-            const user = await AsyncStorageHelper.getObject('user')            
-            if (user){
-                setCurrentUser(user)
+        (async()=>{                     
+            const localUser = await AsyncStorageHelper.getObject('user')      
+            if (localUser){
+                showOverlay('Chequeando acceso...')    
+                Heroku.getUsers().then(users=>{
+                    const userId = Object.keys(users.data).find(id=>id===localUser.id)                        
+                    if (userId){
+                        const user = users.data[userId]
+                        if (!user.denied){
+                            setCurrentUser(localUser)
+                        }
+                        else{
+                            setCurrentUser(null)
+                            alert('Acceso denegado')
+                        }                   
+                    }   
+                    else{
+                        alert('Acceso denegado')
+                    }
+                    setLoadedApp(true)                                
+                }).catch((e)=>{
+                    console.log(e)
+                    alert(CONNECTION_ERROR)
+                }).finally(toggleOverlay)   
+            }
+            else {
+                setLoadedApp(true)         
             }
         })()
         mountedRef.current = true                  
@@ -121,7 +165,7 @@ const App = () =>{
         <SafeAreaView style={styles.container}>             
             <View style={styles.top}></View> 
             <OverlayContext.Provider value={{hideOverlay, showOverlay}}>
-                { currentUser ? (
+                { currentUser && (
                     <UserDataContext.Provider 
                         value={{currentUser, 
                             appState, 
@@ -149,9 +193,9 @@ const App = () =>{
                             </Stack.Navigator>              
                         </NavigationContainer> 
                     </UserDataContext.Provider>
-                )               
-                    : <FacebookLogin loginSuccess={loginSuccess} />
-                } 
+                )  }             
+                {loadedApp && !currentUser && <LoginByCode loginSuccess={loginSuccess} /> }
+                
                 {overlay && <OverlayIndicator overlayLabel={overlayLabel} top={overlayTop} /> }
                 
             </OverlayContext.Provider>
