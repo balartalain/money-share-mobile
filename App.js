@@ -3,7 +3,7 @@ import { View, SafeAreaView, StyleSheet, Text, Dimensions} from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import Constants from 'expo-constants'
-import Heroku from './controllers/index'
+import Firebase from './controllers/firebaseAPI'
 import MainScreen from './components/MainScreen'
 import AddExpense from './components/AddExpense'
 import * as Facebook from 'expo-facebook'
@@ -35,11 +35,11 @@ const App = () =>{
 
     const loginSuccess = (userInfo)=>{   
         showOverlay('Autenticando usuario en Money share') 
-        Heroku.getUsers().then(users=>{
-            const userId = Object.keys(users.data).find(id=>id===userInfo.id)
+        Firebase.getUsers().then(users=>{
+            const userId = Object.keys(users).find(id=>id===userInfo.id)
                 
             if (userId){
-                const user = users.data[userId]
+                const user = users[userId]
                 AsyncStorageHelper.saveObject('user', userInfo)
                 if (!user.denied){
                     setCurrentUser(userInfo)
@@ -49,7 +49,7 @@ const App = () =>{
                 }
                 return
             }               
-            Heroku.registerUser(userInfo).then(()=>{
+            Firebase.registerUser(userInfo).then(()=>{
                 AsyncStorageHelper.saveObject('user', userInfo)
                 setCurrentUser(userInfo)
             }).catch(()=>{
@@ -85,9 +85,9 @@ const App = () =>{
     const loadData = async()=>{
         try{
             toggleOverlay('Obteniendo datos de '+currentUser.name.split(' ')[0])
-            const data = await Heroku.getUserData(currentUser.id)  
+            const data = await Firebase.getUserData(currentUser.id)  
             if (mountedRef.current){
-                const userData = data.data
+                const userData = data
                 const years = Object.keys(userData)  
                 const index = years.findIndex((e)=>equalsIntegers(e, DateUtils.CURRENT_YEAR))  
                 if (index === -1){
@@ -112,38 +112,40 @@ const App = () =>{
         }
 
     }
-
-    useEffect(()=>{    
-        (async()=>{                     
-            const localUser = await AsyncStorageHelper.getObject('user')      
-            if (localUser){
-                showOverlay('Chequeando acceso...')    
-                Heroku.getUsers().then(users=>{
-                    const userId = Object.keys(users.data).find(id=>id===localUser.id)                        
-                    if (userId){
-                        const user = users.data[userId]
-                        if (!user.denied){
-                            setCurrentUser(localUser)
-                        }
-                        else{
-                            setCurrentUser(null)
-                            alert('Acceso denegado')
-                        }                   
-                    }   
-                    else{
-                        alert('Acceso denegado')
+    const useEffectFunction = async ()=>{
+        const localUser = await AsyncStorageHelper.getObject('user')      
+        if (localUser){
+            showOverlay('Chequeando acceso...')    
+            Firebase.getUsers().then(users=>{
+                const userId = Object.keys(users).find(id=>id===localUser.id)                        
+                if (userId){
+                    const user = users[userId]
+                    if (!user.denied){
+                        setCurrentUser(localUser)
                     }
-                    setLoadedApp(true)                                
-                }).catch((e)=>{
-                    console.log(e)
-                    alert(CONNECTION_ERROR)
-                }).finally(toggleOverlay)   
-            }
-            else {
-                setLoadedApp(true)         
-            }
-        })()
-        mountedRef.current = true                  
+                    else{
+                        setCurrentUser(null)
+                        alert('Acceso denegado')
+                    }                   
+                }   
+                else{
+                    alert('Acceso denegado')
+                }
+                setLoadedApp(true)                                
+            }).catch((e)=>{      
+                console.log(e)
+                alert(CONNECTION_ERROR)
+                // trye again
+                useEffectFunction() 
+            }).finally(toggleOverlay)   
+        }
+        else {
+            setLoadedApp(true)         
+        }
+    }
+    useEffect(()=>{            
+        mountedRef.current = true  
+        useEffectFunction()         
         return ()=>{
             mountedRef.current = false
         }

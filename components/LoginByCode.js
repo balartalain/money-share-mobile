@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { StyleSheet, Text, View, TextInput } from 'react-native'
 import { Button } from 'react-native-elements'
-import Heroku from '../controllers/index'
+import Firebase from '../controllers/firebaseAPI'
 
 const LoginByCode = ({loginSuccess})=>{
     const [isLoading, setLoading] = useState(false)
@@ -10,10 +10,10 @@ const LoginByCode = ({loginSuccess})=>{
     const logIn = ()=>{
         setLoading(true)
         setError(null)
-        Heroku.getUsers().then(users=>{
-            const userId = Object.keys(users.data).find(id=>id===code)            
+        Firebase.getUsers().then(users=>{
+            const userId = Object.keys(users).find(id=>id===code)            
             if (userId){
-                const user = users.data[userId]
+                const user = users[userId]
                 if (!user.denied){
                     loginSuccess({...user, id:userId})
                 }

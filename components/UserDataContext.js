@@ -1,5 +1,5 @@
 import {createContext, useContext} from 'react'
-import Heroku from '../controllers/index'
+import Firebase from '../controllers/firebaseAPI'
 import { CONNECTION_ERROR } from '../ErrorConstants'
 
 export const UserDataContext = createContext()
@@ -37,7 +37,7 @@ export const useUserDataContextHook = ()=>{
     }
     const deleteItems = ()=>{        
         const deleteAsync = markedItemsToDelete.map(expense=>{           
-            return Heroku.deleteExpense(currentUser.id, expense)
+            return Firebase.deleteExpense(currentUser.id, expense)
         })
 
         Promise.all(deleteAsync).then(() => {
@@ -56,7 +56,7 @@ export const useUserDataContextHook = ()=>{
     }
     const addExpense = async(newExpense)=>{
         try{
-            await Heroku.createExpense(currentUser.id, newExpense)
+            await Firebase.createExpense(currentUser.id, newExpense)
             const {year, month, day, created} = newExpense
             const _userData = {...appState.userData}
             _userData[year] = _userData[year] || {}

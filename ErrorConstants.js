@@ -1,1 +1,1 @@
-export const CONNECTION_ERROR = 'No tiene conexión a internet'
+export const CONNECTION_ERROR = 'Error de conexión. Active la VPN'

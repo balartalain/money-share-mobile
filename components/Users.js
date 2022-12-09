@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef, useContext} from 'react'
 import {  View, TouchableOpacity, ScrollView } from 'react-native'
 import { ListItem, CheckBox, Button } from 'react-native-elements'
-import Heroku from '../controllers/index'
+import Firebase from '../controllers/firebaseAPI'
 import { OverlayContext } from './OverlayContext'
 import { useUserDataContextHook } from './UserDataContext'
 import {toBoolean} from '../utils'
@@ -19,8 +19,8 @@ const Users = ({navigation})=>{
         setUserLogged(await AsyncStorageHelper.getObject('user'))  
         showOverlay('Obteniendo usuarios...')
         //const me = await AsyncStorageHelper.getObject('me')
-        Heroku.getUsers().then(_users=>{
-            setUsers(_users.data)                
+        Firebase.getUsers().then(_users=>{
+            setUsers(_users)                
             
         }).catch((e)=>{
             console.log(e)
@@ -43,7 +43,7 @@ const Users = ({navigation})=>{
         }
         const supervisor = !toBoolean(users[id].supervisor)
         showOverlay('Cambiando permisos de usuario...')       
-        Heroku.setSupervisor(id, {'isSupervisor': supervisor}).then(()=>{
+        Firebase.setSupervisor(id, {'isSupervisor': supervisor}).then(()=>{
             if (mountedRef.current){
                 const _users = {... users}
                 _users[id].supervisor = supervisor
