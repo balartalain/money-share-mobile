@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { StyleSheet, Text, View, TextInput } from 'react-native'
 import { Button } from 'react-native-elements'
 import Firebase from '../controllers/firebaseAPI'
+import { CONNECTION_ERROR } from '../ErrorConstants'
 
 const LoginByCode = ({loginSuccess})=>{
     const [isLoading, setLoading] = useState(false)
@@ -26,7 +27,7 @@ const LoginByCode = ({loginSuccess})=>{
             }            
         }).catch((e)=>{
             console.log(e)
-            alert('Error de conexión')
+            alert(CONNECTION_ERROR)
         }).finally(()=>{
             setLoading(false)
         })  

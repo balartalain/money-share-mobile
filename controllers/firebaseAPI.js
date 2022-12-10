@@ -1,8 +1,7 @@
 import { ENV } from '../utils'
 import firebaseDB from '../firebaseConfig'
-import { ref, set, get, update } from 'firebase/database'
 import {CONNECTION_ERROR} from '../ErrorConstants'
-const TIMEOUT = 10000 // 5 seconds
+const TIMEOUT = 20000 // 5 seconds
 const dbName = (!ENV || ENV === 'PRODUCTION')?'':'test/'
 const Firebase = {
     getWithTimeOut: (ref)=>{
@@ -14,7 +13,7 @@ const Firebase = {
                 timeout = true        
                 reject(CONNECTION_ERROR)
             }, TIMEOUT)
-            get(ref).then(snapshot=>{
+            firebaseDB.ref(ref).once('value', snapshot=>{
                 if (!timeout){
                     if (snapshot.val() == null) {    
                         resolve({})        
@@ -38,7 +37,7 @@ const Firebase = {
                 timeout = true            
                 reject(CONNECTION_ERROR)
             }, TIMEOUT)
-            set(ref, dataToSave).then(()=>{
+            firebaseDB.ref(ref).set(dataToSave).then(()=>{
                 if (!timeout){
                     resolve()                            
                 }
@@ -58,7 +57,7 @@ const Firebase = {
                 timeout = true            
                 reject(CONNECTION_ERROR)
             }, TIMEOUT)
-            update(ref, dataToSave).then(()=>{
+            firebaseDB.ref(ref).update( dataToSave).then(()=>{
                 if (!timeout){
                     resolve()                            
                 }
@@ -68,13 +67,13 @@ const Firebase = {
                 }
             })
         })
-    },
+    },    
     registerUser : (userInfo)=>{
         const user = {
             name: userInfo.name,
             email: userInfo.email || ''
         }  
-        return Firebase.setWithTimeOut(firebaseDB.ref(`${dbName}users/${userInfo.id}`), user)
+        return Firebase.setWithTimeOut(`${dbName}users/${userInfo.id}`, user)
         // return new Promise((resolve, reject)=>{   
         //     const user = {
         //         name: userInfo.name,
@@ -89,7 +88,7 @@ const Firebase = {
         // })
     },
     getUsers: ()=>{
-        return Firebase.getWithTimeOut(ref(firebaseDB, `${dbName}users`))
+        return Firebase.getWithTimeOut(`${dbName}users`)
         // return new Promise((resolve, reject)=>{
         //     let timeout = false
         //     const doRef = ref(firebaseDB, `${dbName}users`)  
@@ -115,7 +114,7 @@ const Firebase = {
         // })
     },
     getUserData : (userId)=>{  
-        return Firebase.getWithTimeOut(ref(firebaseDB, `${dbName}data/${userId}`) )
+        return Firebase.getWithTimeOut(`${dbName}data/${userId}`)
         // return new Promise((resolve, reject)=>{
         //     const doRef = ref(firebaseDB, `${dbName}data/${userId}`)  
         //     get(doRef).then(snapshot=>{
@@ -137,7 +136,7 @@ const Firebase = {
             comment: comment || '',
             updated
         } 
-        return Firebase.setWithTimeOut(ref(firebaseDB, `${dbName}data/${userId}/${year}/${month}/${day}/${created}`), expense)
+        return Firebase.setWithTimeOut(`${dbName}data/${userId}/${year}/${month}/${day}/${created}`, expense)
         // return new Promise((resolve, reject)=>{
         //     const {year, month, day, created, amount, currency, concept, comment, updated} = data
         //     const expense = {
@@ -157,7 +156,7 @@ const Firebase = {
     },
     deleteExpense: (userId, data)=>{  
         const {year, month, day, created} = data
-        return Firebase.updateWithTimeOut( ref(firebaseDB, `${dbName}data/${userId}/${year}/${month}/${day}/${created}`), {'deleted': 'true'})
+        return Firebase.updateWithTimeOut(`${dbName}data/${userId}/${year}/${month}/${day}/${created}`, {'deleted': 'true'})
         // return new Promise((resolve, reject)=>{
         //     const {year, month, day, created} = data
         //     const doRef = ref(firebaseDB, `${dbName}data/${userId}/${year}/${month}/${day}/${created}`)
@@ -169,7 +168,7 @@ const Firebase = {
         // })
     },
     setSupervisor: (userId, {isSupervisor})=>{  
-        return Firebase.updateWithTimeOut(ref(firebaseDB, `${dbName}users/${userId}`), {'supervisor': isSupervisor})
+        return Firebase.updateWithTimeOut(`${dbName}users/${userId}`, {'supervisor': isSupervisor})
         // return new Promise((resolve, reject)=>{
         //     const doRef = ref(firebaseDB, `${dbName}users/${userId}`)
         //     update(doRef, {'supervisor': isSupervisor}).then(()=>{

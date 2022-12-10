@@ -6,6 +6,7 @@ import { OverlayContext } from './OverlayContext'
 import { useUserDataContextHook } from './UserDataContext'
 import {toBoolean} from '../utils'
 import AsyncStorageHelper  from '../AsyncStorageHelper'
+import { CONNECTION_ERROR } from '../ErrorConstants'
 
 const Users = ({navigation})=>{
 
@@ -24,7 +25,7 @@ const Users = ({navigation})=>{
             
         }).catch((e)=>{
             console.log(e)
-            alert('Error de conexión')
+            alert(CONNECTION_ERROR)
         }).finally(()=>{
             hideOverlay()
         })      
